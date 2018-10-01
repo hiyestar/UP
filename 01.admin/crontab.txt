@@ -1,0 +1,486 @@
+[root@server0 ~]# firewall-cmd --set-default-zone=trusted
+[root@server0 ~]# yum -y install httpd
+[root@server0 ~]# vim /etc/httpd/conf.d/nsd01.conf
+[root@server0 ~]# cat /etc/httpd/conf.d/nsd01.conf
+<VirtualHost *:80>
+  ServerName www0.example.com
+  DocumentRoot /var/www/html
+</VirtualHost>
+[root@server0 ~]# echo '<h1><marquee>NSD test' > /var/www/html/index.html
+[root@server0 ~]# systemctl restart httpd
+[root@server0 ~]# yum -y install mod_ssl
+
+[root@server0 /]# cd /etc/pki/tls/certs
+[root@server0 certs]# wget http://classroom.example.com/pub/tls/certs/server0.crt
+[root@server0 certs]# ls
+ca-bundle.crt        localhost.crt    Makefile          server0.crt
+ca-bundle.trust.crt  make-dummy-cert  renew-dummy-cert
+[root@server0 certs]# vim /etc/httpd/conf.d/ssl.conf
+ 59 DocumentRoot "/var/www/html"
+ 60 #ServerName www.example.com:443
+ 61 ServerName www0.example.com:443
+100 #SSLCertificateFile /etc/pki/tls/certs/localhost.crt
+101 SSLCertificateFile /etc/pki/tls/certs/server0.crt
+[root@server0 certs]# wget http://classroom.example.com/pub/example-ca.crt
+[root@server0 certs]# ls
+ca-bundle.crt        example-ca.crt  make-dummy-cert  renew-dummy-cert
+ca-bundle.trust.crt  localhost.crt   Makefile         server0.crt
+
+[root@server0 certs]# vim  /etc/httpd/conf.d/ssl.conf
+122 #SSLCACertificateFile /etc/pki/tls/certs/ca-bundle.crt
+123 SSLCACertificateFile /etc/pki/tls/certs/example-ca.crt
+[root@server0 certs]# cd /etc/pki/tls/private
+[root@server0 private]# wget http://classroom.example.com/pub/tls/private/server0.key
+[root@server0 private]# ls
+localhost.key  server0.key
+[root@server0 private]# vim /etc/httpd/conf.d/ssl.conf
+107 #SSLCertificateKeyFile /etc/pki/tls/private/localhost.key
+108 SSLCertificateKeyFile /etc/pki/tls/private/server0.key
+
+=================================
+==========================================
+==================================================
+[root@desktop0 ~]# cat /etc/pki/rpm-gpg/RPM-GPG-KEY-redhat-release
+The following public key can be used to verify RPM packages built and
+signed by Red Hat, Inc.  This key is used for packages in Red Hat
+products shipped after November 2009, and for all updates to those
+products.
+
+Questions about this key should be sent to security@redhat.com.
+
+pub  4096R/FD431D51 2009-10-22 Red Hat, Inc. (release key 2) <security@redhat.com>
+
+-----BEGIN PGP PUBLIC KEY BLOCK-----
+Version: GnuPG v1.2.6 (GNU/Linux)
+
+mQINBErgSTsBEACh2A4b0O9t+vzC9VrVtL1AKvUWi9OPCjkvR7Xd8DtJxeeMZ5eF
+0HtzIG58qDRybwUe89FZprB1ffuUKzdE+HcL3FbNWSSOXVjZIersdXyH3NvnLLLF
+0DNRB2ix3bXG9Rh/RXpFsNxDp2CEMdUvbYCzE79K1EnUTVh1L0Of023FtPSZXX0c
+u7Pb5DI5lX5YeoXO6RoodrIGYJsVBQWnrWw4xNTconUfNPk0EGZtEnzvH2zyPoJh
+XGF+Ncu9XwbalnYde10OCvSWAZ5zTCpoLMTvQjWpbCdWXJzCm6G+/hx9upke546H
+5IjtYm4dTIVTnc3wvDiODgBKRzOl9rEOCIgOuGtDxRxcQkjrC+xvg5Vkqn7vBUyW
+9pHedOU+PoF3DGOM+dqv+eNKBvh9YF9ugFAQBkcG7viZgvGEMGGUpzNgN7XnS1gj
+/DPo9mZESOYnKceve2tIC87p2hqjrxOHuI7fkZYeNIcAoa83rBltFXaBDYhWAKS1
+PcXS1/7JzP0ky7d0L6Xbu/If5kqWQpKwUInXtySRkuraVfuK3Bpa+X1XecWi24JY
+HVtlNX025xx1ewVzGNCTlWn1skQN2OOoQTV4C8/qFpTW6DTWYurd4+fE0OJFJZQF
+buhfXYwmRlVOgN5i77NTIJZJQfYFj38c/Iv5vZBPokO6mffrOTv3MHWVgQARAQAB
+tDNSZWQgSGF0LCBJbmMuIChyZWxlYXNlIGtleSAyKSA8c2VjdXJpdHlAcmVkaGF0
+LmNvbT6JAjYEEwECACAFAkrgSTsCGwMGCwkIBwMCBBUCCAMEFgIDAQIeAQIXgAAK
+CRAZni+R/UMdUWzpD/9s5SFR/ZF3yjY5VLUFLMXIKUztNN3oc45fyLdTI3+UClKC
+2tEruzYjqNHhqAEXa2sN1fMrsuKec61Ll2NfvJjkLKDvgVIh7kM7aslNYVOP6BTf
+C/JJ7/ufz3UZmyViH/WDl+AYdgk3JqCIO5w5ryrC9IyBzYv2m0HqYbWfphY3uHw5
+un3ndLJcu8+BGP5F+ONQEGl+DRH58Il9Jp3HwbRa7dvkPgEhfFR+1hI+Btta2C7E
+0/2NKzCxZw7Lx3PBRcU92YKyaEihfy/aQKZCAuyfKiMvsmzs+4poIX7I9NQCJpyE
+IGfINoZ7VxqHwRn/d5mw2MZTJjbzSf+Um9YJyA0iEEyD6qjriWQRbuxpQXmlAJbh
+8okZ4gbVFv1F8MzK+4R8VvWJ0XxgtikSo72fHjwha7MAjqFnOq6eo6fEC/75g3NL
+Ght5VdpGuHk0vbdENHMC8wS99e5qXGNDued3hlTavDMlEAHl34q2H9nakTGRF5Ki
+JUfNh3DVRGhg8cMIti21njiRh7gyFI2OccATY7bBSr79JhuNwelHuxLrCFpY7V25
+OFktl15jZJaMxuQBqYdBgSay2G0U6D1+7VsWufpzd/Abx1/c3oi9ZaJvW22kAggq
+dzdA27UUYjWvx42w9menJwh/0jeQcTecIUd0d0rFcw/c1pvgMMl/Q73yzKgKYw==
+=zbHE
+-----END PGP PUBLIC KEY BLOCK-----
+The following public key can be used to verify RPM packages built and
+signed by Red Hat, Inc.  This key is a supporting (auxiliary) key for
+Red Hat products shipped after November 2006 and for all updates to
+those products.
+
+Questions about this key should be sent to security@redhat.com.
+
+-----BEGIN PGP PUBLIC KEY BLOCK-----
+Version: GnuPG v1.2.6 (GNU/Linux)
+
+mQGiBEVwDGkRBACwPhZIpvkjI8wV9sFTDoqyPLx1ub8Sd/w+YuI5Ovm49mvvEQVT
+VLg8FgE5JlST59AbsLDyVtRa9CxIvN5syBVrWWWtHtDnnylFBcqG/A6J3bI4E9/A
+UtSL5Zxbav0+utP6f3wOpxQrxc+WIDVgpurdBKAQ3dsobGBqypeX6FXZ5wCgou6C
+yZpGIBqosJaDWLzNeOfb/70D/1thLkQyhW3JJ6cHCYJHNfBShvbLWBf6S231mgmu
+MyMlt8Kmipc9bw+saaAkSkVsQ/ZbfjrWB7e5kbMruKLVrH+nGhamlHYUGyAPtsPg
+Uj/NUSj5BmrCsOkMpn43ngTLssE9MLhSPj2nIHGFv9B+iVLvomDdwnaBRgQ1aK8z
+z6MAA/406yf5yVJ/MlTWs1/68VwDhosc9BtU1V5IE0NXgZUAfBJzzfVzzKQq6zJ2
+eZsMLhr96wbsW13zUZt1ing+ulwh2ee4meuJq6h/971JspFY/XBhcfq4qCNqVjsq
+SZnWoGdCO6J8CxPIemD2IUHzjoyyeEj3RVydup6pcWZAmhzkKrQzUmVkIEhhdCwg
+SW5jLiAoYXV4aWxpYXJ5IGtleSkgPHNlY3VyaXR5QHJlZGhhdC5jb20+iF4EExEC
+AB4FAkVwDGkCGwMGCwkIBwMCAxUCAwMWAgECHgECF4AACgkQRWiciC+mWOC1rQCg
+ooNLCFOzNPcvhd9Za8C801HmnsYAniCw3yzrCqtjYnxDDxlufH0FVTwX
+=d/bm
+-----END PGP PUBLIC KEY BLOCK-----
+
+
+[root@server0 ~]# ls  /dev/cdrom
+/dev/cdrom
+[root@server0 ~]# ls /
+bin   dev  home  lib64  mnt  proc  run   srv  tmp  var
+boot  etc  lib   media  opt  root  sbin  sys  usr
+[root@server0 ~]# mkdir /dvd
+[root@server0 ~]# mount /dev/cdrom /dvd
+mount: /dev/sr0 写保护，将以只读方式挂载
+[root@server0 ~]# ls /dvd
+addons  extra_files.json  isolinux    Packages                 RPM-GPG-KEY-redhat-release
+EFI     GPL               LiveOS      repodata                 TRANS.TBL
+EULA    images            media.repo  RPM-GPG-KEY-redhat-beta
+[root@server0 ~]# ls -d /dev/cdrom
+/dev/cdrom
+[root@server0 ~]# ls -ld /dev/cdrom
+lrwxrwxrwx. 1 root root 3 6月  18 11:59 /dev/cdrom -> sr0
+[root@server0 ~]# ls  -l /dev/cdrom
+lrwxrwxrwx. 1 root root 3 6月  18 11:59 /dev/cdrom -> sr0
+[root@server0 ~]# ls /dev/sr0
+/dev/sr0
+[root@server0 ~]# ls /dev/
+autofs           hpet                null      stdout  tty23  tty4   tty56   urandom
+block            hugepages           nvram     tty     tty24  tty40  tty57   usbmon0
+bsg              initctl             oldmem    tty0    tty25  tty41  tty58   usbmon1
+btrfs-control    input               port      tty1    tty26  tty42  tty59   vcs
+bus              kmsg                ppp       tty10   tty27  tty43  tty6    vcs1
+cdrom            log                 ptmx      tty11   tty28  tty44  tty60   vcs6
+char             loop-control        pts       tty12   tty29  tty45  tty61   vcsa
+console          lp0                 random    tty13   tty3   tty46  tty62   vcsa1
+core             lp1                 raw       tty14   tty30  tty47  tty63   vcsa6
+cpu              lp2                 rtc       tty15   tty31  tty48  tty7    vda
+cpu_dma_latency  lp3                 rtc0      tty16   tty32  tty49  tty8    vda1
+crash            mapper              sg0       tty17   tty33  tty5   tty9    vdb
+disk             mcelog              shm       tty18   tty34  tty50  ttyS0   vfio
+dri              mem                 snapshot  tty19   tty35  tty51  ttyS1   vga_arbiter
+fb0              mqueue              snd       tty2    tty36  tty52  ttyS2   vhost-net
+fd               net                 sr0       tty20   tty37  tty53  ttyS3   zero
+full             network_latency     stderr    tty21   tty38  tty54  uhid
+fuse             network_throughput  stdin     tty22   tty39  tty55  uinput
+[root@server0 ~]# ls /dev/sr0/
+ls: 无法访问/dev/sr0/: 不是目录
+[root@server0 ~]# ls /dev/sr0
+/dev/sr0
+[root@server0 ~]# ls -l /dev/sr0
+brw-rw----+ 1 root cdrom 11, 0 6月  18 11:59 /dev/sr0
+[root@server0 ~]# ls /dvd/Packages/  |  head  -3
+389-ds-base-1.3.6.1-16.el7.x86_64.rpm
+389-ds-base-libs-1.3.6.1-16.el7.x86_64.rpm
+abattis-cantarell-fonts-0.0.25-1.el7.noarch.rpm
+[root@server0 ~]# ls /etc/yum.repos.d/*
+/etc/yum.repos.d/rhel_dvd.repo
+[root@server0 ~]# rm -rf /etc/yum.repos.d/*
+[root@server0 ~]# ls /etc/yum.repos.d/
+[root@server0 ~]# ls /etc/yum.repos.d/*
+ls: 无法访问/etc/yum.repos.d/*: 没有那个文件或目录
+[root@server0 ~]# vim /etc/yum.repos.d/dvd.repo
+[root@server0 ~]# cat /etc/yum.repos.d/dvd.repo
+[dvd]
+name=rhel7.0
+baseurl=http://classroom.example.com/content/rhel7.0/x86_64/dvd/
+enable=1
+gpgcheck=0
+[root@server0 ~]# 
+[root@server0 ~]# yum repolist
+已加载插件：langpacks
+dvd                                                                 | 4.1 kB  00:00:00     
+(1/2): dvd/group_gz                                                 | 134 kB  00:00:00     
+(2/2): dvd/primary_db                                               | 3.4 MB  00:00:00     
+源标识                                    源名称                                      状态
+dvd                                       rhel7.0                                     4,305
+repolist: 4,305
+[root@server0 ~]# ls /etc/yum.repos.d/
+dvd.repo
+[root@server0 ~]# ls /etc/yum.repos.d/*
+/etc/yum.repos.d/dvd.repo
+[root@server0 ~]# cat newx.txt | head -2
+����vsftpd-3.0.2-22.el7����>t
+�D�H�`�p�X����/��CQat��SE[�ؼ�P�T�Ĩ��2^�\�f��2�Mp���^|�hL�*�E6�wP)δ�u|�X��w�=�ޚ+��Oep��m��Z�м�
+                               ,�ݶ�[2�٢�u�pq��@>�-/ёNd�=��"�T0qn
+                                                                   E7���"���*e��2�i�(Z-�,._�D��s�9,&���v1�!�1c9������M�䩦x$�a	c-��=�]6\���]"4C�vl�hi����^-oE����~<_�R�x��Q��u^�������"�����eB?�
+
+rh�UƖ�e�K#���enD�����H�ޤ�.|&�R̙]4}+q�E��'��1����o�0ph�{d�xA����}_䍛��)$��h�e��fHۦq3�PJ
+                                                                                          ��]ܸ��߳p9��S��q�dcdbd3b92e0d69740e98094d9051f7f3df38e2ff���X����/��CQ:��>��Cz�nl9ji�T�6�ϛQ)�{
+          ���D�|�>6�Ф�X�
+syNH�"m�����T�W���} �`r���h,��
+[root@server0 ~]# vim newx.txt
+
+[root@server0 ~]# wget http://classroom.example.com/content/rhel7.0/x86_64/errata/Packages/kernel-3.10.0-123.1.2.el7.x86_64.rpm  -O  new2.rpm
+
+[root@server0 ~]# rpm -iv  new2.rpm 
+软件包准备中...
+	软件包 kernel-3.10.0-123.1.2.el7.x86_64 已经安装
+
+
+[root@server0 ~]# rpm -q kernel-3.10.0-123.1.2.el7.x86_64
+kernel-3.10.0-123.1.2.el7.x86_64
+
+
+[root@server0 ~]# nslookup server0.example.com
+Server:		172.25.254.254
+Address:	172.25.254.254#53
+
+Name:	server0.example.com
+Address: 172.25.0.11
+
+[root@desktop0 ~]# nslookup desktop0.example.com
+Server:		172.25.254.254
+Address:	172.25.254.254#53
+
+Name:	desktop0.example.com
+Address: 172.25.0.10
+
+[root@server0 ~]# route
+Kernel IP routing table
+Destination     Gateway         Genmask         Flags Metric Ref    Use Iface
+default         172.25.0.254    0.0.0.0         UG    1024   0        0 eth0
+172.25.0.0      0.0.0.0         255.255.255.0   U     0      0        0 eth0
+172.25.253.254  172.25.0.254    255.255.255.255 UGH   1      0        0 eth0
+[root@server0 ~]# route gateway
+Usage: route [-nNvee] [-FC] [<AF>]           List kernel routing tables
+       route [-v] [-FC] {add|del|flush} ...  Modify routing table for AF.
+
+       route {-h|--help} [<AF>]              Detailed usage syntax for specified AF.
+       route {-V|--version}                  Display version/author and exit.
+
+        -v, --verbose            be verbose
+        -n, --numeric            don't resolve names
+        -e, --extend             display other/more information
+        -F, --fib                display Forwarding Information Base (default)
+        -C, --cache              display routing cache instead of FIB
+
+  <AF>=Use -4, -6, '-A <af>' or '--<af>'; default: inet
+  List of possible address families (which support routing):
+    inet (DARPA Internet) inet6 (IPv6) ax25 (AMPR AX.25) 
+    netrom (AMPR NET/ROM) ipx (Novell IPX) ddp (Appletalk DDP) 
+    x25 (CCITT X.25) 
+
+[root@server0 ~]# nmcli  connection  show
+名称         UUID                                  类型            设备 
+System eth0  5fb06bd0-0bb0-7ffb-45f1-d6edd65f3e03  802-3-ethernet  eth0 
+[root@server0 ~]# ifconfig  | head -2
+eth0: flags=4163<UP,BROADCAST,RUNNING,MULTICAST>  mtu 1500
+        inet 172.25.0.11  netmask 255.255.255.0  broadcast 172.25.0.255
+
+
+
+[root@server0 ~]# nmcli  connection  show System eth0
+Error: System - no such connection profile.
+[root@server0 ~]# nmcli  connection  show  'System eth0'
+connection.id:                          System eth0
+connection.uuid:                        5fb06bd0-0bb0-7ffb-45f1-d6edd65f3e03
+connection.interface-name:              eth0
+connection.type:                        802-3-ethernet
+connection.autoconnect:                 yes
+connection.timestamp:                   1529305462
+connection.read-only:                   no
+connection.permissions:                 
+connection.zone:                        --
+connection.master:                      --
+connection.slave-type:                  --
+connection.secondaries:                 
+connection.gateway-ping-timeout:        0
+802-3-ethernet.port:                    --
+802-3-ethernet.speed:                   0
+802-3-ethernet.duplex:                  --
+802-3-ethernet.auto-negotiate:          yes
+802-3-ethernet.mac-address:             --
+802-3-ethernet.cloned-mac-address:      --
+802-3-ethernet.mac-address-blacklist:   
+802-3-ethernet.mtu:                     自动
+802-3-ethernet.s390-subchannels:        
+802-3-ethernet.s390-nettype:            --
+802-3-ethernet.s390-options:            
+ipv4.method:                            auto
+ipv4.dns:                               
+ipv4.dns-search:                        
+ipv4.addresses:                         
+ipv4.routes:                            
+ipv4.ignore-auto-routes:                no
+ipv4.ignore-auto-dns:                   no
+ipv4.dhcp-client-id:                    --
+ipv4.dhcp-send-hostname:                yes
+ipv4.dhcp-hostname:                     --
+ipv4.never-default:                     no
+ipv4.may-fail:                          yes
+ipv6.method:                            ignore
+ipv6.dns:                               
+ipv6.dns-search:                        
+ipv6.addresses:                         
+ipv6.routes:                            
+ipv6.ignore-auto-routes:                no
+ipv6.ignore-auto-dns:                   no
+ipv6.never-default:                     no
+ipv6.may-fail:                          yes
+ipv6.ip6-privacy:                       -1 (未知)
+ipv6.dhcp-hostname:                     --
+GENERAL.名称:                           System eth0
+GENERAL.UUID:                           5fb06bd0-0bb0-7ffb-45f1-d6edd65f3e03
+GENERAL.设备:                           eth0
+GENERAL.状态:                           已激活
+GENERAL.默认:                           是
+GENERAL.DEFAULT6:                       否
+GENERAL.VPN:                            否
+GENERAL.ZONE:                           --
+GENERAL.DBUS-PATH:                      /org/freedesktop/NetworkManager/ActiveConnection/0
+GENERAL.CON-PATH:                       /org/freedesktop/NetworkManager/Settings/0
+GENERAL.SPEC 对象:                      --
+GENERAL.MASTER-PATH:                    --
+IP4.地址[1]:                            ip = 172.25.0.11/24, gw = 172.25.0.254
+IP4.ROUTE[1]:                           dst = 172.25.253.254/32, nh = 172.25.0.254, mt = 0
+IP4.DNS[1]:                             172.25.254.254
+IP4.DOMAIN[1]:                          example.com
+DHCP4.OPTION[1]:                        requested_domain_search = 1
+DHCP4.OPTION[2]:                        dhcp_message_type = 5
+DHCP4.OPTION[3]:                        requested_time_offset = 1
+DHCP4.OPTION[4]:                        requested_domain_name = 1
+DHCP4.OPTION[5]:                        requested_rfc3442_classless_static_routes = 1
+DHCP4.OPTION[6]:                        requested_broadcast_address = 1
+DHCP4.OPTION[7]:                        requested_classless_static_routes = 1
+DHCP4.OPTION[8]:                        expiry = 1529326524
+DHCP4.OPTION[9]:                        domain_name = example.com
+DHCP4.OPTION[10]:                       next_server = 172.25.0.254
+DHCP4.OPTION[11]:                       broadcast_address = 172.25.0.255
+DHCP4.OPTION[12]:                       requested_interface_mtu = 1
+DHCP4.OPTION[13]:                       requested_subnet_mask = 1
+DHCP4.OPTION[14]:                       dhcp_lease_time = 21600
+DHCP4.OPTION[15]:                       ip_address = 172.25.0.11
+DHCP4.OPTION[16]:                       requested_nis_domain = 1
+DHCP4.OPTION[17]:                       routers = 172.25.0.254
+DHCP4.OPTION[18]:                       requested_wpad = 1
+DHCP4.OPTION[19]:                       requested_static_routes = 1
+DHCP4.OPTION[20]:                       requested_nis_servers = 1
+DHCP4.OPTION[21]:                       domain_name_servers = 172.25.254.254
+DHCP4.OPTION[22]:                       requested_domain_name_servers = 1
+DHCP4.OPTION[23]:                       requested_ntp_servers = 1
+DHCP4.OPTION[24]:                       requested_routers = 1
+DHCP4.OPTION[25]:                       requested_ms_classless_static_routes = 1
+DHCP4.OPTION[26]:                       subnet_mask = 255.255.255.0
+DHCP4.OPTION[27]:                       requested_host_name = 1
+DHCP4.OPTION[28]:                       network_number = 172.25.0.0
+DHCP4.OPTION[29]:                       dhcp_server_identifier = 172.25.253.254
+IP6.地址[1]:                            ip = fe80::5054:ff:fe00:b/64, gw = ::
+
+[root@server0 ~]# rpm -q chrony
+chrony-1.29.1-1.el7.x86_64
+[root@server0 ~]# vim /etc/chrony.conf
+[root@server0 ~]# cat -n /etc/chrony.conf | head -7 | tail -3
+     5	server 2.rhel.pool.ntp.org iburst
+     6	server 3.rhel.pool.ntp.org iburst
+     7	server classroom.example.com  iburst
+[root@server0 ~]# systemctl  restart chronyd
+[root@server0 ~]# timedatectl | grep NTP
+     NTP enabled: yes
+NTP synchronized: yes
+[root@server0 ~]# timedatectl set-ntp yes
+
+[root@server0 ~]# rpm -q cronie
+cronie-1.4.11-11.el7.x86_64
+[root@server0 ~]# rpm -q crontabs
+crontabs-1.11-6.20121102git.el7.noarch
+
+[root@server0 ~]# tail -3 /var/log/cron
+Jun 18 15:30:01 localhost CROND[7286]: (root) CMD (/usr/lib64/sa/sa1 1 1)
+Jun 18 15:40:01 localhost CROND[7386]: (root) CMD (/usr/lib64/sa/sa1 1 1)
+Jun 18 15:50:01 localhost CROND[7518]: (root) CMD (/usr/lib64/sa/sa1 1 1)
+
+
+[root@server0 ~]# mkdir  -p /xxx/x2
+[root@server0 ~]# date  > /xxx/x2/time.txt
+[root@server0 ~]# cat /xxx/x2/time.txt
+2018年 06月 18日 星期一 16:19:20 CST
+[root@server0 ~]# crontab -e  -u root
+crontab: installing new crontab
+[root@server0 ~]# crontab -l -u root
+* 16 18 06 01 echo 'I Love Linux'  >> /xxx/x2/time.txt
+[root@server0 ~]# cat /xxx/x2/time.txt
+2018年 06月 18日 星期一 16:19:20 CST
+I Love Linux
+I Love Linux
+[root@server0 ~]# date >  /xxx/x2/time2.txt
+
+[root@server0 ~]# crontab -l -u root
+*/2 16 18 06 01  echo 'I Love Linu perix'  >> /xxx/x2/time.txt
+
+[root@server0 ~]# crontab -e -u root
+crontab: installing new crontab
+[root@server0 ~]# crontab -l -u root
+*/2 16 18 06 01  echo 'I Love Linu perix'  >> /xxx/x2/time2.txt
+*/3 */2 */2 */2 *  echo 'I love peri' >> /xxx/x2/time2.txt
+* 17 18 06 01 echo 'I am peri' >> /xxx/x2/time2.txt
+[root@server0 ~]# cat /xxx/x2/time2.txt
+2018年 06月 18日 星期一 16:44:21 CST
+I am peri
+===========================================================
+==============ldap====================================================
+
+[root@server0 ~]# yum -y install sssd
+已安装:
+  sssd.x86_64 0:1.11.2-65.el7                                                              
+
+作为依赖被安装:
+  c-ares.x86_64 0:1.10.0-3.el7                 cyrus-sasl-gssapi.x86_64 0:2.1.26-17.el7    
+  libbasicobjects.x86_64 0:0.1.0-22.el7        libcollection.x86_64 0:0.6.2-22.el7         
+  libdhash.x86_64 0:0.4.3-22.el7               libini_config.x86_64 0:1.0.0.1-22.el7       
+  libipa_hbac.x86_64 0:1.11.2-65.el7           libpath_utils.x86_64 0:0.2.1-22.el7         
+  libref_array.x86_64 0:0.1.3-22.el7           libsss_idmap.x86_64 0:1.11.2-65.el7         
+  python-sssdconfig.noarch 0:1.11.2-65.el7     sssd-ad.x86_64 0:1.11.2-65.el7              
+  sssd-common.x86_64 0:1.11.2-65.el7           sssd-common-pac.x86_64 0:1.11.2-65.el7      
+  sssd-ipa.x86_64 0:1.11.2-65.el7              sssd-krb5.x86_64 0:1.11.2-65.el7            
+  sssd-krb5-common.x86_64 0:1.11.2-65.el7      sssd-ldap.x86_64 0:1.11.2-65.el7            
+  sssd-proxy.x86_64 0:1.11.2-65.el7           
+
+完毕！
+
+[root@server0 ~]# rpm -q sssd
+sssd-1.11.2-65.el7.x86_64
+[root@server0 ~]# yum -y install authconfig-gtk
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

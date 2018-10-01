@@ -1,0 +1,226 @@
+[root@desktop0 ~]# getenforce
+Enforcing
+[root@desktop0 ~]# firewall-cmd --set-default-zone=trusted
+success
+[root@desktop0 ~]# firewall-cmd --get-default-zone
+trusted
+
+[root@server0 ~]# getenforce
+Enforcing
+[root@server0 ~]# firewall-cmd --set-default-zone=trusted
+success
+[root@server0 ~]# firewall-cmd --get-default-zone
+trusted
+
+[root@server0 ~]# lsblk
+NAME   MAJ:MIN RM SIZE RO TYPE MOUNTPOINT
+vda    253:0    0  10G  0 disk 
+└─vda1 253:1    0  10G  0 part /
+vdb    253:16   0  10G  0 disk 
+[root@server0 ~]# parted /dev/vdb
+GNU Parted 3.1
+使用 /dev/vdb
+Welcome to GNU Parted! Type 'help' to view a list of commands.
+(parted) mktable gpt                                                      
+(parted) print                                                            
+
+Number  Start  End  Size  File system  Name  标志
+
+(parted) mkpart
+分区名称？  []? haha                                                      
+文件系统类型？  [ext2]? ext4                                              
+起始点？ 0                                                                
+结束点？ 2G                                                               
+警告: The resulting partition is not properly aligned for best performance.
+忽略/Ignore/放弃/Cancel? i                                                
+(parted) unit GB                                                          
+(parted) mkpart                                                           
+分区名称？  []? hah2                                                      
+文件系统类型？  [ext2]? ext4                                              
+起始点？ 2G                                                               
+结束点？ 4G                                                               
+(parted) print
+Model: Virtio Block Device (virtblk)
+Disk /dev/vdb: 10.7GB
+Sector size (logical/physical): 512B/512B
+Partition Table: gpt
+Disk Flags: 
+
+Number  Start   End     Size    File system  Name  标志
+ 1      0.00GB  2.00GB  2.00GB               haha
+ 2      2.00GB  4.00GB  2.00GB               hah2
+(parted) mkpart                                                           
+分区名称？  []? hah3                                                      
+文件系统类型？  [ext2]? xfs
+起始点？ 4G                                                               
+结束点？ 5G                                                               
+(parted) print                                                            
+Model: Virtio Block Device (virtblk)
+Disk /dev/vdb: 10.7GB
+Sector size (logical/physical): 512B/512B
+Partition Table: gpt
+Disk Flags: 
+
+Number  Start   End     Size    File system  Name  标志
+ 1      0.00GB  2.00GB  2.00GB               haha
+ 2      2.00GB  4.00GB  2.00GB               hah2
+ 3      4.00GB  5.00GB  1.00GB               hah3
+
+(parted) mkpart                                                           
+分区名称？  []? hah4                                                      
+文件系统类型？  [ext2]? xfs                                               
+起始点？ 5G                                                               
+结束点？ 6G                                                               
+(parted) rm                                                               
+分区编号？ 3                                                              
+(parted) parted                                                           
+  align-check TYPE N                        check partition N for TYPE(min|opt) alignment
+  help [COMMAND]                           print general help, or help on COMMAND
+  mklabel,mktable LABEL-TYPE               create a new disklabel (partition table)
+  mkpart PART-TYPE [FS-TYPE] START END     make a partition
+  name NUMBER NAME                         name partition NUMBER as NAME
+  print [devices|free|list,all|NUMBER]     display the partition table, available devices, free space, all found
+        partitions, or a particular partition
+  quit                                     exit program
+  rescue START END                         rescue a lost partition near START and END
+  rm NUMBER                                delete partition NUMBER
+  select DEVICE                            choose the device to edit
+  disk_set FLAG STATE                      change the FLAG on selected device
+  disk_toggle [FLAG]                       toggle the state of FLAG on selected device
+  set NUMBER FLAG STATE                    change the FLAG on partition NUMBER
+  toggle [NUMBER [FLAG]]                   toggle the state of FLAG on partition NUMBER
+  unit UNIT                                set the default unit to UNIT
+  version                                  display the version number and copyright information of GNU Parted
+(parted) print                                                            
+Model: Virtio Block Device (virtblk)
+Disk /dev/vdb: 10.7GB
+Sector size (logical/physical): 512B/512B
+Partition Table: gpt
+Disk Flags: 
+
+Number  Start   End     Size    File system  Name  标志
+ 1      0.00GB  2.00GB  2.00GB               haha
+ 2      2.00GB  4.00GB  2.00GB               hah2
+ 4      5.00GB  6.00GB  1.00GB               hah4
+(parted) quit                                                             
+信息: You may need to update /etc/fstab.
+
+[root@server0 ~]# lsblk
+NAME   MAJ:MIN RM  SIZE RO TYPE MOUNTPOINT
+vda    253:0    0   10G  0 disk 
+└─vda1 253:1    0   10G  0 part /
+vdb    253:16   0   10G  0 disk 
+├─vdb1 253:17   0  1.9G  0 part 
+├─vdb2 253:18   0  1.9G  0 part 
+└─vdb4 253:20   0  954M  0 part 
+[root@server0 ~]# mkswap /dev/vdb1
+正在设置交换空间版本 1，大小 = 1953104 KiB
+无标签，UUID=698b24c4-54f4-4a9c-be20-fd670f8cad4f
+[root@server0 ~]# mkswap /dev/vdb2
+正在设置交换空间版本 1，大小 = 1952764 KiB
+无标签，UUID=1fc37cbe-aed9-4fcf-aa73-41ebceaa6303
+[root@server0 ~]# swapon  /dev/vdb1
+[root@server0 ~]# swapon /dev/vdb2
+[root@server0 ~]# swapon -s
+文件名				类型		大小	已用	权限
+/dev/vdb1                              	partition	1953104	0	-1
+/dev/vdb2                              	partition	1952764	0	-2
+[root@server0 ~]# history
+[root@server0 ~]# mkswap /dev/vdb4
+正在设置交换空间版本 1，大小 = 976892 KiB
+无标签，UUID=c8bdac71-8eba-49b5-b646-78385f6a9d93
+[root@server0 ~]# swapon /dev/vdb4
+[root@server0 ~]# swapon -s
+文件名				类型		大小	已用	权限
+/dev/vdb1                              	partition	1953104	0	-1
+/dev/vdb2                              	partition	1952764	0	-2
+/dev/vdb4                              	partition	976892	0	-3
+[root@server0 ~]# swapoff /dev/vdb4
+[root@server0 ~]# vim /etc/fstab
+[root@server0 ~]# cat /etc/fstab  | tail -3
+UUID=9bf6b9f7-92ad-441b-848e-0257cbb883d1 /                       xfs     defaults        1 1
+/dev/vdb1  swap   defaults  0  0
+/dev/vdb2  swap   defaults  0  0
+[root@server0 ~]# lsblk
+NAME   MAJ:MIN RM  SIZE RO TYPE MOUNTPOINT
+vda    253:0    0   10G  0 disk 
+└─vda1 253:1    0   10G  0 part /
+vdb    253:16   0   10G  0 disk 
+├─vdb1 253:17   0  1.9G  0 part [SWAP]
+├─vdb2 253:18   0  1.9G  0 part [SWAP]
+└─vdb4 253:20   0  954M  0 part 
+
+[root@server0 ~]# yum repolist 
+已加载插件：langpacks
+[root@server0 ~]# yum -y  nfs-utils
+[root@server0 ~]# mkdir /test
+[root@server0 ~]# echo ABcde内容 > /test/x1.txt
+[root@server0 ~]# vim /etc/exports
+[root@server0 ~]# cat /etc/exports
+/test  *(ro)
+[root@server0 ~]# systemctl restart nfs-server
+
+=======================desktop0=====================
+
+[root@desktop0 ~]# mkdir /mnt/nfs
+[root@desktop0 ~]# mount 172.25.0.11:/test /mnt/nfs
+[root@desktop0 ~]# df -h /mnt/nfs
+文件系统           容量  已用  可用 已用% 挂载点
+172.25.0.11:/test   10G  3.0G  7.1G   30% /mnt/nfs
+[root@desktop0 ~]# umount /mnt/nfs
+[root@desktop0 ~]# df -h
+文件系统        容量  已用  可用 已用% 挂载点
+/dev/vda1        10G  3.0G  7.1G   30% /
+devtmpfs        906M     0  906M    0% /dev
+tmpfs           921M   80K  921M    1% /dev/shm
+tmpfs           921M   17M  904M    2% /run
+tmpfs           921M     0  921M    0% /sys/fs/cgroup
+
+[root@desktop0 ~]# vim /etc/fstab
+[root@desktop0 ~]# cat /etc/fstab | tail -2
+UUID=9bf6b9f7-92ad-441b-848e-0257cbb883d1 /       xfs     defaults        1 1
+172.25.0.11:/test  /mnt/nfs  nfs  defaults,_netdev  0  0
+[root@desktop0 ~]# mount -a
+[root@desktop0 ~]# df -h
+文件系统           容量  已用  可用 已用% 挂载点
+/dev/vda1           10G  3.0G  7.1G   30% /
+devtmpfs           906M     0  906M    0% /dev
+tmpfs              921M   80K  921M    1% /dev/shm
+tmpfs              921M   17M  904M    2% /run
+tmpfs              921M     0  921M    0% /sys/fs/cgroup
+172.25.0.11:/test   10G  3.0G  7.1G   30% /mnt/nfs
+[root@desktop0 ~]# ls /mnt/nfs
+x1.txt
+[root@desktop0 ~]# cat /mnt/nfs/x1.txt
+ABcde内容
+[root@desktop0 ~]# mkdir /mnt/nfs/deskdir
+mkdir: 无法创建目录"/mnt/nfs/deskdir": 只读文件系统
+[root@desktop0 ~]# ls /mnt/nfs
+servertest  x1.txt
+
+[root@server0 ~]# mkdir /test/servertest
+[root@server0 ~]# ls /test
+servertest  x1.txt
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
