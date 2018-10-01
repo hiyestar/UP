@@ -1,0 +1,277 @@
+Network Time Protocol 网络时间协议
+
+[root@server0 ~]# rpm -q chrony
+chrony-1.29.1-1.el7.x86_64
+[root@server0 ~]# vim /etc/chrony.conf  #配置文件
+
+#server 1.rhel.pool.ntp.org iburst
+#server 2.rhel.pool.ntp.org iburst
+server classroom.example.com iburst
+[root@server0 ~]# systemctl restart chronyd  #服务名 chronyd
+[root@server0 ~]# systemctl enable chronyd
+
+[root@server0 ~]# date     #date -s "年-月-日 时：分：秒"
+2018年 07月 04日 星期三 16:45:05 CST
+[root@server0 ~]# date -s '1988-10-10 12:55:56'
+1988年 10月 10日 星期一 12:55:56 CST
+[root@server0 ~]# date
+1988年 10月 10日 星期一 12:58:08 CST
+[root@server0 ~]# systemctl restart chronyd
+[root@server0 ~]# date
+2018年 07月 04日 星期三 16:51:17 CST
+
+
+[root@server0 ~]# rpm -q cronie
+cronie-1.4.11-11.el7.x86_64
+[root@server0 ~]# rpm -q crontabs
+crontabs-1.11-6.20121102git.el7.noarch
+[root@server0 ~]# ls /var/log
+chrony          libvirt            rhsm              wtmp
+cloud-init.log  maillog            sa                Xorg.0.log
+cron            messages           samba             Xorg.0.log.old
+[root@server0 ~]# systemctl status crond   #服务名crond
+crond.service - Command Scheduler
+   Loaded: loaded (/usr/lib/systemd/system/crond.service; enabled)
+   Active: active (running) since 三 2018-07-04 09:21:54 CST; 7h ago
+[root@server0 ~]# ls /etc | grep crontab
+anacrontab
+crontab
+
+# .---------------- minute (0 - 59)
+# |  .------------- hour (0 - 23)
+# |  |  .---------- day of month (1 - 31)
+# |  |  |  .------- month (1 - 12) OR jan,feb,mar,apr ...
+# |  |  |  |  .---- day of week (0 - 6) (Sunday=0 or 7) OR sun,  mon, tue,wed,thu,fri,sat
+#  |   |   |   |   |
+# *  *  *  *  * user-name  command to be executed
+
+
+#  crontab   -e   -u root   #编辑任务  -e
+
+#  crontab   -r   -u root     #删除任务 -r
+
+#  crontab   -l   -u root      #查看计划任务 -l
+         
+date +%Y年         date +%m月	date +%d日	date +%F年月日
+date +%H时	date +%M分	date +%S秒		date +%R时分
+
+[root@server0 ~]# crontab -e
+[root@server0 ~]# crontab -l -u root
+*/2 * 4 7 * date +%R >> /opt/time.txt
+*/3 * * * * echo hell >> /opt/time.txt
+
+
+[root@server0 ~]# find  /  -user  student  -type f  -exec  cp  -p  {}  /root/findfiles/  \;
+或者
+[root@server0 ~]# \cp  -p  $(find  /  -user  student  -type f)  /root/findfiles/
+
+[root@server0 ~]# ls -ldh /root
+dr-xr-x---. 15 root root 4.0K 7月   5 08:38 /root
+
+[root@server0 ~]# grep -n login /etc/passwd | head -20 | tail -5  #用户基本信息文件/etc/passwd
+20: nfsnobody:  x:  65534:    65534:  Anonymous NFS User:  /var/lib/nfs:  /sbin/nologin		
+   用户名：密码占位符：用户uid: 基本组gid:  用户信息描述信息:         用户家目录      ：解释器程序
+
+
+[root@server0 ~]# ls  -ld /home
+   d  	 rwx    r-x    r-x     .     3     root    root    20     7月  11 2014      /home
+文件类型d目录 所有者u  所属组g 其他者o |  | 硬连接数  所有者u 所属组g  文件大小  创建最后修改时间  文件目录 
+[root@room11pc13 ~]# man find
+ -type c      文件是 c 类型的。类型可取值如下：
+              b      特殊块文件(缓冲的)
+              c      特殊字符文件(不缓冲)
+              d      目录
+              p      命名管道 (FIFO)
+              f      普通文件
+              l      符号链接
+              s      套接字
+
+
+[root@server0 ~]# chmod -R 777 /opt/aa   #-R 递归修改
+[root@server0 ~]# ls -ld /opt/aa
+drwxrwxrwx. 3 root root 15 7月   5 10:31 /opt/aa
+
+[root@server0 ~]# chmod -R 000 /opt/aa    # -R 递归
+[root@server0 ~]# ls -ld /opt/aa
+d---------. 3 root root 15 7月   5 10:31 /opt/aa
+
+r 	w	x
+4	2	1
+[root@server0 ~]# chmod 444 /opt/aa	
+#ls -ld /opt/aa
+dr--r--r--. 3 root root 15 7月   5 10:31 /opt/aa
+[root@server0 ~]# chmod 222 /opt/aa
+# ls -ld /opt/aa
+d-w--w--w-. 3 root root 15 7月   5 10:31 /opt/aa
+[root@server0 ~]# chmod 111 /opt/aa
+#ls -ld /opt/aa
+d--x--x--x. 3 root root 15 7月   5 10:31 /opt/aa
+[root@server0 ~]# chmod ug=rw,o=r /nsd01/
+#ls -ld /nsd01
+drw-rw-r--. 2 root root 6 7月   5 10:21 /nsd01
+
+[root@server0 ~]# chmod o+w /nsddir/readme.txt 
+[root@server0 ~]# chmod u-x,g-x,o-x /nsddir/
+[root@server0 ~]# chmod ugo-x /nsddir/
+# ls -ld /nsddir/
+drw-r-----. 3 root root 37 7月   5 11:20 /nsddir/
+
+[root@server0 ~]# chmod -R 750 /nsddir/
+[root@server0 ~]# ls -ld /nsddir/
+drwxr-x---. 3 root root 37 7月   5 11:20 /nsddir/
+
+
+#chown  -R  属主：属组 /文件路径 -----------  -R 针对现有已经建立的旧文档
+      -R 递归修改
+
+附加权限  Set GID ----适用于目录，可以使目录下新增的文档自动设置与父目录相同的
+属组，继承父目录的所属组身份,Set GID针对未来新建的文档
+
+[root@server0 ~]# mkdir /nsd07
+[root@server0 ~]# ls -ld /nsd07    #（注意属组的变化root）
+drwx	r-x r-x. 2 root root 6 7月   5 14:29 /nsd07
+
+[root@server0 ~]# chmod g+s /nsd07    #（注意属组的变化）
+[root@server0 ~]# ls -ld /nsd07
+drwx	r-s r-x. 2 root root 6 7月   5 14:29 /nsd07
+
+[root@server0 ~]# chmod g-x /nsd07
+[root@server0 ~]# ls -ld /nsd07
+drwxr-S  r-x. 2 root root 6 7月   5 14:29 /nsd07
+
+[root@server0 ~]# chmod g+x /nsd07
+[root@server0 ~]# ls -ld /nsd07
+drwxr-s  r-x. 2 root root 6 7月   5 14:29 /nsd07
+
+
+[root@server0 ~]# mkdir /nsd08    #（注意属组的变化root）
+[root@server0 ~]# chown :tarena /nsd08
+[root@server0 ~]# ls -ld /nsd08
+drwxr-xr-x. 2 	root 	tarena 6 7月   5 14:40 /nsd08
+
+[root@server0 ~]# mkdir /nsd08/abc01   #（注意属组的变化root）
+[root@server0 ~]# ls -ld /nsd08/abc01
+drwxr-xr-x. 2 	root 	root 6 7月   5 14:41 /nsd08/abc01
+
+附加权限  Set GID ----适用于目录，可以使目录下新增的文档自动设置与父目录相同的
+属组，继承父目录的所属组身份,Set GID针对未来新建的文档
+
+[root@server0 ~]# chmod g+s /nsd08    #（注意属组的变化root）
+[root@server0 ~]# ls -ld /nsd08
+drwx   r-s  r-x. 3 	root 	tarena 18 7月   5 14:41 /nsd08
+
+[root@server0 ~]# mkdir /nsd08/abc02     #（注意属组的变化root）
+[root@server0 ~]# ls -ld /nsd08/abc02
+drwx  r-s  r-x. 2 	root 	tarena 6 7月   5 14:42 /nsd08/abc02
+
+[root@server0 ~]# touch /nsd08/x1.txt    #（注意属组的变化root）
+[root@server0 ~]# ls -ld /nsd08/x1.txt
+-rw-r--r--. 1 	root 	tarena 0 7月   5 14:42 /nsd08/x1.txt
+
+
+
+[root@server0 ~]# mkdir /nsd11
+[root@server0 ~]# chmod o=--- /nsd11
+[root@server0 ~]# ls -ld /nsd11
+drwxr-x---. 2 root root 6 7月   5 15:50 /nsd11
+[root@server0 ~]# grep lisi /etc/passwd
+lisi:x:1002:1002::/home/lisi:/bin/bash
+
+--------------#  -m, --modify=acl        modify the current ACL(s) of file(s)----
+[root@server0 ~]# setfacl -m u:lisi:rx /nsd11  #setfacl 为用户单独设置权限
+[root@server0 ~]# su - lisi
+上一次登录：四 7月  5 11:19:49 CST 2018pts/1 上
+[lisi@server0 ~]$ cd /nsd11
+[lisi@server0 nsd11]$ exit
+logout
+[root@server0 ~]# ls -ld /nsd11   #注意‘.’变化 "---  '+'  2"
+drwx  r-x  ---  +  2 root root 6 7月   5 15:50 /nsd11
+
+[root@server0 ~]# getfacl /nsd11   #getfacl 查看ACL权限
+getfacl: Removing leading '/' from absolute path names
+# file: nsd11
+# owner: root
+# group: root
+user::rwx
+user:lisi:r-x
+group::r-x
+mask::r-x
+other::---
+
+
+===============================
+LDAP
+一 搭建LADA服务器 classroom.example.com
+
+二 打建客户端，虚拟机Server0
+   1 yum -y install sssd 
+    [root@server0 ~]# rpm -q sssd
+	sssd-1.11.2-65.el7.x86_64
+
+2  [root@server0 ~]# yum -y install authconfig-gtk.x86_64 
+   [root@server0 ~]# rpm -q authconfig-gtk
+   authconfig-gtk-6.2.8-8.el7.x86_64
+
+3  [root@server0 ~]# authconfig-gtk 
+    身份&验证
+  	用户账户数据库（U）：LDAP
+         LDAP 搜索基础DN（B): dc=example,dc=com
+         LDAP 服务器（S）： classroom.example.com
+    |—_|  用TLS加密连接（T）   
+           下载CA证书（D） http://classroom.example.com/pub/example-ca.crt  
+
+ 认证配置
+   认证方法(H): LDAP密码
+4 重起服务 [root@server0 ~]# systemctl restart sssd
+	[root@server0 ~]# systemctl enable sssd
+	[root@server0 ~]# systemctl status sssd
+
+5验证[root@server0 ~]# grep ldapuser0 /etc/passwd
+   [root@server0 ~]# id ldapuser0     #密码password
+   uid=1700(ldapuser0) gid=1700(ldapuser0) 组=1700(ldapuser0)
+[root@server0 ~]# id ldapuser20
+uid=1720(ldapuser20) gid=1720(ldapuser20) 组=1720(ldapuser20)
+[root@server0 ~]# id ldapuser21
+id: ldapuser21: no such user
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

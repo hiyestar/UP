@@ -1,0 +1,292 @@
+
+-------------------a4-----192.168.4.7---------------
+[root@a4 ~]# ifconfig |grep 'inet ';
+        inet 192.168.4.7  netmask 255.255.255.0  broadcast 192.168.4.255
+        inet 192.168.2.7  netmask 255.255.255.0  broadcast 192.168.2.255
+[root@a4 ~]# ll /sbin/nginx 
+lrwxrwxrwx. 1 root root 27 8月  20 19:41 /sbin/nginx -> /usr/local/nginx/sbin/nginx
+[root@a4 ~]# yum -y install gcc pcre-devel openssl-devel
+[root@a4 ~]# rpm -q gcc pcre-devel openssl-devel
+gcc-4.8.5-16.el7.x86_64
+pcre-devel-8.32-17.el7.x86_64
+openssl-devel-1.0.2k-8.el7.x86_64
+[root@a4 ~]# useradd -s/sbin/nologin nginx
+[root@a4 ~]# tar -xzPf lnmp_soft.tar.gz
+[root@a4 ~]# cd lnmp_soft/
+[root@a4 lnmp_soft]# ls nginx-1.10.3.tar.gz 
+nginx-1.10.3.tar.gz
+[root@a4 lnmp_soft]# tar -xzPf nginx-1.10.3.tar.gz
+[root@a4 lnmp_soft]# cd nginx-1.10.3/
+[root@a4 nginx-1.10.3]# pwd
+/root/lnmp_soft/nginx-1.10.3
+[root@a4 nginx-1.10.3]# ls
+auto     CHANGES.ru  configure  html     man     src
+CHANGES  conf        contrib    LICENSE  README
+[root@a4 nginx-1.10.3]# ./configure --prefix=/usr/local/nginx \
+> --user=nginx --group=nginx --with-http_ssl_module;
+
+[root@a4 nginx-1.10.3]# make |tail -3 && make install |tail -4;
+
+[root@a4 nginx-1.10.3]# ll /usr/local/nginx/sbin/nginx 
+-rwxr-xr-x. 1 root root 5409032 8月  21 20:29 /usr/local/nginx/sbin/nginx
+-------------# ln -s /usr/local/nginx/sbin/nginx  /sbin/  #方便后期使用,建立软连接
+[root@a4 nginx-1.10.3]# ll /sbin/nginx  #建立软连接ln -s /source  /lianjie/dian
+lrwxrwxrwx. 1 root root 27 8月  20 19:41 /sbin/nginx -> /usr/local/nginx/sbin/nginx
+[root@a4 nginx-1.10.3]# netstat -anptul |grep :80
+[root@a4 nginx-1.10.3]# nginx 
+[root@a4 nginx-1.10.3]# netstat -anptul |grep nginx
+tcp        0      0 0.0.0.0:80              0.0.0.0:*               LISTEN      4795/nginx: master  
+[root@a4 nginx-1.10.3]# nginx -v    //查看软件信息
+nginx version: nginx/1.10.3
+netstat命令可以查看系统中启动的端口信息，该命令常用选项如下：
+-a显示所有端口的信息
+-n以数字格式显示端口号
+-t显示TCP连接的端口
+-u显示UDP连接的端口
+-l显示服务正在监听的端口信息，如httpd启动后，会一直监听80端口
+-p显示监听端口的服务名称是什么（也就是程序名称）
+nginx服务默认通过TCP 80端口监听客户端请求：
+[root@a4 nginx-1.10.3]# firefox 192.168.4.7
+[root@a4 nginx-1.10.3]# cd ~;ls
+anaconda-ks.cfg       lnmp_soft.tar.gz     模板  文档  桌面
+initial-setup-ks.cfg  nginx-1.12.2.tar.gz  视频  下载
+lnmp_soft             公共                 图片  音乐
+[root@a4 ~]# tar -xPf nginx-1.12.2.tar.gz  #升级软件版本号
+[root@a4 ~]# cd nginx-1.12.2/
+[root@a4 nginx-1.12.2]# ls
+auto     CHANGES.ru  configure  html     man     src
+CHANGES  conf        contrib    LICENSE  README
+
+[root@a4 nginx-1.12.2]# ./configure --prefix=/usr/local/nginx \
+> --user=nginx --group=nginx --with-http_ssl_module |tail -5;
+
+[root@a4 nginx-1.12.2]# make |tail -3;
+	-e "s|%%ERROR_LOG_PATH%%|/usr/local/nginx/logs/error.log|" \
+	< man/nginx.8 > objs/nginx.8
+make[1]: 离开目录“/root/nginx-1.12.2”
+[root@a4 nginx-1.12.2]# mv /usr/local/nginx/sbin/nginx{,old}
+[root@a4 nginx-1.12.2]# ls /usr/local/nginx/sbin/
+nginxold
+[root@a4 nginx-1.12.2]# ls 
+auto     CHANGES.ru  configure  html     Makefile  objs    src
+CHANGES  conf        contrib    LICENSE  man       README
+[root@a4 nginx-1.12.2]# ls objs
+autoconf.err  nginx    ngx_auto_config.h   ngx_modules.c  src
+Makefile      nginx.8  ngx_auto_headers.h  ngx_modules.o
+[root@a4 nginx-1.12.2]# 
+[root@a4 nginx-1.12.2]# cp objs/nginx /usr/local/nginx/sbin/
+[root@a4 nginx-1.12.2]# ls /usr/local/nginx/sbin/
+nginx  nginxold
+[root@a4 nginx-1.12.2]# /sbin/nginx -s stop
+[root@a4 nginx-1.12.2]# netstat -anptul |grep :80
+[root@a4 nginx-1.12.2]# nginx
+[root@a4 nginx-1.12.2]# netstat -anptul |grep :80
+tcp        0      0 0.0.0.0:80              0.0.0.0:*               LISTEN      7703/nginx: master  
+[root@a4 nginx-1.12.2]# nginx -v
+nginx version: nginx/1.12.2
+root@a4 nginx-1.12.2]# firefox 192.168.4.7
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+------------------------------pc207--- 192.168.4.207----------
+[root@pc207 ~]# ifconfig |grep 'inet ';
+        inet 192.168.4.207  netmask 255.255.255.0  broadcast 192.168.4.255
+        inet 192.168.2.207  netmask 255.255.255.0  broadcast 192.168.2.255
+[root@pc207 ~]# ll /sbin/nginx 
+lrwxrwxrwx. 1 root root 27 8月  20 19:39 /sbin/nginx -> /usr/local/nginx/sbin/nginx
+[root@pc207 ~]# rpm -q gcc pcre-devel openssl-devel
+gcc-4.8.5-16.el7.x86_64
+pcre-devel-8.32-17.el7.x86_64
+openssl-devel-1.0.2k-8.el7.x86_64
+[root@pc207 ~]# useradd -s/sbin/nologin nginx
+[root@pc207 ~]# tar -xzPf lnmp_soft.tar.gz 
+[root@pc207 ~]# cd lnmp_soft/
+[root@pc207 lnmp_soft]# ls nginx-1.10.3.tar.gz 
+nginx-1.10.3.tar.gz
+[root@pc207 lnmp_soft]# tar -xzPf nginx-1.10.3.tar.gz
+[root@pc207 lnmp_soft]# cd nginx-1.10.3/
+[root@pc207 nginx-1.10.3]# pwd
+/root/lnmp_soft/nginx-1.10.3
+[root@pc207 nginx-1.10.3]# ls
+auto     CHANGES.ru  configure  html     man     src
+CHANGES  conf        contrib    LICENSE  README
+[root@pc207 nginx-1.10.3]# ./configure  --prefix=/usr/local/nginx \
+> --user=nginx --group=nginx --with-http_ssl_module;
+
+[root@pc207 nginx-1.10.3]# make |tail -3 && make install |tail -4;
+
+[root@pc207 nginx-1.10.3]# ll /usr/local/nginx/sbin/nginx 
+-rwxr-xr-x. 1 root root 5409032 8月  21 20:32 /usr/local/nginx/sbin/nginx
+------# ln -s /usr/local/nginx/sbin/nginx  /sbin/  #方便后期使用,建立软连接
+[root@pc207 nginx-1.10.3]# ll /sbin/nginx  #建立软连接ln -s /source  /lianjie/dian
+lrwxrwxrwx. 1 root root 27 8月  20 19:39 /sbin/nginx -> /usr/local/nginx/sbin/nginx
+[root@pc207 nginx-1.10.3]# netstat -anptul |grep :80
+[root@pc207 nginx-1.10.3]# nginx 
+[root@pc207 nginx-1.10.3]# netstat -anptul |grep nginx |column -t;
+tcp  0  0  0.0.0.0:80  0.0.0.0:*  LISTEN  9059/nginx:  master
+[root@pc207 nginx-1.10.3]# nginx -v    //查看软件信息
+nginx version: nginx/1.10.3
+[root@pc207 nginx-1.10.3]# firefox 192.168.4.207
+[root@pc207 nginx-1.10.3]# cd ~;ls
+anaconda-ks.cfg       lnmp_soft            shel6  模板  文档  桌面
+initial-setup-ks.cfg  lnmp_soft.tar.gz     x.sh   视频  下载
+ks.cfg                nginx-1.12.2.tar.gz  公共   图片  音乐
+[root@pc207 ~]# tar -xPf nginx-1.12.2.tar.gz   #升级软件版本号
+[root@pc207 ~]# cd nginx-1.12.2/;ls
+auto     CHANGES.ru  configure  html     man     src
+CHANGES  conf        contrib    LICENSE  README
+[root@pc207 nginx-1.12.2]# ./configure  --prefix=/usr/local/nginx \
+> --user=nginx --group=nginx --with-http_ssl_module |tail -3;
+  nginx http uwsgi temporary files: "uwsgi_temp"
+  nginx http scgi temporary files: "scgi_temp"
+
+[root@pc207 nginx-1.12.2]# 
+[root@pc207 nginx-1.12.2]# make |tail -3;
+	-e "s|%%ERROR_LOG_PATH%%|/usr/local/nginx/logs/error.log|" \
+	< man/nginx.8 > objs/nginx.8
+make[1]: 离开目录“/root/nginx-1.12.2”
+
+[root@pc207 nginx-1.12.2]# mv /usr/local/nginx/sbin/nginx{,old}
+[root@pc207 nginx-1.12.2]# ls objs
+autoconf.err  nginx    ngx_auto_config.h   ngx_modules.c  src
+Makefile      nginx.8  ngx_auto_headers.h  ngx_modules.o
+
+[root@pc207 nginx-1.12.2]# cp objs/nginx /usr/local/nginx/sbin/
+[root@pc207 nginx-1.12.2]# ls /usr/local/nginx/sbin/
+nginx  nginxold
+[root@pc207 nginx-1.12.2]# /sbin/nginx -s stop
+[root@pc207 nginx-1.12.2]# netstat -anptul |grep :80
+[root@pc207 nginx-1.12.2]# nginx 
+[root@pc207 nginx-1.12.2]# netstat -anptul |grep nginx
+tcp        0      0 0.0.0.0:80              0.0.0.0:*               LISTEN      13896/nginx: master 
+[root@pc207 nginx-1.12.2]# nginx -v
+nginx version: nginx/1.12.2
+[root@pc207 nginx-1.12.2]# firefox 192.168.4.207
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+==============c4---192.168.4.208--------------------------
+[root@c4 ~]# ifconfig |sed -n '/inet /p'
+        inet 192.168.4.208  netmask 255.255.255.0  broadcast 192.168.4.255
+        inet 192.168.2.208  netmask 255.255.255.0  broadcast 192.168.2.255
+[root@c4 ~]# ll /sbin/nginx
+lrwxrwxrwx. 1 root root 27 8月  20 19:57 /sbin/nginx -> /usr/local/nginx/sbin/nginx
+
+[root@c4 ~]# rpm -q gcc pcre-devel openssl-devel
+gcc-4.8.5-16.el7.x86_64
+pcre-devel-8.32-17.el7.x86_64
+openssl-devel-1.0.2k-8.el7.x86_64
+
+[root@c4 ~]# useradd -s/sbin/nologin nginx
+
+[root@c4 ~]# tar -xzPf lnmp_soft.tar.gz 
+[root@c4 ~]# cd lnmp_soft/
+[root@c4 lnmp_soft]# ls nginx-1.10.3.tar.gz 
+nginx-1.10.3.tar.gz
+[root@c4 lnmp_soft]# tar -xzPf nginx-1.10.3.tar.gz
+
+[root@c4 lnmp_soft]# cd nginx-1.10.3/
+[root@c4 nginx-1.10.3]# pwd
+/root/lnmp_soft/nginx-1.10.3
+[root@c4 nginx-1.10.3]# ls
+auto     CHANGES.ru  configure  html     man     src
+CHANGES  conf        contrib    LICENSE  README
+
+[root@c4 nginx-1.10.3]# ./configure --prefix=/usr/local/nginx \
+> --user=nginx --group=nginx --with-http_ssl_module;
+
+[root@c4 nginx-1.10.3]# make |tail -3 && make install |tail -4;
+
+[root@c4 nginx-1.10.3]# ll /usr/local/nginx/sbin/nginx 
+-rwxr-xr-x. 1 root root 5409032 8月  21 20:32 /usr/local/nginx/sbin/nginx
+---# ln -s /usr/local/nginx/sbin/nginx  /sbin/  #方便后期使用,建立软连接
+[root@c4 nginx-1.10.3]# ll /sbin/nginx  #建立软连接ln -s /source  /lianjie/dian
+lrwxrwxrwx. 1 root root 27 8月  20 19:57 /sbin/nginx -> /usr/local/nginx/sbin/nginx
+
+[root@c4 nginx-1.10.3]# netstat -anptul |grep nginx |column -t;
+[root@c4 nginx-1.10.3]# nginx
+[root@c4 nginx-1.10.3]# netstat -anptul |grep nginx |column -t;
+tcp  0  0  0.0.0.0:80  0.0.0.0:*  LISTEN  4853/nginx:  master
+[root@c4 nginx-1.10.3]# nginx -v    //查看软件信息
+nginx version: nginx/1.10.3
+[root@c4 nginx-1.10.3]# firefox 192.168.4.208
+[root@c4 nginx-1.10.3]# cd ~;ls
+anaconda-ks.cfg       lnmp_soft.tar.gz     模板  文档  桌面
+initial-setup-ks.cfg  nginx-1.12.2.tar.gz  视频  下载
+lnmp_soft             公共                 图片  音乐
+[root@c4 ~]# tar -xPf nginx-1.12.2.tar.gz     #升级软件版本号
+[root@c4 ~]# cd nginx-1.12.2/;ls
+auto     CHANGES.ru  configure  html     man     src
+CHANGES  conf        contrib    LICENSE  README
+
+[root@c4 nginx-1.12.2]# ./configure --prefix=/usr/local/nginx \
+> --user=nginx --group=nginx --with-http_ssl_module |tail -3;
+  nginx http uwsgi temporary files: "uwsgi_temp"
+  nginx http scgi temporary files: "scgi_temp"
+
+[root@c4 nginx-1.12.2]# 
+[root@c4 nginx-1.12.2]# make |tail -3;
+	-e "s|%%ERROR_LOG_PATH%%|/usr/local/nginx/logs/error.log|" \
+	< man/nginx.8 > objs/nginx.8
+make[1]: 离开目录“/root/nginx-1.12.2”
+
+[root@c4 nginx-1.12.2]# mv /usr/local/nginx/sbin/nginx{,old}
+[root@c4 nginx-1.12.2]# ls objs
+autoconf.err  nginx    ngx_auto_config.h   ngx_modules.c  src
+Makefile      nginx.8  ngx_auto_headers.h  ngx_modules.o
+
+[root@c4 nginx-1.12.2]# cp objs/nginx /usr/local/nginx/sbin/
+[root@c4 nginx-1.12.2]# ls
+auto     CHANGES.ru  configure  html     Makefile  objs    src
+CHANGES  conf        contrib    LICENSE  man       README
+[root@c4 nginx-1.12.2]# ls /usr/local/nginx/sbin/
+nginx  nginxold
+[root@c4 nginx-1.12.2]# nginx -s stop
+[root@c4 nginx-1.12.2]# netstat -anptul |grep nginx
+[root@c4 nginx-1.12.2]# nginx
+[root@c4 nginx-1.12.2]# netstat -anptul |grep nginx
+tcp        0      0 0.0.0.0:80              0.0.0.0:*               LISTEN      7897/nginx: master  
+[root@c4 nginx-1.12.2]# nginx -v
+nginx version: nginx/1.12.2
+[root@c4 nginx-1.12.2]# firefox 192.168.4.208
+
+
+
+
+
+
+
+
+
+
+
+
+

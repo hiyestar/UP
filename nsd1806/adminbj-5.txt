@@ -1,0 +1,530 @@
+ 
+  2 案例4:tar制作/释放归档压缩包(zcf、ztf、zxf、jcf、jtf、jxf、cf、tf）
+  3   首先创建/root/boothome/与/root/usrsbin/目录
+  4     1）备份/boot、/home这两个文件夹，保存为boothome.tar.gz文件
+  5     2）查看boothome.tar.gz文件内包含哪些内容
+  6     3）将boothome.tar.gz释放到文件夹/root/boothome/下
+  7     4）备份/usr/sbin目录，保存为usrsbin.tar.bz2文件
+  8     5）查看usrsbin.tar.bz2文件内包含哪些内容
+  9     6）将usrsbin.tar.bz2释放到/root/usrsbin/文件夹下
+ 10 
+ 11 
+ 12 
+ 13 案例5：添加并测试用户账号
+ 14     1）创建一个名为stu01的用户账号
+ 15     2）检查/etc/passwd、/etc/shadow文件的最后一行
+ 16     3）检查/home/新增加的宿主目录（家目录）
+ 17     4）为用户stu01设置一个密码（123456）
+ 18 
+ 19 
+ 20 案例6：添加账号时设置不同属性
+ 21     1）新建用户nsd01，宿主目录位于/opt/nsd01
+ 22     2）新建系统账号sys01，将UID设为1234，登录Shell设为/sbin/nologin
+ 23     3）为用户sys01设置密码，并测试是否能够登录
+ 24     4）新建用户admin，将其基本组设为users，附加组设为adm、root
+ 25 
+26 案例7：passwd设置密码
+ 27     1）给用户nsd01设置密码123456
+ 28     2）采用--stdin方式将用户nsd01的密码设为654321
+ 29 
+ 30 案例8：usermod修改用户
+ 31     1）新建一个用户nsd03，将宿主目录设为/opt/home03，并设置密码
+ 32     2）设置nsd03密码为redhat
+ 33     3）将用户nsd03的宿主目录改为/home/nsd03
+ 34     4）将用户sys01的登录Shell改为/bin/bash
+ 35 
+ 36 案例9：组账号基本管理
+ 37     1）新建组账号stugrp
+ 38     2）为stugrp组添加三个成员用户（user01、root、zhangsan）
+ 39     3）从stugrp组删除一个成员（user01）
+ 40 
+ 41 案例10：配置NTP网络时间客户端
+ 42         配置虚拟机 server0，自动校对系统时间
+ 43         NTP服务器位于 classroom.example.com
+ 44         此客户机的时间与NTP服务器的时间保持同步
+ 45 
+ 46 
+ 47 [root@server0 ~]# find  /  -user  student  -type f  -exec  cp  -p  {}  /root/findfiles/  \;
+ 48 或者
+ 49 [root@server0 ~]# \cp  -p  $(find  /  -user  student  -type f)  /root/findfiles/
+                                                                              
+ [root@server0 ~]# rpm -q cronie
+ 52 cronie-1.4.11-11.el7.x86_64
+ 53 
+ 54 [root@server0 ~]# rpm -q crontabs
+ 55 crontabs-1.11-6.20121102git.el7.noarch
+ 56 
+ 57 
+ 58 #chown  -R  属主：属组 /文件路径 -----------  -R 针对现有已经建立的旧文档
+ 59       -R 递归修改
+ 60 
+ 61 [root@server0 ~]# mkdir /AAA
+ 62 [root@server0 ~]# ls -ld /AAA  #（注意属组的变化）
+ 63 drwxr-xr-x. 2 root root 6 7月   5 15:01 /AAA
+ 64 [root@server0 ~]# mkdir /AAA/bb
+ 65 [root@server0 ~]# mkdir /AAA/bb/cc
+ 66 [root@server0 ~]# mkdir /AAA/BB
+ 67 [root@server0 ~]# mkdir /AAA/BB/CC
+ 68 [root@server0 ~]# ls -Rl /AAA  #（注意属组的变化）
+ 69 /AAA:
+ 70 总用量 0
+ 71 drwxr-xr-x. 3 root root 15 7月   5 15:02 bb
+ 72 drwxr-xr-x. 3 root root 15 7月   5 15:02 BB
+ 73 
+  74 /AAA/bb:
+ 75 总用量 0
+ 76 drwxr-xr-x. 2 root root 6 7月   5 15:02 cc
+ 77 
+ 78 /AAA/BB:
+ 79 总用量 0
+ 80 drwxr-xr-x. 2 root root 6 7月   5 15:02 CC
+ 81 
+ 82 [root@server0 ~]# groupadd ZUZU
+ 83 ##chown  -R  属主：属组 /文件路径 -----------  -R 针对现有已经建立的旧文档
+ 84 [root@server0 ~]# chown -R :ZUZU /AAA  #（注意属组的变化）
+ 85 [root@server0 ~]# ls -ld /AAA
+ 86 drwxr-xr-x. 4 root ZUZU 24 7月   5 15:02 /AAA
+ 87 [root@server0 ~]# ls -Rl /AAA   # -R 针对现有已经建立的旧文档（注意属组的变化）
+ 88 /AAA:
+ 89 总用量 0
+ 90 drwxr-xr-x. 3 root ZUZU 15 7月   5 15:02 bb
+ 91 drwxr-xr-x. 3 root ZUZU 15 7月   5 15:02 BB
+ 92 
+ 93 /AAA/bb:
+ 94 总用量 0
+ 95 drwxr-xr-x. 2 root ZUZU 6 7月   5 15:02 cc
+ 96 
+ 97 /AAA/BB:
+  98 总用量 0
+ 99 drwxr-xr-x. 2 root ZUZU 6 7月   5 15:02 CC
+100 
+101 [root@server0 ~]# mkdir /AAA/ccc   #-R 不针对后来新建立的新文档（注意属组的变化）
+102 [root@server0 ~]# ls -ld /AAA/ccc
+103 drwxr-xr-x. 2 root     root    6 7月   5 15:11 /AAA/ccc
+104 
+105 [root@server0 ~]# echo 123 > /AAA/BB/txt.txt  #-R ‘不’针对后来新建立的新文档（注意属组的变化
+    ）
+106 [root@server0 ~]# ls -l /AAA/BB/txt.txt
+107 -rw-r--r--. 1 root    root    4 7月   5 15:13 /AAA/BB/txt.txt
+108 
+109 
+110 
+111 #chown  -R  属主：属组 /文件路径 -----------  -R 针对现有已经建立的旧文档
+112       -R 递归修改
+113 
+114 附加权限  Set GID ----适用于目录，可以使目录下新增的文档自动设置与父目录相同的
+115 属组，继承父目录的所属组身份,Set GID针对未来新建的文档
+116 
+117 [root@room11pc13 ~]# setfacl --help
+118 setfacl 2.2.51 -- set file access control lists
+119 Usage: setfacl [-bkndRLP] { -m|-M|-x|-X ... } file ...
+120   -m, --modify=acl        modify the current ACL(s) of file(s) # 为用户单独设置权限
+ 121 
+122   -M, --modify-file=file  read ACL entries to modify from file
+123 
+124   -x, --remove=acl        remove entries from the ACL(s) of file(s) #删除指定的用户ACL权限#
+125 
+126   -X, --remove-file=file  read ACL entries to remove from file
+127 
+128   -b, --remove-all        remove all extended ACL entries # #删除所有的ACL策略
+129 
+130   -k, --remove-default    remove the default ACL
+131       --set=acl           set the ACL of file(s), replacing the current ACL
+132       --set-file=file     read ACL entries to set from file
+133       --mask              do recalculate the effective rights mask
+134   -n, --no-mask           don't recalculate the effective rights mask
+135   -d, --default           operations apply to the default ACL
+136   -R, --recursive         recurse into subdirectories
+137   -L, --logical           logical walk, follow symbolic links
+138 
+139 --------------#  -m, --modify=acl        modify the current ACL(s) of file(s)----
+140 [root@server0 ~]# setfacl -m u:lisi:rx /nsd11  #setfacl 为用户单独设置权限
+141 
+142 [root@server0 ~]# mkdir /nsd12
+143 [root@server0 ~]# ls -ld /nsd12
+ 144 drwxr-xr-x. 2 root root 6 7月   5 16:37 /nsd12
+145 [root@server0 ~]# setfacl -m u:lisi:rwx /nsd12
+146 [root@server0 ~]# ls -ld /nsd12
+147 drwxrwxr-x+ 2 root root 6 7月   5 16:37 /nsd12
+148 [root@server0 ~]# getfacl /nsd12
+149 getfacl: Removing leading '/' from absolute path names
+150 # file: nsd12
+151 # owner: root
+152 # group: root
+153 user::rwx
+154 user:lisi:rwx
+155 group::r-x
+156 mask::rwx
+157 other::r-x
+158 
+159 [root@server0 ~]# setfacl -m u:gelin01:rwx /nsd12
+160 [root@server0 ~]# setfacl -m u:zhangsan:rx /nsd12
+161 [root@server0 ~]# setfacl -m u:gelin02:rx /nsd12
+162 [root@server0 ~]# getfacl /nsd12
+163 getfacl: Removing leading '/' from absolute path names
+164 # file: nsd12
+165 # owner: root
+166 # group: root
+167 user::rwx
+ 168 user:zhangsan:r-x
+169 user:lisi:rwx
+170 user:gelin01:rwx
+171 user:gelin02:r-x
+172 group::r-x
+173 mask::rwx
+174 other::r-x
+175 ---- -x, --remove=acl   remove entries from the ACL(s) of file(s) #删除指定的用户ACL权限#
+176 [root@server0 ~]# setfacl -x u:gelin01 /nsd12
+177 [root@server0 ~]# getfacl /nsd12
+178 getfacl: Removing leading '/' from absolute path names
+179 # file: nsd12
+180 # owner: root
+181 # group: root
+182 user::rwx
+183 user:zhangsan:r-x
+184 user:lisi:rwx
+185 user:gelin02:r-x
+186 group::r-x
+187 mask::rwx
+188 other::r-x
+189 -----------b, --remove-all        remove all extended ACL entries
+190 [root@server0 ~]# setfacl -b /nsd12  #删除所有的ACL策略
+191 [root@server0 ~]# getfacl /nsd12
+  192 getfacl: Removing leading '/' from absolute path names
+193 # file: nsd12
+194 # owner: root
+195 # group: root
+196 user::rwx
+197 group::r-x
+198 other::r-x
+199 
+200 [root@server0 ~]# mkdir -m ugo=rwx -p /qq/qq/qq  #创建文件夹的同时，为子文件夹/qq/qq/qq设置t    wx权限
+201 [root@server0 ~]# ls -ld /qq/qq/qq
+202 drwxrwxrwx. 2 root root 6 7月   5 19:44 /qq/qq/qq
+203 
+204 [root@server0 ~]# mkdir -m 770 -p /qq/qq/qq
+205 [root@server0 ~]# ls -ld /qq/qq/qq
+206 drwxrwx---. 2 root root 6 7月   5 19:51 /qq/qq/qq
+207 [root@server0 ~]# ls -ld /qq/qq/
+208 drwxr-xr-x. 3 root root 15 7月   5 19:51 /qq/qq/
+209 [root@server0 ~]# ls -ld /qq/
+210 drwxr-xr-x. 3 root root 15 7月   5 19:51 /qq/
+211 
+212 Ctrl+u为清空至行首，Ctrl+k为清空至行尾，Ctrl+c为结束当
+213 
+214 (单选题)kickarstart 应答文件的包名是（ A）
+ 215  A.system-config-kickstart
+216 正确答案：A
+217 生成自动应答文件为system-config-kickstart，
+218 
+219 LDAP
+220 一 搭建LADA服务器 classroom.example.com
+221 
+222 二 打建客户端，虚拟机Server0
+223    1 yum -y install sssd
+224     [root@server0 ~]# rpm -q sssd
+225         sssd-1.11.2-65.el7.x86_64
+226 
+227 2  [root@server0 ~]# yum -y install authconfig-gtk.x86_64
+228    [root@server0 ~]# rpm -q authconfig-gtk
+229    authconfig-gtk-6.2.8-8.el7.x86_64
+230 
+231 3  [root@server0 ~]# authconfig-gtk
+232     身份&验证
+233         用户账户数据库（U）：LDAP
+234          LDAP 搜索基础DN（B): dc=example,dc=com
+235          LDAP 服务器（S）： classroom.example.com
+236     |—_|  用TLS加密连接（T）
+237            下载CA证书（D） http://classroom.example.com/pub/example-ca.crt
+238 
+239  认证配置
+240    认证方法(H): LDAP密码
+241 4 重起服务 [root@server0 ~]# systemctl restart sssd
+242         [root@server0 ~]# systemctl enable sssd
+243         [root@server0 ~]# systemctl status sssd
+244 
+245 5验证[root@server0 ~]# grep ldapuser0 /etc/passwd
+246    [root@server0 ~]# id ldapuser0     #密码password
+247    uid=1700(ldapuser0) gid=1700(ldapuser0) 组=1700(ldapuser0)
+248 [root@server0 ~]# id ldapuser20
+249 uid=1720(ldapuser20) gid=1720(ldapuser20) 组=1720(ldapuser20)
+250 [root@server0 ~]# id ldapuser21
+251 id: ldapuser21: no such user
+252 
+253 
+254 [root@desktop0 ~]# showmount -e classroom.example.com
+255 Export list for classroom.example.com:
+256 /home/guests 172.25.0.0/255.255.0.0
+257 
+258 [root@server0 ~]# ls /home
+259 student
+260 [root@server0 ~]# ls classroom:/home/guests
+261 ls: 无法访问classroom:/home/guests: 没有那个文件或目录
+262 [root@server0 ~]# mkdir /nsd
+  263 [root@server0 ~]# mount classroom.example.com:/home/guests /nsd
+264 [root@server0 ~]# ls /nsd
+265 ldapuser0   ldapuser12  ldapuser16  ldapuser2   ldapuser5  ldapuser9
+266 ldapuser1   ldapuser13  ldapuser17  ldapuser20  ldapuser6
+267 ldapuser10  ldapuser14  ldapuser18  ldapuser3   ldapuser7
+268 ldapuser11  ldapuser15  ldapuser19  ldapuser4   ldapuser8
+269 [root@server0 ~]# ls -ld /nsd/ldapuser0
+270 drwx------. 4 ldapuser0 ldapuser0 88 7月  11 2014 /nsd/ldapuser0
+271 
+272 [root@server0 ~]# cd /nsd/ldapuser0
+273 -bash: cd: /nsd/ldapuser0: 权限不够
+274 [root@server0 ~]# df -h
+275 文件系统                            容量  已用  可用 已用% 挂载点
+276 /dev/vda1                            10G  3.1G  7.0G   31% /
+277 devtmpfs                            906M     0  906M    0% /dev
+278 tmpfs                               921M   80K  921M    1% /dev/shm
+279 tmpfs                               921M   17M  904M    2% /run
+280 tmpfs                               921M     0  921M    0% /sys/fs/cgroup
+281 classroom.example.com:/home/guests   10G  3.1G  7.0G   31% /nsd
+282 
+283 [root@server0 ~]# umount /nsd
+284 [root@server0 ~]# mount classroom.example.com:/home/guests
+285 mount: 在 /etc/fstab 中找不到 classroom.example.com:/home/guests
+286 [root@server0 ~]# mkdir /home/guests
+
+[root@server0 ~]# mount classroom.example.com:/home/guests  /home/guests
+[root@server0 ~]# df -h 
+文件系统                            容量  已用  可用 已用% 挂载点
+/dev/vda1                            10G  3.1G  7.0G   31% /
+devtmpfs                            906M     0  906M    0% /dev
+tmpfs                               921M   80K  921M    1% /dev/shm
+tmpfs                               921M   17M  904M    2% /run
+tmpfs                               921M     0  921M    0% /sys/fs/cgroup
+classroom.example.com:/home/guests   10G  3.1G  7.0G   31% /home/guests
+[root@server0 ~]# ls /home/guests
+
+  [root@server0 ~]# ls /home/guests
+ldapuser0   ldapuser12  ldapuser16  ldapuser2   ldapuser5  ldapuser9
+[root@server0 ~]# ls -ld /home/guests
+drwxr-xr-x. 23 root root 4096 7月  11 2014 /home/guests
+[root@server0 ~]# ls -ld /home/guests/ldapuser0
+drwx------. 5 ldapuser0 ldapuser0 101 7月   6 10:09 /home/guests/ldapuser0
+[root@server0 ~]# su - ldapuser0
+[ldapuser0@server0 ~]$ cd /home/guests
+[ldapuser0@server0 guests]$ ls /home/guests
+ldapuser0   ldapuser12  ldapuser16  ldapuser2   ldapuser5  ldapuser9
+
+[root@desktop0 ~]# ls /usr/bin/vim
+/usr/bin/vim
+[root@desktop0 ~]# /usr/bin/hostname
+desktop0.example.com
+
+[root@desktop0 ~]# chmod u+s /usr/bin/vim
+[root@desktop0 ~]# ls -l /usr/bin/vim
+-    rw s     r-xr-x. 1 root root 2289600 1月  30 2014 /usr/bin/vim
+[root@desktop0 ~]# /usr/bin/mkdir /opt/haha  #新建文件夹
+[root@desktop0 ~]# ls /opt
+haha  rh
+[root@desktop0 ~]# cp /usr/bin/mkdir  /usr/bin/cpmkdir
+[root@desktop0 ~]# ls -l /usr/bin/cpmkdir
+-rwxr-xr-x. 1 root root 79712 7月   6 10:58 /usr/bin/cpmkdir
+
+[root@desktop0 ~]# chmod u+s /usr/bin/cpmkdir    #Set Uid注意user zhsan 变成 root  
+
+[root@desktop0 ~]# ls -l /usr/bin/cpmkdir
+-    rw s    r-xr-x. 1 root root 79712 7月   6 10:58 /usr/bin/cpmkdir   #Set Uid  
+[root@desktop0 ~]# useradd zhsan
+[root@desktop0 ~]# su - zhsan
+[zhsan@desktop0 ~]$ /usr/bin/mkdir /test01
+/usr/bin/mkdir: cannot create directory ‘/test01’: Permission denied
+[zhsan@desktop0 ~]$ pwd
+/home/zhsan
+[zhsan@desktop0 ~]$ /usr/bin/mkdir /home/zhsan/test01 #新建文件夹
+[zhsan@desktop0 ~]$ ls -l /home/zhsan/test01
+total 0
+[zhsan@desktop0 ~]$ ls -ld /home/zhsan/test01
+drwxrwxr-x. 2 zhsan zhsan 6 Jul  6 11:00 /home/zhsan/test01
+[zhsan@desktop0 ~]$ /usr/bin/cpmkdir text02    #新建文件夹
+
+[zhsan@desktop0 ~]$ ls -ld /home/zhsan/text02/     #Set Uid注意user zhsan 变成 root  
+drwxrwxr-x. 2 root zhsan 6 Jul  6 11:01 /home/zhsan/text02/
+
+[zhsan@desktop0 ~]$ exit
+logout
+
+
+
+Sticky Bit
+chmod o+t /wenjian/mulu
+==============================
+[root@desktop0 ~]# mkdir /public
+
+[root@desktop0 ~]# chmod ugo=rwx /public
+[root@desktop0 ~]# ls -ld /public
+drwx rwx rw x. 2 root root 6 7月   6 11:14 /public
+
+[root@desktop0 ~]# chmod o+t /public  #Sticky Bit阻止用户滥用写w权限（禁止操作他人的文档）
+[root@desktop0 ~]# ls -ld /public    #注意x--->t变化
+drwx rwx rw t. 2 root root 6 7月   6 11:14 /public
+===============================================
+[root@desktop0 ~]# useradd lisi
+[root@desktop0 ~]# useradd lis2
+[root@desktop0 ~]# su - lisi
+[lisi@desktop0 ~]$ mkdir /public/lisi/
+[lisi@desktop0 ~]$ echo lisidewendang >/public/lisi/lisi.txt
+[lisi@desktop0 ~]$ exit
+logout
+[root@desktop0 ~]# su - lis2
+[lis2@desktop0 ~]$ mkdir /public/lis2
+[lis2@desktop0 ~]$ echo lis2wenzi >  /public/lis2/lis2.txt
+[lis2@desktop0 ~]$ cat /public/lis2/lis2.txt
+lis2wenzi
+
+
+[lis2@desktop0 ~]$ ls /public/lis2/
+lis2.txt
+[lis2@desktop0 ~]$ ls /public/lisi
+lisi.txt
+[lis2@desktop0 ~]$ exit
+logout
+[root@desktop0 ~]# su - lisi
+上一次登录：五 7月  6 11:22:28 CST 2018pts/0 上
+[lisi@desktop0 ~]$ ls /public/lisi
+lisi.txt
+[lisi@desktop0 ~]$ ls /public/lis2
+lis2.txt
+[lisi@desktop0 ~]$ cat /public/lis2/lis2.txt
+lis2wenzi
+[lisi@desktop0 ~]$ cat /public/lisi/lisi.txt
+lisidewendang
+[lisi@desktop0 ~]$ echo hhhhaahahha >>/public/lis2/lis2.txt
+-bash: /public/lis2/lis2.txt: Permission denied
+[lisi@desktop0 ~]$ echo hhhhaahahha >>/public/lisi/lisi.txt
+[lisi@desktop0 ~]$ cat /public/lisi/lisi.txt
+lisidewendang
+hhhhaahahha
+
+[root@server0 ~]# find  /  -user  student  -type f  -exec  cp  -p  {}  /root/findfiles/  \;
+或者
+[root@server0 ~]# \cp  -p  $(find  /  -user  student  -type f)  /root/findfiles/
+[root@desktop0 ~]# mkdir /nsd/ss2/ /nsd/ssss2  /nsd/ssk  /nsd/ssk2
+[root@desktop0 ~]# touch /nsd/nsd.txt
+[root@desktop0 ~]# touch /nsd/nsd2.txt
+[root@desktop0 ~]# ls /nsd
+nsd2.txt  nsd.txt  ss2  ssk  ssk2  ssss2
+
+[root@desktop0 ~]# find /nsd -name "?s*"  -o  -type f
+/nsd
+/nsd/ss2
+/nsd/ssss2
+/nsd/ssk
+/nsd/ssk2
+/nsd/nsd.txt
+/nsd/nsd2.txt
+[root@desktop0 ~]# find /nsd -name "?s*"  -a  -type f
+/nsd/nsd.txt
+/nsd/nsd2.txt
+
+[root@server0 ~]# rm -rf $(find /var/log/ -mtime +100)
+
+
+http://classroom.example.com/content/rhel7.0/x86_64/dvd/
+
+http://classroom.example.com/pub/example-ca.crt
+
+
+
+
+
+                                                           
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                                                           
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

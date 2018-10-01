@@ -1,0 +1,225 @@
+----------	ipv6  2^128  2^16=16^4=65536	2^16*8组=2^128=16^4*8组	--------------
+#/etc/fstab 
+#172.25.254.254:/home/guests /home/guests     nfs   defaults,_netdev  0   0
+[root@desktop0 ~]# tail -1 /etc/fstab
+172.25.0.11:/public  /mnt/nfsmount     nfs   defaults,_netdev  0   0
+
+
+[root@room11pc13 ~]# ls /content
+courses  lost+found  rhel7.0
+[root@room11pc13 ~]# ls -ld /content
+drwxr-xr-x 5 root root 4096 6月  28 18:21 /content
+[root@room11pc13 ~]# firewall-cmd --get-default-zone 
+trusted
+[root@room11pc13 ~]# df -hT
+文件系统       类型      容量  已用  可用 已用% 挂载点
+/dev/sda2      ext4      118G   14G   99G   13% /
+devtmpfs       devtmpfs  7.8G     0  7.8G    0% /dev
+tmpfs          tmpfs     7.8G  4.9M  7.8G    1% /dev/shm
+tmpfs          tmpfs     7.8G  9.2M  7.8G    1% /run
+tmpfs          tmpfs     7.8G     0  7.8G    0% /sys/fs/cgroup
+/dev/sda1      ext4      197G   36G  152G   20% /var/lib/libvirt/images
+/dev/loop0     iso9660   3.8G  3.8G     0  100% /var/ftp/rhel7
+tmpfs          tmpfs     1.6G  4.0K  1.6G    1% /run/user/42
+tmpfs          tmpfs     1.6G   48K  1.6G    1% /run/user/0
+[root@room11pc13 ~]# getenforce 
+Disabled
+----------	ipv6  2^128  2^16=16^4=65536	2^16*8组=2^128=16^4*8组	--------------
+[root@desktop0 ~]# nmcli connection modify 'System eth0' ipv6.method manual ipv6.addresses '2003:ac18::303/64' connection.autoconnect yes
+[root@desktop0 ~]# nmcli connection up 'System eth0' 
+[root@server0 ~]# nmcli connection modify 'System eth0' ipv6.method manual ipv6.addresses 2003:ac18::305/64 connection.autoconnect yes
+
+[root@server0 ~]# nmcli connection up 'System eth0' 
+
+[root@server0 ~]# ping6 2003:ac18::305
+PING 2003:ac18::305(2003:ac18::305) 56 data bytes
+64 bytes from 2003:ac18::305: icmp_seq=1 ttl=64 time=0.069 ms
+64 bytes from 2003:ac18::305: icmp_seq=2 ttl=64 time=0.072 ms
+64 bytes from 2003:ac18::305: icmp_seq=3 ttl=64 time=0.073 ms
+^C
+--- 2003:ac18::305 ping statistics ---
+[root@desktop0 ~]# ping6 -c 3 2003:ac18::303
+PING 2003:ac18::303(2003:ac18::303) 56 data bytes
+64 bytes from 2003:ac18::303: icmp_seq=1 ttl=64 time=0.069 ms
+64 bytes from 2003:ac18::303: icmp_seq=2 ttl=64 time=0.079 ms
+64 bytes from 2003:ac18::303: icmp_seq=3 ttl=64 time=0.078 ms
+----------	ipv6  2^128  2^16=16^4=65536	2^16*8组=2^128=16^4*8组	--------------
+3 packets transmitted, 3 received, 0% packet loss, time 2000ms
+rtt min/avg/max/mdev = 0.069/0.071/0.073/0.007 ms
+[root@server0 ~]# ifconfig eth0 | head -5
+eth0: flags=4163<UP,BROADCAST,RUNNING,MULTICAST>  mtu 1500
+        inet 172.25.0.11  netmask 255.255.255.0  broadcast 172.25.0.255
+        inet6 2003:ac18::305  prefixlen 128  scopeid 0x0<global>
+        inet6 fe80::5054:ff:fe00:b  prefixlen 64  scopeid 0x20<link>
+        ether 52:54:00:00:00:0b  txqueuelen 1000  (Ethernet)
+
+----------	ipv6  2^128  2^16=16^4=65536	2^16*8组=2^128=16^4*8组	--------------
+#/etc/fstab 
+#172.25.254.254:/home/guests /home/guests     nfs   defaults,_netdev  0   0
+#/etc/fstab 
+#172.25.254.254:/home/guests /home/guests     nfs   defaults,_netdev  0   0
+[root@desktop0 ~]# tail -1 /etc/fstab
+172.25.0.11:/public  /mnt/nfsmount     nfs   defaults,_netdev  0   0
+
+
+制作链路聚合---------------------------------------config-name------con-name
+--------------------ifconfig name   ifname
+1,创建虚拟网卡 team0 
+[root@server0 ~]# nmcli connection add type 
+ vlan         ethernet           
+bridge         team         
+[root@server0 ~]# nmcli connection add type team con-name team0 ifname team0 autoconnect yes config '{"runner":{"name":"activebackup"}}'
+Connection 'team0' (c1ea6cea-8bc3-4aeb-89a9-ae61754f92b4) successfully added.
+
+[root@server0 ~]# ifconfig team0
+team0: flags=4099<UP,BROADCAST,MULTICAST>  mtu 1500
+        ether da:78:9c:74:4b:d4  txqueuelen 0  (Ethernet)
+
+[root@server0 ~]# cat /etc/sysconfig/network-scripts/ifcfg-team0 
+
+[root@server0 ~]# nmcli connection add type team-slave con-name team0-1 ifname eth1 master team0 
+
+[root@server0 ~]# nmcli connection add type team-slave con-name team0-2 ifname eth2 master team0 
+
+
+[root@server0 ~]# nmcli connection modify 'team0' ipv4.method manual ipv4.addresses 192.168.1.1/24 connection.autoconnect yes
+[root@server0 ~]# nmcli connection up team0
+Connection successfully activated (D-Bus active path: /org/freedesktop/NetworkManager/ActiveConnection/6)
+[root@server0 ~]# nmcli connection up team0-1
+
+[root@server0 ~]# nmcli connection up team0-2
+[root@server0 ~]# nmcli device status 
+设备   类型      状态    CONNECTION  
+eth0   ethernet  连接的  System eth0 
+eth1   ethernet  连接的  team0-1     
+eth2   ethernet  连接的  team0-2     
+team0  team      连接的  team0       
+lo     loopback  未管理  --          
+[root@server0 ~]# nmcli connection show 
+名称         UUID                                  类型            设备  
+team0-1      1ae4cf12-a488-440f-bc65-3490d70c9d83  802-3-ethernet  eth1  
+team0        c1ea6cea-8bc3-4aeb-89a9-ae61754f92b4  team            team0 
+System eth0  5fb06bd0-0bb0-7ffb-45f1-d6edd65f3e03  802-3-ethernet  eth0  
+team0-2      35968bda-f062-4c81-9ec2-94426372536a  802-3-ethernet  eth2  
+
+[root@desktop0 ~]# nmcli connection delete team0
+[root@desktop0 ~]# nmcli connection delete team0-1
+[root@desktop0 ~]# nmcli connection delete team0-2
+[root@desktop0 ~]# nmcli connection show 
+名称         UUID                                  类型            设备 
+System eth0  5fb06bd0-0bb0-7ffb-45f1-d6edd65f3e03  802-3-ethernet  eth0 
+
+[root@server0 ~]# ifconfig team0
+team0: flags=4163<UP,BROADCAST,RUNNING,MULTICAST>  mtu 1500
+        inet 192.168.1.1  netmask 255.255.255.0  broadcast 192.168.1.255
+        inet6 fe80::5054:ff:fe38:79d9  prefixlen 64  scopeid 0x20<link>
+        ether 52:54:00:38:79:d9  txqueuelen 0  (Ethernet)
+        RX packets 1092  bytes 50371 (49.1 KiB)
+        RX errors 0  dropped 1114  overruns 0  frame 0
+        TX packets 51  bytes 6685 (6.5 KiB)
+        TX errors 0  dropped 0 overruns 0  carrier 0  collisions 0
+
+[root@server0 ~]# teamdctl team0 state
+setup:
+  runner: activebackup
+ports:
+  eth1
+    link watches:
+      link summary: up
+      instance[link_watch_0]:
+        name: ethtool
+        link: up
+  eth2
+    link watches:
+      link summary: up
+      instance[link_watch_0]:
+        name: ethtool
+        link: up
+runner:
+  active port: eth1
+[root@server0 ~]# ping -c 2 192.168.1.1
+PING 192.168.1.1 (192.168.1.1) 56(84) bytes of data.
+64 bytes from 192.168.1.1: icmp_seq=1 ttl=64 time=0.072 ms
+64 bytes from 192.168.1.1: icmp_seq=2 ttl=64 time=0.064 ms
+
+[root@server0 ~]# cat /etc/sysconfig/network-scripts/ifcfg-team0
+DEVICE=team0
+TEAM_CONFIG="{\"runner\":{\"name\":\"activebackup\"}}"
+DEVICETYPE=Team
+BOOTPROTO=none
+DEFROUTE=yes
+IPV4_FAILURE_FATAL=no
+IPV6INIT=yes
+IPV6_AUTOCONF=yes
+IPV6_DEFROUTE=yes
+IPV6_FAILURE_FATAL=no
+NAME=team0
+UUID=c1ea6cea-8bc3-4aeb-89a9-ae61754f92b4
+ONBOOT=yes
+IPADDR0=192.168.1.1
+PREFIX0=24
+IPV6_PEERDNS=yes
+IPV6_PEERROUTES=yes
+[root@server0 ~]# ls /etc/sysconfig/network-scripts/
+ifcfg-eth0     ifdown-isdn      ifup-bnep    ifup-sit
+ifcfg-lo       ifdown-post      ifup-eth     ifup-Team
+ifcfg-team0    ifdown-ppp       ifup-ippp    ifup-TeamPort
+ifcfg-team0-1  ifdown-routes    ifup-ipv6    ifup-tunnel
+ifcfg-team0-2  ifdown-sit       ifup-isdn    ifup-wireless
+[root@server0 ~]# vim /opt/foo.sh
+[root@server0 ~]# chmod +x /opt/foo.sh
+[root@server0 ~]# cat /opt/foo.sh
+#!/bin/bash
+if [ $# -eq 0  ];then
+  echo '/opt/foo.sh redhat | fedora' >&2
+  exit 1
+elif [ $1 == redhat ];then
+  echo fedora
+  exit 0
+elif [ $1 == fedora ];then
+  echo redhat
+  exit 0
+else 
+  echo '/opt/foo.sh redhat | fedora' >&2
+  exit 1
+fi
+[root@server0 ~]# /opt/foo.sh
+/opt/foo.sh redhat | fedora
+[root@server0 ~]# echo $?
+1
+[root@server0 ~]# /opt/foo.sh 2> /opt/f.txt
+[root@server0 ~]# cat /opt/f.txt
+/opt/foo.sh redhat | fedora
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

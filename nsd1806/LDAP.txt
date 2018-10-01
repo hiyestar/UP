@@ -1,0 +1,268 @@
+#######################################################
+ 使用LDAP认证
+
+    LDAP服务器:  网络用户认证
+
+• 轻量级目录访问协议
+ – Lightweight Directory Access Protocol
+  – 由服务器来集中存储并向客户端提供的信息,存储方式类似于DNS分层结构
+  – 提供的信息包括:用户名、密码、通信录、主机名映 射记录、......
+
+      网络用户: 由LDAP服务器提供用户名 密码信息
+      本地用户: /etc/passwd  /etc/shadow
+
+一  搭建LDAP服务器 classroom.example.com
+
+二  搭建客户端,虚拟机Server0
+
+[root@LDAP ~]# which authconfig-tui 
+/usr/sbin/authconfig-tui
+
+[root@LDAP ~]# ls -l /usr/sbin/authconfig-tui 
+lrwxrwxrwx. 1 root root 39 1月  30 12:02 /usr/sbin/authconfig-tui -> /usr/share/authconfig/authconfig-tui.py
+
+[root@LDAP ~]# ls /usr/share/authconfig/
+authconfig.py   authconfig-tui.py   authinfo.py   dnsclient.py   msgarea.py   shvfile.py
+authconfig.pyc  authconfig-tui.pyc  authinfo.pyc  dnsclient.pyc  msgarea.pyc  shvfile.pyc
+
+[root@LDAP ~]# cat -n /usr/share/authconfig/authconfig-tui.py | grep authconfig-tui
+    40	if runsAs("authconfig-tui"):
+   370			if self.module() == "authconfig-tui":
+   400			if (not self.module() == "authconfig-tui" and not self.options.probe and
+   681			return "authconfig-tui"
+  1076		if runsAs("authconfig-tui"):
+===========================================================
+[root@LDAP ~]# ifconfig
+eth0: flags=4163<UP,BROADCAST,RUNNING,MULTICAST>  mtu 1500
+        inet 172.25.0.20  netmask 255.255.255.0  broadcast 172.25.0.255
+
+[root@LDAP ~]# cat /etc/sysconfig/network-scripts/ifcfg-eth0a
+TYPE=Ethernet
+NAME=eth0a
+UUID=397ac1cf-18b1-4161-a442-364de9951b51
+DEVICE=eth0
+ONBOOT=yes
+IPADDR=172.25.0.20
+PREFIX=24
+GATEWAY=172.25.0.254
+DNS1=172.25.254.254
+
+[root@LDAP ~]# ls /etc/yum.repos.d/
+redhat.repo  rhel7.repo
+[root@LDAP ~]# rm -rf /etc/yum.repos.d/redhat.repo
+
+[root@room11pc13 ~]# ifconfig rhce:0
+rhce:0: flags=4163<UP,BROADCAST,RUNNING,MULTICAST>  mtu 1500
+        inet 172.25.0.250  netmask 255.255.0.0  broadcast 172.25.255.255
+        ether 52:54:00:45:6a:61  txqueuelen 1000  (Ethernet)
+
+[root@room11pc13 ~]# tail -2 /etc/fstab 
+UUID=a1bc4085-ad0a-443c-9d62-00d84a1a2e3c /var/lib/libvirt/images ext4    defaults        1 2
+/var/lib/libvirt/images/iso/rhel-server-7.4-x86_64-dvd.iso  /var/ftp/rhel7 iso9660 defaults 0 0
+[root@room11pc13 ~]# systemctl status vsftpd
+● vsftpd.service - Vsftpd ftp daemon
+   Loaded: loaded (/usr/lib/systemd/system/vsftpd.service; enabled; vendor preset: disabled)
+   Active: active (running) since 六 2018-07-07 07:43:19 CST; 3h 2min ago
+
+[root@LDAP ~]# vim /etc/yum.repos.d/redhat.repo 
+[root@LDAP ~]# cat /etc/yum.repos.d/rhel7.repo 
+[rhel7]
+name=rhel7.0
+gpgcheck=0
+enabled=1
+baseurl=ftp://172.25.0.250/rhel7
+
+[root@LDAP ~]# yum clean all
+[root@LDAP ~]# yum repolist 
+
+[root@LDAP ~]# yum -y install sssd  # 1.安装软件sssd,与LDAP服务器沟通
+
+[root@LDAP ~]# rpm -q sssd
+sssd-1.15.2-50.el7.x86_64
+
+[root@LDAP ~]# authconfig-tui   #  2.使用 图形命令 配置sssd软件
+
+   选择LDAP
+
+
+                        ┌────────────────┤ 认证配置 ├───────┐
+                        │                                                                │ 
+                        │  用户信息           认证                                      │ 
+                        │  [ ] 缓存信息       [ ] 使用 MD5 密码                         │ 
+                         |----[*] 使用 LDAP      [*] 使用 shadow 密码                 │ 
+                        │  [ ] 使用 NIS       [*] 使用 LDAP 认证   --------------------- │ 
+                        │  [ ] 使用 IPAv2     [ ] 使用 Kerberos                │ 
+                        │  [ ] 使用 Winbind   [*] 使用指纹读取器                     │ 
+                        │                        [ ] 使用 Winbind 认证                  │ 
+                        │                        [*] 本地授权即可                        │ 
+                        │                                                                │ 
+                        │      ┌──────┐            ┌────────┐        │ 
+                        │      │    取消     │            │    下一步      │        │ 
+                        │      └──────┘            └────────┘        │ 
+                        │                                                                 | 
+                        └──────────────────────────────┘ 
+    
+      dc=example,dc=com             #指定服务端域名
+      classroom.example.com         #指定服务端主机名                                                                   
+                ┌————───────────────────┤ LDAP 设置 ├────────────┐
+                    │                                                                       │ 
+                    │           [*] 使用 TLS                                      │ 
+                    │  服务器： classroom.example.com_________________________ │ 
+                    │ 基础 DN： dc=example,dc=com____________________________ │ 
+                    │                                                                      │ 
+                    │         ┌──────┐                 ┌──────┐          │ 
+                    │         │    后退     │                 │    确定     │          │ 
+                    │         └──────┘                 └──────┘          │ 
+                    │                                                                      │ 
+                    │                                                                      │ 
+                    └─────────────────────────────────┘ 
+                                                                           
+
+
+  勾选TLS加密
+  使用证书加密: http://classroom.example.com/pub/example-ca.crt
+   选择LDAP密码
+
+                     ┌─────────────────────┤ 警告 ├────────────────────┐
+                     │                                                                                                  │ 
+                     │ 要连到启用 TLS 的 LDAP                                                        │ 
+                     │ 服务器，您需要一个签署您服务器证书的 CA                                           │ 
+                     │ 证书。将此PEM                                                                │ 
+                     │ 格式的证书复制到“/etc/openldap/cacerts”目录中。⏎                              │ 
+                     │ 然后按“确定”。                                                                                │ 
+                     │                                                                                                  │ 
+                     │                    ┌──────┐                                                             │ 
+                     │                    │    确定     │                                                             │ 
+                     │                    └──────┘                                                              │ 
+                     │                                                                                                   │
+                     │                                                                                                    | 
+                     └──────────────────────────────────────────────┘ 
+
+ [root@room11pc13 ~]# ssh -X root@172.25.0.20
+root@172.25.0.20's password: 
+
+[root@LDAP ~]# ls /etc/openldap/
+cacerts  certs  ldap.conf
+[root@LDAP ~]# ls /etc/openldap/cacerts/
+
+ [root@LDAP ~]# cd /etc/openldap/cacerts/
+##  使用证书加密: http://classroom.example.com/pub/example-ca.crt-------------------
+
+[root@LDAP cacerts]# wget http://classroom.example.com/pub/EXAMPLE-CA-CERT
+
+ [root@LDAP cacerts]# ls /etc/openldap/cacerts/
+EXAMPLE-CA-CERT
+       
+                     ┌─────────────────────┤ 警告 ├─────────────────────┐
+                     │                                                                                                     │ 
+                     │ 要连到启用 TLS 的 LDAP                                                           │ 
+                     │ 服务器，您需要一个签署您服务器证书的 CA                                              │ 
+                     │ 证书。将此PEM                                                                   │ 
+                     │ 格式的证书复制到“/etc/openldap/cacerts”目录中。⏎                                 │ 
+                     │ 然后按“确定”。                                                                                   │ 
+                     │                                                                                                     │ 
+                     │                    ┌──────┐                                                                │ 
+                     │                    │    确定     │                                                                │ 
+                     │                    └──────┘                                                                │ 
+                     │                                                                                                     │ 
+                     │                                                                                                     │ 
+                     └───────────────────────────────────────────────┘ 
+[root@LDAP ~]# systemctl restart sssd    ##4.重起服务
+[root@LDAP ~]# systemctl enable sssd
+[root@LDAP ~]# ls /etc/openldap/cacerts/
+d5912a02.0  EXAMPLE-CA-CERT
+---------------------------------------- 1.查看服务端共享文件夹
+[root@LDAP ~]# showmount -e classroom.example.com  #查看服务器地址，共享位置
+Export list for classroom.example.com:
+/home/guests 172.25.0.0/255.255.0.0
+
+[root@LDAP ~]# mkdir /home/guests
+[root@LDAP ~]# ls /home/guests
+-----------------------家目录漫游
+什么是NFS共享
+• Network File System,网络文件系统
+– 由NFS服务器将指定的文件夹共享给客户机
+– 客户机将此共享目录 mount 到本地目录,访问此共享
+资源就像访问本地目录一样方便
+– 类似于 EXT4、XFS等类型,只不过资源在网上
+ NFS共享服务器:classroom.example.com
+----------------------------------------------------------------------------------  2.挂载共享文件夹mount 
+[root@LDAP ~]# mount classroom.example.com:/home/guests  /home/guests
+[root@LDAP ~]# ls /home/guests
+ldapuser0   ldapuser11  ldapuser14  ldapuser17  ldapuser2   ldapuser4  ldapuser7
+ldapuser1   ldapuser12  ldapuser15  ldapuser18  ldapuser20  ldapuser5  ldapuser8
+ldapuser10  ldapuser13  ldapuser16  ldapuser19  ldapuser3   ldapuser6  ldapuser9
+
+[root@LDAP ~]# id ldapuser0    ##可以看到用户基本信息
+uid=1700(ldapuser0) gid=1700(ldapuser0) 组=1700(ldapuser0)
+[root@LDAP ~]# su - ldapuser0
+[ldapuser0@LDAP ~]$ ls /etc/sysconfig/
+anaconda    ebtables-config   kernel           ntpdate        rsyncd         sysstat.ioconf
+
+[ldapuser0@LDAP ~]$ mkdir /xx/
+mkdir: 无法创建目录"/xx/": 权限不够
+[ldapuser0@LDAP ~]$ pwd
+/home/guests/ldapuser0
+[ldapuser0@LDAP ~]$ mkdir xx
+[ldapuser0@LDAP ~]$ ls /home/guests/ldapuser0
+xx
+[ldapuser0@LDAP ~]$ ls -ld /etc/sysconfig/
+drwxr-xr-x. 7 root root 4096 1月  30 12:17 /etc/sysconfig/
+[ldapuser0@LDAP ~]$ ls -ld /home/guests
+drwxr-xr-x. 23 root root 4096 7月  11 2014 /home/guests
+
+[ldapuser0@LDAP ~]$ ls -ld /home/guests/ldapuser0
+drwx------. 6 ldapuser0 ldapuser0 4096 7月   7 11:26 /home/guests/ldapuser0
+[ldapuser0@LDAP ~]$ exit
+登出
+--------------------------------------------------------------------------------------------------------
+[root@room11pc13 ~]# which hostname
+/usr/bin/hostname
+[root@room11pc13 ~]# cat /etc/sysconfig/network
+NETWORKING=yes
+HOSTNAME=room11pc13
+-------------------------------------------------------------------------------------------------------
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,141 @@
+
+
+
+[root@room11pc13 ~]# unzip /root/桌面/项目1.zip -d /root/
+
+[root@room11pc13 ~]# ls /root/
+aa.txt           initial-setup-ks.cfg  rht-checkcsa.py  模板  音乐
+anaconda-ks.cfg  NSD_PROJECT1.pdf      score-csa.txt    视频  桌面
+bbs              original-ks.cfg       score.xls        图片
+bin              ReadMe.txt            topology.pptx    文档
+checkcsa.py      require.doc           公共             下载
+[root@room11pc13 ~]# scp -r  /root/bbs  root@172.25.0.11:/root/
+[root@server0 ~]# ls /root
+anaconda-ks.cfg  Desktop    Downloads  Pictures  Templates
+bbs              Documents  Music      Public    Videos
+
+[root@server0 bbs]# yum repolist
+
+[root@server0 bbs]# yum -y install mariadb-server.x86_64  mariadb  php php-mysql.x86_64 
+
+[root@server0 bbs]# systemctl start mariadb
+[root@server0 bbs]# systemctl enable mariadb
+
+[root@server0 ~]# mysqladmin -u root password '123'
+[root@server0 ~]# mysql -u root -p123
+
+MariaDB [(none)]> exit;
+Bye
+[root@server0 ~]# ls /var/www/html
+[root@server0 ~]# cd /var/www/html
+[root@server0 html]# vim test1.php
+[root@server0 html]# cat test1.php
+<?php
+  phpinfo();
+
+?>
+[root@server0 html]# vim test2.php
+[root@server0 html]# cat test2.php
+<?php
+
+    $link=mysql_connect('localhost','root','123');
+
+    if($link) echo "Success !!";         //成功则显示Success !!
+
+    else echo "Failure !!";             //失败则显示Failure !!
+
+    mysql_close();                       //关闭数据库连接
+
+?>
+[root@server0 html]# httpd -t
+Syntax OK
+[root@server0 html]# systemctl restart httpd
+[root@server0 html]# systemctl enable httpd
+[root@server0 html]# firefox 127.0.0.1/test1.php
+
+[root@server0 html]# curl 127.0.0.1/test2.php
+Success !!
+[root@server0 html]# yum -y install elinks.x86_64 
+
+[root@server0 html]# elinks -dump 127.0.0.1/test1.php
+[root@server0 html]# elinks -dump 127.0.0.1/test2.php
+   Success !!
+
+[root@server0 ~]# mysql -u root -p123
+
+MariaDB [(none)]> create database bbsdb;
+Query OK, 1 row affected (0.01 sec)
+
+MariaDB [(none)]> show databases;
++--------------------+
+| Database           |
++--------------------+
+| information_schema |
+| bbsdb              |
+| mysql              |
+| performance_schema |
+| test               |
++--------------------+
+5 rows in set (0.00 sec)
+
+MariaDB [(none)]> grant all on bbsdb.* to runbbs@localhost identified  by 'pwd123';
+Query OK, 0 rows affected (0.01 sec)
+
+MariaDB [(none)]> quit;
+
+[root@server0 ~]# ls /root/bbs
+Discuz_Setup.jpg  Discuz_X3.3_SC_UTF8.zip  LAMP.txt
+[root@server0 ~]# unzip /root/bbs/Discuz_X3.3_SC_UTF8.zip -d /root
+
+[root@server0 ~]# ls /root
+anaconda-ks.cfg  Documents  Pictures  Templates  Videos
+bbs              Downloads  Public    upload
+Desktop          Music      readme    utility
+
+[root@server0 ~]# ls /root/utility/
+convert  oldprg  restore.php  update.php
+[root@server0 ~]# ls /root/upload/
+admin.php    cp.php           home.php    portal.php  uc_client
+api          crossdomain.xml  index.php   robots.txt  uc_server
+api.php      data             install     search.php  userapp.php
+archiver     favicon.ico      member.php  source
+config       forum.php        misc.php    static
+connect.php  group.php        plugin.php  template
+[root@server0 ~]# cp -rf /root/upload/* /var/www/html/
+
+[root@server0 ~]# cd /var/www/html/
+[root@server0 html]# chown -R apache template/ config/ data/ uc_client/ uc_server/
+[root@server0 html]# ls 
+
+[root@server0 html]# ls -ld /var/www/html/template/
+drwxr-xr-x. 3 apache root 36 8月   6 14:29 /var/www/html/template/
+
+[root@server0 html]# ls -F /var/www/html/template/
+default/  index.htm
+[root@server0 html]# ls /var/www/html/template/
+default  index.htm
+[root@server0 html]# ls /var/www/html/template/default/
+common                    index.htm    preview_large.jpg  touch
+discuz_style_default.xml  member       ranklist           userapp
+forum                     mobile       search             wml
+group                     portal       style
+home                      preview.jpg  tag
+[root@server0 html]# firefox http://127.0.0.1/
+
+[root@server0 ~]# firewall-cmd --set-default-zone=trusted
+success
+[root@server0 ~]# getenforce 
+Permissive
+[root@server0 ~]# firefox http://127.0.0.1/
+[root@room11pc13 ~]# firefox http://172.25.0.11/
+
+
+
+
+
+
+
+
+
+
+

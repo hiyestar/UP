@@ -1,0 +1,198 @@
+
+[root@server0 ~]# firewall-cmd --set-default-zone=trusted 
+[root@server0 ~]# yum install -y elinks
+[root@server0 ~]# yum install -y httpd
+
+[root@server0 ~]# vim /etc/httpd/conf/httpd.conf 
+[root@server0 ~]# head -95 /etc/httpd/conf/httpd.conf | tail -1
+ServerName server0.example.com:80
+
+
+[root@server0 ~]# cat /var/www/html/index.html 
+<marquee><h1><font color=gray>/var/www/html/index.html</font></h1></marquee>
+[root@server0 ~]# 
+[root@server0 ~]# vim /etc/httpd/conf.d/slave.conf
+[root@server0 ~]# cat /etc/httpd/conf.d/slave.conf
+<VirtualHost *:80>
+  ServerName  www0.example.com
+  DocumentRoot /var/www/html
+</VirtualHOst>
+<VirtualHost *:80>
+  ServerName  server0.example.com
+  DocumentRoot /var/www/server
+</VirtualHost>
+[root@server0 ~]# mkdir /var/www/server
+[root@server0 ~]# echo '<marquee><h1><font color=pink>/var/www/server/index.html SERVER0</font></h1></marquee>' > /var/www/server/index.html
+
+
+
+[root@server0 ~]# ls -Zd /var/www/html
+drwxr-xr-x. root root system_u:object_r:httpd_sys_content_t:s0 /var/www/html
+[root@server0 ~]# ls -Zd /var/www/server/
+drwxr-xr-x. root root unconfined_u:object_r:httpd_sys_content_t:s0 /var/www/server/
+[root@server0 ~]# chcon  -R  --reference=/var/www  /var/www/server
+[root@server0 ~]# ls -Zd /var/www/server
+drwxr-xr-x. root root system_u:object_r:httpd_sys_content_t:s0 /var/www/server
+
+
+[root@server0 ~]# cd /etc/pki/tls/certs
+[root@server0 certs]# wget http://classroom.example.com/pub/tls/certs/server0.crt
+[root@server0 certs]# wget http://classroom.example.com/pub/example-ca.crt
+[root@server0 tls]# cd /etc/pki/tls/private
+[root@server0 private]# ls
+[root@server0 private]# wget http://classroom.example.com/pub/tls/private/server0.key
+
+
+
+[root@server0 private]# pwd
+/etc/pki/tls/private
+[root@server0 private]# ls
+server0.key
+[root@server0 private]# ls /etc/pki/tls/certs
+ca-bundle.crt        example-ca.crt   Makefile          server0.crt
+ca-bundle.trust.crt  make-dummy-cert  renew-dummy-cert
+
+
+
+
+
+[root@server0 private]# yum install -y mod_ssl
+
+
+
+
+[root@server0 private]# ls
+localhost.key  server0.key
+[root@server0 private]# ls /etc/pki/tls/certs
+ca-bundle.crt        example-ca.crt  make-dummy-cert  renew-dummy-cert
+ca-bundle.trust.crt  localhost.crt   Makefile         server0.crt
+
+
+[root@server0 private]# ls /etc/httpd/conf.d
+autoindex.conf  README  slave.conf  ssl.conf  userdir.conf  welcome.conf
+
+
+[root@server0 private]# vim /etc/httpd/conf.d/ssl.conf
+[root@server0 private]# head -100 /etc/httpd/conf.d/ssl.conf | tail -1
+SSLCertificateFile /etc/pki/tls/certs/server0.crt
+[root@server0 private]# head -107 /etc/httpd/conf.d/ssl.conf | tail -1
+SSLCertificateKeyFile /etc/pki/tls/private/server0.key
+[root@server0 private]# head -122 /etc/httpd/conf.d/ssl.conf | tail -1
+SSLCACertificateFile /etc/pki/tls/certs/example-ca.crt
+
+
+[root@server0 private]# cat /etc/httpd/conf.d/slave.conf 
+<VirtualHost *:80>
+  ServerName  www0.example.com
+  DocumentRoot /var/www/html
+</VirtualHOst>
+<VirtualHost *:80>
+  ServerName  server0.example.com
+  DocumentRoot /var/www/server
+</VirtualHost>
+[root@server0 private]# elinks -dump https://www0.example.com
+
+
+[root@server0 private]# cat /var/www/server/index.html 
+<marquee><h1><font color=pink>/var/www/server/index.html SERVER0</font></h1></marquee>
+[root@server0 private]# cat /var/www/html/index.html 
+<marquee><h1><font color=gray>/var/www/html/index.html</font></h1></marquee>
+
+
+[root@server0 private]# vim /etc/httpd/conf.d/ssl.conf
+[root@server0 private]# head -60 /etc/httpd/conf.d/ssl.conf | tail -2
+DocumentRoot "/var/www/server"
+ServerName server0.example.com:443
+[root@server0 private]# systemctl restart httpd
+
+
+[root@server0 private]# grep -v '^#' /etc/httpd/conf.d/ssl.conf | grep -v '^$' > /etc/httpd/conf.d/ssl2.conf
+[root@server0 private]# vim /etc/httpd/conf.d/ssl2.conf
+<VirtualHost _default_:443>
+DocumentRoot "/var/www/html"
+ServerName www0.example.com:443
+
+[root@server0 private]# vim /etc/httpd/conf.d/ssl.conf
+:r /etc/httpd/conf.d/ssl2.conf
+
+
+[root@server0 private]# systemctl restart httpd
+[root@server0 private]# firefox https://server0.example.com
+[root@server0 private]# firefox https://www0.example.com
+
+[root@server0 private]# grep -v '^#' /etc/httpd/conf.d/ssl.conf | grep -v '^$' > /etc/httpd/conf.d/ssl3.conf
+[root@server0 private]# vim /etc/httpd/conf.d/ssl3.conf
+[root@server0 private]# cat /etc/httpd/conf.d/ssl3.conf
+
+Listen 443 https
+SSLPassPhraseDialog exec:/usr/libexec/httpd-ssl-pass-dialog
+SSLSessionCache         shmcb:/run/httpd/sslcache(512000)
+SSLSessionCacheTimeout  300
+SSLRandomSeed startup file:/dev/urandom  256
+SSLRandomSeed connect builtin
+SSLCryptoDevice builtin
+
+<VirtualHost _default_:443>
+
+DocumentRoot "/var/www/server"
+ServerName server0.example.com:443
+
+ErrorLog logs/ssl_error_log
+TransferLog logs/ssl_access_log
+LogLevel warn
+SSLEngine on
+SSLProtocol all -SSLv2
+SSLCipherSuite HIGH:MEDIUM:!aNULL:!MD5
+
+SSLCertificateFile /etc/pki/tls/certs/server0.crt
+
+SSLCertificateKeyFile /etc/pki/tls/private/server0.key
+
+SSLCACertificateFile /etc/pki/tls/certs/example-ca.crt
+
+<Files ~ "\.(cgi|shtml|phtml|php3?)$">
+    SSLOptions +StdEnvVars
+</Files>
+<Directory "/var/www/cgi-bin">
+    SSLOptions +StdEnvVars
+</Directory>
+BrowserMatch "MSIE [2-5]" \
+         nokeepalive ssl-unclean-shutdown \
+         downgrade-1.0 force-response-1.0
+CustomLog logs/ssl_request_log \
+          "%t %h %{SSL_PROTOCOL}x %{SSL_CIPHER}x \"%r\" %b"
+</VirtualHost>      
+                            
+<VirtualHost _default_:443>
+
+DocumentRoot "/var/www/html"
+
+ServerName www0.example.com:443
+
+ErrorLog logs/ssl_error_log
+TransferLog logs/ssl_access_log
+LogLevel warn
+SSLEngine on
+SSLProtocol all -SSLv2
+SSLCipherSuite HIGH:MEDIUM:!aNULL:!MD5
+
+SSLCertificateFile /etc/pki/tls/certs/server0.crt
+
+SSLCertificateKeyFile /etc/pki/tls/private/server0.key
+
+SSLCACertificateFile /etc/pki/tls/certs/example-ca.crt
+
+<Files ~ "\.(cgi|shtml|phtml|php3?)$">
+    SSLOptions +StdEnvVars
+</Files>
+<Directory "/var/www/cgi-bin">
+    SSLOptions +StdEnvVars
+</Directory>
+BrowserMatch "MSIE [2-5]" \
+         nokeepalive ssl-unclean-shutdown \
+         downgrade-1.0 force-response-1.0
+CustomLog logs/ssl_request_log \
+          "%t %h %{SSL_PROTOCOL}x %{SSL_CIPHER}x \"%r\" %b"
+</VirtualHost>                                  
+[root@server0 private]# 
+

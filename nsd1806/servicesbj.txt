@@ -1,0 +1,482 @@
+[root@room11pc13 ~]# systemctl is-active vsftpd
+active
+[root@room11pc13 ~]# systemctl is-enabled vsftpd
+enabled
+[root@room11pc13 ~]# systemctl status sshd
+[root@room11pc13 ~]# systemctl  is-active sshd
+active
+[root@room11pc13 ~]# systemctl disable firewalld.service 
+[root@room11pc13 ~]# systemctl enable firewalld.service 
+[root@room11pc13 ~]# systemctl is-enabled  firewalld.service 
+enabled
+[root@room11pc13 ~]# getenforce 
+Disabled
+
+[root@room11pc13 ~]# scp -r /root/桌面/tools.tar.gz  root@176.121.211.187:/root/桌面/
+ssh: connect to host 176.121.211.187 port 22: Connection refused
+[root@room11pc13 ~]# getenforce 
+Disabled
+[root@room11pc13 ~]# systemctl is-active firewalld.service 
+active
+[root@room11pc13 ~]# systemctl stop firewalld.service 
+[root@room11pc13 ~]# systemctl is-active firewalld.service 
+inactive
+[root@room11pc13 ~]# systemctl start firewalld.service 
+[root@room11pc13 ~]# systemctl is-active firewalld.service 
+active
+[root@room11pc13 ~]# semanage port -l
+SELinux 端口类型                   协议       端口号
+
+afs3_callback_port_t           tcp      7001
+afs3_callback_port_t           udp      7001
+[root@room11pc13 ~]# semanage port -l | grep ssh
+ssh_port_t                     tcp      22
+
+[root@room11pc13 ~]# getsebool -a
+getsebool:  SELinux is disabled
+[root@room11pc13 ~]# head -8 /etc/selinux/config | tail -2
+SELINUX=disabled
+# SELINUXTYPE= can take one of three two values:
+[root@room11pc13 ~]# firewall-cmd --get-default-zone 
+trusted
+[root@room11pc13 ~]# getenforce 
+Disabled
+
+
+[root@svr7 ~]# vim /etc/selinux/config 
+[root@svr7 ~]# getenforce 
+Permissive
+[root@svr7 ~]# semanage port -l  | head -3
+SELinux 端口类型                   协议       端口号
+
+afs3_callback_port_t           tcp      7001
+
+[root@svr7 ~]# getsebool -a | grep ssh
+fenced_can_ssh --> off
+selinuxuser_use_ssh_chroot --> off
+ssh_chroot_rw_homedirs --> off
+ssh_keysign --> off
+ssh_sysadm_login --> off
+[root@svr7 ~]# semanage port -l | grep ssh
+ssh_port_t                     tcp      22
+
+
+/boot           存放系统引导必需的文件,包括内核,启动配置
+/bin  /sbin     存放各种命令程序
+/dev            硬盘,键盘,鼠标,光驱等设备文件
+/etc            存放Linux系统及各种程序的配置文件
+/root   /home/  管理员,普通用户的默认家目录
+/var        日志文件,邮箱目录等经常变化的文件
+/proc       存放内存中的映射数据,不占用磁盘空间
+/tmp        系统运行过程中使用的一些临时文件
+
+[root@room11pc13 ~]# ls /var/lib/libvirt/images/content/
+courses  lost+found  rhel7.0
+[root@room11pc13 ~]# ls /content
+courses  lost+found  rhel7.0
+
+[root@room11pc13 ~]# ls -l /etc/redhat-release 
+lrwxrwxrwx. 1 root root 14 3月  10 23:43 /etc/redhat-release -> centos-release
+[root@room11pc13 ~]# ls -l /etc/centos-release
+-rw-r--r--. 1 root root 38 8月  30 2017 /etc/centos-release
+[root@room11pc13 ~]# cat /etc/centos-release
+CentOS Linux release 7.4.1708 (Core)
+[root@room11pc13 ~]# cat /etc/redhat-release 
+CentOS Linux release 7.4.1708 (Core) 
+
+[root@room11pc13 ~]# tail -2 /etc/fstab
+UUID=a1bc4085-ad0a-443c-9d62-00d84a1a2e3c /var/lib/libvirt/images ext4    defaults        1 2
+/var/lib/libvirt/images/iso/rhel-server-7.4-x86_64-dvd.iso  /var/ftp/rhel7 iso9660 defaults 0 0
+
+[root@room11pc13 ~]# ls /var/lib/libvirt/images/iso
+CentOS-7-x86_64-DVD-1708.iso  rhel-server-6.7-x86_64-dvd.iso  Win10_Pro_X64_zh_CN.iso
+lost+found                    rhel-server-7.4-x86_64-dvd.iso
+
+[root@room11pc13 ~]# ls /var/ftp/rhel7/
+addons  extra_files.json  isolinux    Packages                 RPM-GPG-KEY-redhat-release
+EFI     GPL               LiveOS      repodata                 TRANS.TBL
+EULA    images            media.repo  RPM-GPG-KEY-redhat-beta
+
+[root@room11pc13 ~]# yum repolist
+源标识                                    源名称                                    状态
+rhel7                            rhel7.4                          4,986
+rpm                              rpm                              23
+repolist: 5,009
+[root@room11pc13 ~]# cat /etc/yum.repos.d/rhel7.repo 
+[rhel7]
+name=rhel7.4
+baseurl=file:///var/ftp/rhel7
+gpgcheck=0
+enabled=1
+
+[root@room11pc13 ~]# systemctl is-active vsftpd
+active
+[root@pc207 ~]# vim /etc/yum.repos.d/rhel7.repo 
+[root@pc207 ~]# cat /etc/yum.repos.d/rhel7.repo 
+[rhel7]
+name=rhel7.4
+enabled=1
+gpgcheck=0
+baseurl=ftp://192.168.4.254/rhel7
+[root@pc207 ~]# yum repolist
+
+
+
+[root@svr7 ~]# vim /etc/yum.repos.d/rhel7.repo
+[root@svr7 ~]# yum clean all
+[root@svr7 ~]# yum repolist
+
+[root@svr7 ~]# cat /etc/yum.repos.d/rhel7.repo 
+[rhel7]
+name=rhel7.4
+enabled=1
+gpgcheck=0
+baseurl=ftp://192.168.4.254/rhel7
+
+
+sss+cp=scp
+
+[root@pc207 ~]# yum install vsftpd  sshd
+
+[root@svr7 ~]# mkdir -p /newdir/dir2
+[root@svr7 ~]# echo abc123 > /newdir/dir2/new.txt
+[root@svr7 ~]# ls -Rl  /newdir/
+/newdir/:
+drwxr-xr-x. 2 root root 21 7月  18 14:05 dir2
+
+/newdir/dir2:
+-rw-r--r--. 1 root root 7 7月  18 14:05 new.txt
+[root@svr7 ~]# ls -ld /newdir/
+drwxr-xr-x. 3 root root 18 7月  18 14:04 /newdir/
+
+[root@svr7 ~]# chmod -R 7 /newdir/
+[root@svr7 ~]# ls -ld /newdir/
+d------rwx. 3 root root 18 7月  18 14:04 /newdir/
+[root@svr7 ~]# ls -ld /newdir/dir2/
+d------rwx. 2 root root 21 7月  18 14:05 /newdir/dir2/
+[root@svr7 ~]# ls -l /newdir/dir2/new.txt 
+-------rwx. 1 root root 7 7月  18 14:05 /newdir/dir2/new.txt
+
+[root@svr7 ~]# chmod -R 71 /newdir/
+[root@svr7 ~]# ls -ld /newdir/
+d---rwx--x. 3 root root 18 7月  18 14:04 /newdir/
+[root@svr7 ~]# ls -ld /newdir/dir2/
+d---rwx--x. 2 root root 21 7月  18 14:05 /newdir/dir2/
+[root@svr7 ~]# ls -l /newdir/dir2/new.txt 
+----rwx--x. 1 root root 7 7月  18 14:05 /newdir/dir2/new.txt
+
+[root@svr7 ~]# chmod -R 7071 /newdir/
+[root@svr7 ~]# ls -ld /newdir/
+d--Srws--t. 3 root root 18 7月  18 14:04 /newdir/
+[root@svr7 ~]# ls -ld /newdir/dir2/
+d--Srws--t. 2 root root 21 7月  18 14:05 /newdir/dir2/
+[root@svr7 ~]# ls -l /newdir/dir2/new.txt 
+---Srws--t. 1 root root 7 7月  18 14:05 /newdir/dir2/new.txt
+
+[root@svr7 ~]# chmod -R 0071 /newdir/
+[root@svr7 ~]# ls -ld /newdir/
+d--Srws--x. 3 root root 18 7月  18 14:04 /newdir/
+[root@svr7 ~]# ls -ld /newdir/dir2/
+d--Srws--x. 2 root root 21 7月  18 14:05 /newdir/dir2/
+[root@svr7 ~]# ls -l /newdir/dir2/new.txt 
+----rwx--x. 1 root root 7 7月  18 14:05 /newdir/dir2/new.txt
+
+[root@svr7 ~]# chmod -R 00071 /newdir/
+[root@svr7 ~]# ls -ld /newdir/
+d---rwx--x. 3 root root 18 7月  18 14:04 /newdir/
+[root@svr7 ~]# ls -ld /newdir/dir2/
+d---rwx--x. 2 root root 21 7月  18 14:05 /newdir/dir2/
+[root@svr7 ~]# ls -l /newdir/dir2/new.txt 
+----rwx--x. 1 root root 7 7月  18 14:05 /newdir/dir2/new.txt
+
+
+
+
+
+[root@svr7 ~]# vim /etc/profile
+[root@svr7 ~]# head -46 /etc/profile | tail -2
+HOSTNAME=`/usr/bin/hostname 2>/dev/null`
+HISTSIZE=1000
+
+
+[root@svr7 ~]# tar -xPf /root/tools.tar.gz 
+[root@svr7 ~]# ls /root
+anaconda-ks.cfg       tools         公共  视频  文档  音乐
+initial-setup-ks.cfg  tools.tar.gz  模板  图片  下载  桌面
+
+[root@svr7 ~]# ls /root/tools
+inotify-tools-3.13.tar.gz  other
+[root@svr7 ~]# ls /root/tools/other/
+boxes-1.1.1-4.el7.x86_64.rpm        oneko-1.2-19.fc24.x86_64.rpm
+cmatrix-1.2a-1.i386.rpm             sl-5.02-1.el7.x86_64.rpm
+ntfs-3g-2014.2.15-6.el6.x86_64.rpm
+
+[root@svr7 ~]# createrepo /root/tools/other/
+
+[root@svr7 ~]# ls /root/tools/other/
+boxes-1.1.1-4.el7.x86_64.rpm        oneko-1.2-19.fc24.x86_64.rpm
+cmatrix-1.2a-1.i386.rpm             repodata                 ------------repodata---------
+ntfs-3g-2014.2.15-6.el6.x86_64.rpm  sl-5.02-1.el7.x86_64.rpm
+
+[root@svr7 ~]# vim /etc/yum.repos.d/myrpm.repo
+[root@svr7 ~]# cat /etc/yum.repos.d/myrpm.repo
+[myrpm]
+name=myrpm
+enabled=1
+gpgcheck=0
+baseurl=file:///root/tools/other
+[root@svr7 ~]# yum repolist
+源标识                           源名称                             状态
+myrpm                    myrpm                          5
+rhel7                   rhel7.4                      4,986
+repolist: 4,991
+
+[root@svr7 ~]# yum install -y sl
+[root@svr7 ~]# rpm -ql sl
+/usr/bin/sl
+/usr/share/doc/sl-5.02
+/usr/share/doc/sl-5.02/LICENSE
+/usr/share/doc/sl-5.02/README.ja.md
+/usr/share/doc/sl-5.02/README.md
+/usr/share/man/ja/man1/sl.1.ja.gz
+/usr/share/man/man1/sl.1.gz
+
+[root@svr7 ~]# yum install oneko -y
+[root@svr7 ~]# rpm -ql oneko 
+/usr/bin/oneko
+/usr/share/applications/oneko.desktop
+/usr/share/doc/oneko
+.......
+
+[root@svr7 ~]# /usr/bin/oneko -tomoyo &
+[1] 4008
+[root@svr7 ~]# killall oneko
+
+[root@svr7 ~]# ls -l /etc/redhat-release 
+-rw-r--r--. 1 root root 52 6月  29 2017 /etc/redhat-release
+[root@svr7 ~]# cat /etc/redhat-release 
+Red Hat Enterprise Linux Server release 7.4 (Maipo)
+[root@svr7 ~]# ls /opt
+rh
+[root@svr7 ~]# ln -s /etc/redhat-release  /opt
+[root@svr7 ~]# ls /opt
+redhat-release  rh
+[root@svr7 ~]# ls -l /opt/redhat-release 
+lrwxrwxrwx. 1 root root 19 7月  18 15:38 /opt/redhat-release -> /etc/redhat-release
+[root@svr7 ~]# ls -i /opt/redhat-release
+44506 /opt/redhat-release
+[root@svr7 ~]# ls -i /etc/redhat-release
+16778276 /etc/redhat-release
+
+[root@svr7 ~]# ls /opt
+redhat-release  rh
+[root@svr7 ~]# echo 1234 > /opt/Aa.txt
+[root@svr7 ~]# ls /opt
+Aa.txt  redhat-release  rh
+[root@svr7 ~]# ls -i /opt/Aa.txt
+44507 /opt/Aa.txt
+[root@svr7 ~]# ln -s /opt/Aa.txt   /opt/B
+[root@svr7 ~]# ls -i /opt/B
+44508 /opt/B
+[root@svr7 ~]# ls  /opt
+Aa.txt  B  redhat-release  rh
+[root@svr7 ~]# ln /opt/Aa.txt /opt/c
+[root@svr7 ~]# ls -i /opt/c
+44507 /opt/c
+[root@svr7 ~]# ls /opt
+Aa.txt  B  c  redhat-release  rh
+[root@svr7 ~]# rm -f /opt/Aa.txt 
+[root@svr7 ~]# ls /opt
+B  c  redhat-release  rh
+[root@svr7 ~]# ls -i /opt/B
+44508 /opt/B
+[root@svr7 ~]# ls  -i /opt/c
+44507 /opt/c
+[root@svr7 ~]# cat /opt/c
+1234
+[root@svr7 ~]# cat /opt/B
+cat: /opt/B: 没有那个文件或目录
+
+[root@svr7 ~]# mkdir /null
+[root@svr7 ~]# ls /null
+[root@svr7 ~]# echo 1234 > /null/num.txt
+[root@svr7 ~]# ls /null
+num.txt
+[root@svr7 ~]# ls -l /null/num.txt 
+-rw-r--r--. 1 root root 5 7月  18 16:09 /null/num.txt
+[root@svr7 ~]# ln /null/num.txt /null/a
+[root@svr7 ~]# ls -l /null/num.txt 
+-rw-r--r--. 2 root root 5 7月  18 16:09 /null/num.txt
+[root@svr7 ~]# ln /null/num.txt /null/b
+[root@svr7 ~]# ls -l /null/num.txt 
+-rw-r--r--. 3 root root 5 7月  18 16:09 /null/num.txt
+[root@svr7 ~]# ls -i /null/num.txt
+33732900 /null/num.txt
+[root@svr7 ~]# ls -i /null/a
+33732900 /null/a
+[root@svr7 ~]# ls -i /null/b
+33732900 /null/b
+[root@svr7 ~]# ls /null
+a  b  num.txt
+
+[root@svr7 ~]# ln -s /null/nb.txt /null/nb ---先建立不存在的文档的软连接
+[root@svr7 ~]# ls -i /null/nb
+33732901 /null/nb
+[root@svr7 ~]# ls -i /null/nb.txt
+ls: 无法访问/null/nb.txt: 没有那个文件或目录
+[root@svr7 ~]# echo abcd > /null/nb.txt   ---后建立预先设定的文档名
+[root@svr7 ~]# ls -i /null/nb.txt
+33732902 /null/nb.txt
+[root@svr7 ~]# ls -i /null/nb
+33732901 /null/nb
+
+
+[root@svr7 ~]# zip -r /opt/test.zip /usr/local /etc/passwd 2> /opt/test.txt
+  adding: usr/local/ (stored 0%)
+  adding: usr/local/bin/ (stored 0%)
+[root@svr7 ~]# zip -r /opt/test2.zip /usr/local /etc/passwd > /opt/test2.txt
+[root@svr7 ~]# ls /opt
+rh  test2.txt  test2.zip  test.txt  test.zip
+[root@svr7 ~]# mkdir /rh2
+[root@svr7 ~]# ls /rh2
+[root@svr7 ~]# ls /rh
+[root@svr7 ~]# unzip /opt/test.zip  -d  /rh
+Archive:  /opt/test.zip
+   creating: /rh/usr/local/
+[root@svr7 ~]# unzip /opt/test2.zip  -d  /rh2
+Archive:  /opt/test2.zip
+   creating: /rh2/usr/local/
+[root@svr7 ~]# ls /rh
+etc  usr
+[root@svr7 ~]# ls /rh2
+etc  usr
+[root@svr7 ~]# ls -l /opt/test.txt 
+-rw-r--r--. 1 root root 0 7月  18 16:51 /opt/test.txt
+[root@svr7 ~]# ls -l /opt/test2.txt 
+-rw-r--r--. 1 root root 1580 7月  18 17:02 /opt/test2.txt
+
+[root@svr7 ~]# zip -r /opt/test3.zip /usr/local /etc/passwd > /opt/test3.txt
+[root@svr7 ~]# echo $?
+0
+[root@svr7 ~]# ls /opt
+etc  test2.txt  test3.txt  test.txt  usr
+rh   test2.zip  test3.zip  test.zip
+
+
+
+[root@svr7 ~]# man 5 passwd
+:set ai   设置缩进自动
+:r /root/wenjian
+:set noai  取消自动缩进
+
+
+#yum install -y  nfs-utils
+#vim /etc/exports
+/test *(rw)
+-------------------------
+#vim /etc/fstab
+172.25.0.11:/test  /clientmountpoint  nfs  defaults,_netdev  0   0
+
+
+
+#yum install -y sssd authconfig-gtk
+#systemctl start sssd
+#showmount -e classroom.example.com
+#showmount -e 172.25.254.254
+#vim /etc/fstab
+172.25.254.254:/home/guests  /home/guests   nfs  defaults,_netdev   0    0
+#
+
+#vim /etc/selinux/config
+#head -8 /etc/selinux/config  |  tail -1
+SELINUX=permissive
+#firewall-cmd --permanent --zone=public  --add-service=http
+#firewall-cmd --permanent  --zone=public  --add-forward-port=port=5423:proto=tcp:toport=80
+#firewall-cmd --reload
+#firewall-cmd --zone=public  --list-all
+#
+
+#yum install -y samba 
+#useradd -s /sbin/nologin  harry
+#pdbedit -a harry
+#vim /etc/samba/smb.conf
+#90 workgroup  =   STAFF
+#tail -3  /etc/samba/smb.conf
+[common]
+path  =  /common
+write list =  harry
+#
+#systemctl restart smb
+#
+#-----client-------------
+#yum install -y samba-client
+#smbclient -L  //172.25.0.11/common
+#smbclient -U  harry  //172.25.0.11/common
+#getsebool -a | grep samba
+samba_export_all_rw  --> off
+#setsebool  -P samba_export_all_rw  on
+#yum install -y cifs-utils
+#vim /etc/fstab
+//172.25.0.11/common  /clientmountpoint   cifs defaults,username=harry,password=123,_netdev,multiuser,sec=ntlmssp  0  0
+
+#parted /dev/vdb
+(parted) mktable gpt
+(parted) mkpart
+(parted) unit GB
+(parted) mkpart
+(parted)quit
+#mkswap  /dev/vdb1
+#swapon /dev/vdb1
+#vim /etc/fstab
+/dev/vdb1   swap   swap  defaults   0   0
+#swapon -a
+
+--------server服务端-------------------------
+[root@room11pc13 ~]# yum install -y nfs-utils
+[root@room11pc13 ~]# vim  /etc/exports
+[root@room11pc13 ~]# cat /etc/exports
+/content/  172.25.254.0/24(ro)
+/var/ftp/rhel7  192.168.4.254/24(ro)
+[root@room11pc13 ~]# yum install -y vsftpd
+[root@room11pc13 ~]# systemctl restart vsftpd
+[root@room11pc13 ~]# systemctl restart nfs-server.service 
+[root@room11pc13 ~]# systemctl is-enabled nfs-server.service 
+enabled
+[root@room11pc13 ~]# tail -1 /etc/fstab 
+/var/lib/libvirt/images/iso/rhel-server-7.4-x86_64-dvd.iso  /var/ftp/rhel7 iso9660 defaults 0 0
+[root@room11pc13 ~]# ls /var/ftp/rhel7/
+addons            images      repodata
+EFI               isolinux    RPM-GPG-KEY-redhat-beta
+EULA              LiveOS      RPM-GPG-KEY-redhat-release
+extra_files.json  media.repo  TRANS.TBL
+GPL               Packages
+
+----------------------------------------client-----------------------
+#vim /etc/fstab
+[root@pc207 ~]# tail -1 /etc/fstab
+192.168.4.254:/var/ftp/rhel7/  /clienpoint  nfs  defaults,_netdev  0   0
+
+[root@pc207 ~]# mkdir /clienpoint
+
+[root@pc207 ~]# vim /etc/yum.repos.d/rhel7.repo 
+[root@pc207 ~]# cat /etc/yum.repos.d/rhel7.repo
+[rhel7]
+name=rhel7.4
+enabled=1
+gpgcheck=0
+baseurl=file:///clienpoint
+-------------------------技术限制,未知数太多,不可用
+
+
+
+
+
+
+
+
+
+
+
+
+
+

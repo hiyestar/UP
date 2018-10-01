@@ -1,0 +1,367 @@
+[root@B01 ~]# cd /root
+[root@B01 ~]# cd ~root
+[root@B01 ~]# cd ~home
+-bash: cd: ~home: 没有那个文件或目录
+[root@B01 ~]# ls /home
+lisi
+[root@B01 ~]# cd ~lisi
+[root@B01 lisi]# cd ~root
+[root@room11pc13 ~]# clone-vm7
+[root@room11pc13 ~]# clone-auto7
+[root@Ser ~]# nmcli connection 
+add     down    help    modify  show    
+delete  edit    load    reload  up  
+[root@Ser ~]# nmcli 
+connection  device      general     help        networking  radio
+
+--------------------------------------------------------------------------------------------------------------------------
+[root@room11pc13 ~]# tail -3 /etc/fstab
+UUID=987e8693-eb61-4a69-9531-0ed377b321ad /                       ext4    defaults        1 1
+UUID=a1bc4085-ad0a-443c-9d62-00d84a1a2e3c /var/lib/libvirt/images ext4    defaults        1 2
+/var/lib/libvirt/images/iso/rhel-server-7.4-x86_64-dvd.iso  /var/ftp/rhel7 iso9660 defaults 0 0
+
+[root@room11pc13 ~]# ls -lh /var/lib/libvirt/images/iso/rhel-server-7.4-x86_64-dvd.iso 
+-rw-r--r-- 1 qemu qemu 3.8G 1月  10 16:27 /var/lib/libvirt/images/iso/rhel-server-7.4-x86_64-dvd.iso
+
+[root@room11pc13 ~]# ls /var/ftp/rhel7/Packages/ | grep kernel
+abrt-addon-kerneloops-2.1.11-48.el7.x86_64.rpm
+kernel-3.10.0-693.el7.x86_64.rpm
+kernel-abi-whitelists-3.10.0-693.el7.noarch.rpm
+kernel-debug-3.10.0-693.el7.x86_64.rpm
+kernel-debug-devel-3.10.0-693.el7.x86_64.rpm
+kernel-devel-3.10.0-693.el7.x86_64.rpm
+kernel-doc-3.10.0-693.el7.noarch.rpm
+kernel-headers-3.10.0-693.el7.x86_64.rpm
+kernel-tools-3.10.0-693.el7.x86_64.rpm
+kernel-tools-libs-3.10.0-693.el7.x86_64.rpm
+texlive-l3kernel-svn29409.SVN_4469-38.el7.noarch.rpm
+
+[root@room11pc13 ~]# uname -r
+3.10.0-693.el7.x86_64
+-----------------------------------------------------------------------------------------------------------------------------------------------------------
+
+[root@server0 ~]# head /root/.bashrc
+# .bashrc
+alias vncviewerup='xOvncserver --rfbport=7000 AcceptPointEvents=0 --AcceptKeyEvents=0 --AlwaysShared --SecurityTypes None &'
+alias vncviewerdown='pkill -9 xOvncserver &'
+# User specific aliases and functions
+
+alias rm='rm -i'
+alias cp='cp -i'
+alias mv='mv -i'
+[root@room11pc13 ~]# vncviewer & 176.121.211.187:6000
+
+[root@desktop0 ~]# ls -l /dev/cdrom 
+lrwxrwxrwx. 1 root root 3 7月   3 11:33 /dev/cdrom -> sr0
+[root@desktop0 ~]# ls -l /dev/sr0 
+brw-rw----+ 1 root cdrom 11, 0 7月   3 11:33 /dev/sr0
+
+[root@server0 ~]# rpm -i /dvd/Packages/vsftpd-3.0.2-22.el7.x86_64.rpm 
+警告：/dvd/Packages/vsftpd-3.0.2-22.el7.x86_64.rpm: 头V3 RSA/SHA256 Signature, 密钥 ID fd431d51: NOKEY
+#signature 签名标记
+
+[root@desktop0 ~]# rpm -q vsftpd
+vsftpd-3.0.2-22.el7.x86_64
+[root@desktop0 ~]# rpm -e vsftpd
+[root@desktop0 ~]# rpm -q vsftpd
+未安装软件包 vsftpd 
+
+http://content.example.com/rhel7.0/x86_64/dvd/Packages/kernel-3.10.0-123.el7.x86_64.rpm
+
+[root@desktop0 ~]# wget http://classroom/content/rhel7.0/x86_64/dvd/Packages/elinks-0.12-0.36.pre6.el7.x86_64.rpm
+[root@desktop0 ~]# ls
+anaconda-ks.cfg  Downloads                             Pictures   Videos
+Desktop          elinks-0.12-0.36.pre6.el7.x86_64.rpm  Public
+Documents        Music                                 Templates
+
+
+[root@Ser ~]# nslookup classroom.example.com
+Server:		172.25.254.254
+Address:	172.25.254.254#53
+Name:	classroom.example.com
+Address: 172.25.254.254
+
+[root@Ser ~]# nslookup desktop0.example.com
+Server:		172.25.254.254
+Address:	172.25.254.254#53
+Name:	desktop0.example.com
+Address: 172.25.0.10
+
+[root@Ser ~]# nslookup server0.example.com
+Server:		172.25.254.254
+Address:	172.25.254.254#53
+Name:	server0.example.com
+Address: 172.25.0.11
+
+[root@Ser ~]# nslookup www0.example.com
+Server:		172.25.254.254
+Address:	172.25.254.254#53
+www0.example.com	canonical name = server0.example.com.
+Name:	server0.example.com
+Address: 172.25.0.11
+
+[root@Ser ~]# nslookup webapp0.example.com
+Server:		172.25.254.254
+Address:	172.25.254.254#53
+webapp0.example.com	canonical name = server0.example.com.
+Name:	server0.example.com
+Address: 172.25.0.11
+
+管理员的UID永远是：0
+普通用户的UID默认从:UID 1000起始
+组：基本组（私有组）-g		 附加组（公共组）-G
+#useradd    【选项】	用户名
+#userdel -rf  用户名
+用户id  家目录路径    登陆Shell   基本组   附加组（公共组）
+ -u 	 -d	 	-s 		-g	 -G
+
+#echo 密码  |  passwd  --stdin  用户名
+gpasswd -a 用户名  组名  添加组员
+gpasswd -d 用户名  组名  删除组员
+
+[root@server0 ~]# grep -n login /etc/passwd | head -20 | tail -5  #用户基本信息文件/etc/passwd
+20: nfsnobody:  x:  65534:    65534:  Anonymous NFS User:  /var/lib/nfs:  /sbin/nologin		
+   用户名：密码占位符：用户uid: 基本组gid:  用户信息描述信息:         用户家目录      ：解释器程序
+
+[root@server0 ~]# grep -n s /etc/group | head -20 | tail -3  #组基本信息文件/etc/group
+51:	saslauth:	x:	76:
+55:	pulse-access:	x:	992:
+56:	pulse:	x:	171:
+
+[root@server0 ~]# grep -n ssh /etc/shadow   #用户密码信息文件/etc/shadow
+23:	sshd:	!!:	16197:	:::::
+		时间天数16197天
+[root@server0 ~]# grep -n root /etc/shadow
+1: root:  $6$UiGI4Tc2$htsXYn5cJnOqv3P1VLcUSgfjDu2pL5yiJBuua6foZAHdwqeuLHfYUfS/vBn27Wjvoel8EJgtdsMjyquqvKAmf1:  16261:  0: 99999:  7:::
+                                                                                                       时间天数16261天 ：可以随时修改的时间不限0：最大使用时间99999天
+
+[root@server0 ~]# grep -n  root /etc/gshadow #组密码信息文件/etc/gshadow
+1:	root	:::
+
+[root@server0 ~]# grep -n ssh /etc/gshadow
+27:	ssh_keys:	!:	:
+41:	sshd:		!:	:
+
+
+
+[root@server0 ~]# ls -ld /etc/gshadow
+----------. 1 root root 684 7月  11 2014 /etc/gshadow
+[root@server0 ~]# ls -ld /etc/shadow
+----------. 1 root root 1148 7月  11 2014 /etc/shadow
+[root@server0 ~]# ls -ld /etc/group
+-rw-r--r--. 1 root root 850 7月  11 2014 /etc/group   #组基本信息文件/etc/group
+
+[root@server0 ~]# ls -ld /etc/passwd
+-rw-r--r--. 1 root root 2005 7月  11 2014 /etc/passwd
+
+[root@server0 ~]# useradd tom
+[root@server0 ~]# ls /home
+student  tom
+[root@server0 ~]# grep -n tom /etc/passwd    #用户基本信息文件/etc/passwd
+40:  tom:	x:   1001:  1001:           :  /home/tom:  /bin/bash
+  用户名 :密码占位符：UID： GID基本组：用户描述信息：用户家目录 ：解释器程序
+[root@server0 ~]# grep root /etc/passwd
+   root:    x:     0:     0:    root:       /root:    /bin/bash
+operator:   x:     11:    0:    operator:  /root:    /sbin/nologin
+
+[root@server0 ~]# grep -n tom /etc/shadow     #用户密码信息文件/etc/shadow
+40:tom:!!:17716:0:99999:7:::
+
+[root@server0 ~]# grep -n tom /etc/gshadow   #组密码信息文件/etc/gshadow
+64:tom:!::
+[root@server0 ~]# grep -n tom /etc/group
+64:tom:x:1001:
+
+[root@server0 ~]# useradd nsd01
+[root@server0 ~]# ls /home
+nsd01  student  tom
+[root@server0 ~]# grep -n nsd01 /etc/passwd
+41:nsd01:x:1002:1002::/home/nsd01:/bin/bash
+
+[root@server0 ~]# useradd -d /opt/nsd07 nsd07 #创建指定 家目录/opt/nsd07 的新用户nsd07
+[root@server0 ~]# grep -n nsd07 /etc/passwd
+42:nsd07:x:1003:1003::/opt/nsd07:/bin/bash
+
+[root@server0 ~]# ls /opt/
+nsd07  rh
+[root@server0 ~]# useradd -u 1600 nsd06    #指定用户id号
+[root@server0 ~]# grep -n nsd06 /etc/passwd
+43:nsd06:x:1600:1600::/home/nsd06:/bin/bash
+
+[root@server0 ~]# groupadd tarena
+[root@server0 ~]# grep -n tarena /etc/group
+68:tarena:x:1601:
+
+[root@server0 ~]# cat /etc/shells 
+/bin/sh
+/bin/bash
+/sbin/nologin  #禁止用户登陆操作系统/sbin/nologin
+/usr/bin/sh
+/usr/bin/bash
+/usr/sbin/nologin
+/bin/tcsh
+/bin/csh
+[root@server0 ~]# useradd -G tarena nsd08   #附加组（公共组）-G
+[root@server0 ~]# useradd -G tarena nsd09
+[root@server0 ~]# grep -n tarena /etc/group
+68:tarena:x:1601:nsd08,nsd09
+
+[root@server0 ~]# useradd -s /sbin/nologin nsd10
+[root@server0 ~]# grep nsd10 /etc/passwd
+nsd10:    x:     1603:    1604:           :  /home/nsd10:  /sbin/nologin
+用户名：密码占位符：用户UID：基本组GID：用户描述信息：用户家目录：登陆解释器程序
+[root@server0 ~]# useradd -s /sbin/nologin  nsd11
+[root@server0 ~]# grep nsd11 /etc/passwd
+nsd11:x:1604:1605::/home/nsd11:/sbin/nologin
+
+[root@server0 ~]# ls /home
+nsd01  nsd06  nsd08  nsd09  nsd10  nsd11  student  tom
+[root@server0 ~]# ls /opt
+nsd07  rh
+
+[root@server0 ~]# groupadd tarena
+[root@server0 ~]# grep -n tarena /etc/group
+68:tarena:x:1601:
+[root@server0 ~]# useradd harry
+[root@server0 ~]# usermod -u 1700  -d  /opt/harry  -s /sbin/nologin  -G tarena  harry
+			      用户id     家目录路径           登陆Shell          附加组（公共组）	
+[root@server0 ~]# id harry
+uid=1700(harry) gid=1606(harry) groups=1606(harry),1601(tarena)
+用户id            基本组gid               附加组（公共组成员harry）id1601
+[root@server0 ~]# grep -n harry /etc/passwd
+48:harry:x:1700:1606::/opt/harry:/sbin/nologin
+
+[root@server0 ~]# grep -n tarena /etc/group
+68:tarena: x:   1601: nsd08,nsd09,harry
+  组名：组密码占位 ：组GID：组成员列表
+
+
+[root@server0 ~]# userdel -r nsd01
+userdel: user nsd01 is currently used by process 3095
+[root@server0 ~]# userdel -rf nsd01
+userdel: user nsd01 is currently used by process 3095
+[root@server0 ~]# jobs
+[root@server0 ~]# kill -9 3095
+[root@server0 ~]# 已杀死 (core dumped)
+[root@server0 ~]# glogout
+[nsd01@server0 ~]$ 登出
+Connection to 172.25.0.11 closed.
+
+
+[root@server0 ~]# useradd natasha
+
+[root@server0 ~]# groupadd stugrp
+
+[root@server0 ~]# useradd kenji
+[root@server0 ~]# useradd jack
+[root@server0 ~]# useradd kaka
+[root@server0 ~]# gpasswd -a natasha stugrp
+正在将用户“natasha”加入到“stugrp”组中
+[root@server0 ~]# gpasswd -a kenji stugrp
+正在将用户“kenji”加入到“stugrp”组中
+[root@server0 ~]# gpasswd -a jack stugrp
+正在将用户“jack”加入到“stugrp”组中
+[root@server0 ~]# grep -n stugrp /etc/group
+74:stugrp:x:1702:natasha,kenji,jack
+[root@server0 ~]# gpasswd -d kenji stugrp
+正在将用户“kenji”从“stugrp”组中删除
+[root@server0 ~]# gpasswd -a kaka stugrp
+正在将用户“kaka”加入到“stugrp”组中
+[root@server0 ~]# grep -n stugrep /etc/group
+[root@server0 ~]# grep -n stugrp /etc/group
+74:stugrp:x:1702:natasha,jack,kaka
+
+[root@server0 ~]# groupdel stugrp
+[root@server0 ~]# grep -n stugrp /etc/group
+[root@server0 ~]# 
+
+[root@server0 ~]# groupadd zux1
+[root@server0 ~]# grep -n zux1 /etc/group
+77:zux1:x:1706:
+[root@server0 ~]# grep -n zux1 /etc/gshadow
+77:zux1:!::
+[root@server0 ~]# groupmod -g 1112 -n zux2  zux1
+		#   groupmod -g 组ID  -n(new) 新组名 旧有的组名
+[root@server0 ~]# grep -n zux /etc/group
+77:zux2:x:1112:
+[root@server0 ~]# groupdel zux2
+[root@server0 ~]# grep -n zux /etc/group
+[root@server0 ~]# grep -n zux /etc/gshadow
+
+
+[root@server0 ~]# grep zuxx /etc/group
+zuxx:x:1706:
+[root@server0 ~]# gpasswd -M 'jack,kenji,harry,nsd11' zuxx
+[root@server0 ~]# grep zuxx /etc/group
+zuxx:x:1706:jack,kenji,harry,nsd11
+[root@server0 ~]# grep -n zuxx /etc/gshadow
+77:zuxx:!::jack,kenji,harry,nsd11
+
+[root@server0 ~]# grep -n jack /etc/passwd
+50:jack:x:1703:1704::/home/jack:/bin/bash
+[root@server0 ~]# usermod -s /sbin/nologin  -G zuxx jack
+[root@server0 ~]# grep -n jack /etc/passwd
+50:jack:x:1703:1704::/home/jack:/sbin/nologin
+[root@server0 ~]# grep -n zuxx /etc/group
+77:zuxx:x:1706:jack,kenji,harry,nsd11
+[root@server0 ~]# id jack
+uid=1703(jack) gid=1704(jack) 组=1704(jack),1706(zuxx)
+
+======================================================
+			快 gzip ----------.gz -------  -z               
+		慢 xz  --------------.xz ------  -J
+	中 bzip2 ---------.bz2 -----------  -j
+
+打包-------------      tar [ -c   -z  -j  -J   -f ]   /压缩的路径/打包的名字     /被压缩归档的源文件...
+                               -cjf
+
+解开压缩包-----------  tar [ -x   -t  -f  ]      /压缩的路径/打包的名字   -C  解压释放路径 
+                       -xf
+   查看压缩包内容    tar    -tPf   原有的压缩包的路径/包名
+  [root@server0 ~]# tar -tPf /root/backup.tar.bz2 
+usr/local/
+usr/local/bin/
+usr/local/bin/lab
+
+
+[root@server0 ~]# ls /opt
+file.tar.bz2  nsd07  nsd.tar.xz  rh  test01.tar.gz
+
+[root@server0 ~]# tar -xf /opt/file.tar.bz2  -C /file
+[root@server0 ~]# tar -xf /opt/nsd.tar.xz  -C /file
+[root@server0 ~]# tar -xf /opt/test01.tar.gz  -C /file
+[root@server0 ~]# ls /file
+etc  home
+[root@server0 ~]# mkdir  /user
+[root@server0 ~]# tar -zcf /opt/back.gz  /etc/passwd  /etc/shadow  /etc/gshadow /boot/
+tar: 从成员名中删除开头的“/”
+[root@server0 ~]# ls  /opt
+back.gz  file.tar.bz2  nsd07  nsd.tar.xz  rh  test01.tar.gz
+[root@server0 ~]# tar -xf /opt/back.gz  -C /user
+[root@server0 ~]# ls /user
+boot  etc
+   
+Network  Time Protocol  网络时间协议
+
+[root@server0 ~]# vim /etc/chrony.conf 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

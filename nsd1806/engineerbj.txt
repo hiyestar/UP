@@ -1,0 +1,746 @@
+fstab---------file system table
+
+扇区默认单元大小 512字节  512byte    2^8=256  2^9=512 	2^10=1024
+virtual disk ---vda vdb
+MBR/msdos-----2.2TB
+1～4个主分区  或者 3个主分区+1个扩展分区（n个逻辑分区）
+[root@server0 ~]# blkid /dev/vdc
+/dev/vdc: PTTYPE="dos" 
+
+
+GPT-----18EB
+厂商 1EB=1000PB	1PB=1000TB	  1TB=1000GB	1GB=1000MB
+最大划分128主分区
+支持的各种功能的集和----参数----defaultS （acl,suid,sgid,rw...)
+备份标记 	1备份  dump    	0不备份
+检测顺序	1  开启检测		0不开启检测
+#cat /etc/fstab
+UUID=9bf6b9f7-92ad-441b-848e-0257cbb883d1 /        xfs    defaults     1  	1
+		设备路径		              挂载点   文件系统类型    参数     备份标记   检测顺序	
+/dev/mapper/rhel-root    		      /       xfs    defaults     0   0
+UUID=5d6c8afe-b75a-4e6b-9de1-1a3eeeaf23d9  /boot   xfs    defaults     0   0
+		   设备路径              	 挂载点   文件系统类型     参数     备份标记   检测顺序	
+/dev/mapper/rhel-swap                      swap    swap    defaults    0   0
+
+[root@clinet-pc01 ~]# tail -3 /etc/fstab
+		   设备路径              	 挂载点   文件系统类型     参数     备份标记   检测顺序
+/dev/mapper/rhel-root  		           /        xfs     defaults    0   0
+UUID=5d6c8afe-b75a-4e6b-9de1-1a3eeeaf23d9 /boot    xfs     defaults    0   0
+/dev/mapper/rhel-swap                    swap      swap    defaults    0   0
+[root@clinet-pc01 ~]# lsblk
+NAME          MAJ:MIN RM  SIZE RO TYPE MOUNTPOINT
+sr0            11:0    1 1024M  0 rom  
+vda           252:0    0   20G  0 disk 
+├─vda1        252:1    0    1G  0 part /boot
+└─vda2        252:2    0   19G  0 part 
+  ├─rhel-root 253:0    0   17G  0 lvm  /
+  └─rhel-swap 253:1    0    2G  0 lvm  [SWAP]
+
+[root@server0 ~]# lsblk
+NAME   MAJ:MIN RM SIZE RO TYPE MOUNTPOINT
+vda    253:0    0  10G  0 disk 
+└─vda1 253:1    0  10G  0 part /
+vdb    253:16   0  10G  0 disk 
+[root@server0 ~]# tail -2 /etc/fstab
+#
+UUID=9bf6b9f7-92ad-441b-848e-0257cbb883d1 	/   xfs    defaults     1 	1
+		设备路径		 挂载点	文件系统类型	参数	  备份标记   检测顺序	
+
+[root@room11pc13 ~]# tail -1 /etc/fstab 
+/var/lib/libvirt/images/iso/rhel-server-7.4-x86_64-dvd.iso  /var/ftp/rhel7 iso9660 defaults 0 0
+[root@room11pc13 ~]# lsblk
+NAME   MAJ:MIN RM   SIZE RO TYPE MOUNTPOINT
+sda      8:0    0 931.5G  0 disk 
+├─sda1   8:1    0   200G  0 part /var/lib/libvirt/images
+└─sda2   8:2    0   120G  0 part /
+loop0    7:0    0   3.8G  1 loop /var/ftp/rhel7
+
+--------------------------------------------------------------------
+   m   print this menu
+   p   print the partition table
+   d   delete a partition
+   n   add a new partition
+
+   q   quit without saving changes
+   w   write table to disk and exit
+[root@server0 ~]# fdisk /dev/vdb
+命令(输入 m 获取帮助)：m
+命令(输入 m 获取帮助)：n
+Partition type:
+   p   primary (0 primary, 0 extended, 4 free)
+   e   extended
+Select (default p): p
+分区号 (1-4，默认 1)：1
+起始 扇区 (2048-20971519，默认为 2048)：
+将使用默认值 2048
+Last 扇区, +扇区 or +size{K,M,G} (2048-20971519，默认为 20971519)：+1G
+分区 1 已设置为 Linux 类型，大小设为 1 GiB
+
+命令(输入 m 获取帮助)：n
+Partition type:
+   p   primary (2 primary, 0 extended, 2 free)
+   e   extended
+Select (default p): p
+分区号 (3,4，默认 3)：3
+起始 扇区 (4196352-20971519，默认为 4196352)：
+将使用默认值 4196352
+Last 扇区, +扇区 or +size{K,M,G} (4196352-20971519，默认为 20971519)：+500M
+分区 3 已设置为 Linux 类型，大小设为 500 MiB
+
+命令(输入 m 获取帮助)：n
+Partition type:
+   p   primary (3 primary, 0 extended, 1 free)
+   e   extended
+Select (default e): e
+已选择分区 4
+起始 扇区 (5220352-20971519，默认为 5220352)：
+将使用默认值 5220352
+Last 扇区, +扇区 or +size{K,M,G} (5220352-20971519，默认为 20971519)：
+将使用默认值 20971519
+分区 4 已设置为 Extended 类型，大小设为 7.5 GiB
+
+命令(输入 m 获取帮助)：n
+All primary partitions are in use
+添加逻辑分区 5
+起始 扇区 (5222400-20971519，默认为 5222400)：
+将使用默认值 5222400
+Last 扇区, +扇区 or +size{K,M,G} (5222400-20971519，默认为 20971519)：+800M           
+分区 5 已设置为 Linux 类型，大小设为 800 MiB
+
+
+命令(输入 m 获取帮助)：n
+All primary partitions are in use
+添加逻辑分区 6
+起始 扇区 (6862848-20971519，默认为 6862848)：
+将使用默认值 6862848
+Last 扇区, +扇区 or +size{K,M,G} (6862848-20971519，默认为 20971519)：+600M
+分区 6 已设置为 Linux 类型，大小设为 600 MiB
+
+命令(输入 m 获取帮助)：p
+
+磁盘 /dev/vdb：10.7 GB, 10737418240 字节，20971520 个扇区
+Units = 扇区 of 1 * 512 = 512 bytes
+扇区大小(逻辑/物理)：512 字节 / 512 字节
+I/O 大小(最小/最佳)：512 字节 / 512 字节
+磁盘标签类型：dos
+磁盘标识符：0x90db4b10
+
+   设备 Boot      Start         End      Blocks   Id  System
+/dev/vdb1            2048     2099199     1048576   83  Linux
+/dev/vdb2         2099200     4196351     1048576   83  Linux
+/dev/vdb3         4196352     5220351      512000   83  Linux
+/dev/vdb4         5220352    20971519     7875584    5  Extended
+/dev/vdb5         5222400     6860799      819200   83  Linux
+/dev/vdb6         6862848     8091647      614400   83  Linux
+
+命令(输入 m 获取帮助)：w
+The partition table has been altered!
+the next reboot or after you run partprobe(8) or kpartx(8)
+正在同步磁盘。
+
+[root@server0 ~]# fdisk -l
+
+磁盘 /dev/vda：10.7 GB, 10737418240 字节，20971520 个扇区
+Units = 扇区 of 1 * 512 = 512 bytes
+扇区大小(逻辑/物理)：512 字节 / 512 字节
+I/O 大小(最小/最佳)：512 字节 / 512 字节
+磁盘标签类型：dos
+磁盘标识符：0x00013f3e
+
+   设备 Boot      Start         End      Blocks   Id  System
+/dev/vda1   *        2048    20970332    10484142+  83  Linux
+
+磁盘 /dev/vdb：10.7 GB, 10737418240 字节，20971520 个扇区
+Units = 扇区 of 1 * 512 = 512 bytes
+扇区大小(逻辑/物理)：512 字节 / 512 字节
+I/O 大小(最小/最佳)：512 字节 / 512 字节
+磁盘标签类型：dos
+磁盘标识符：0x90db4b10
+
+   设备 Boot      Start         End      Blocks   Id  System
+/dev/vdb1            2048     2099199     1048576   83  Linux
+/dev/vdb2         2099200     4196351     1048576   83  Linux
+
+[root@server0 ~]# ls /dev/ | grep vdb
+vdb
+vdb1
+vdb2
+[root@server0 ~]# ls /dev/vdb[1-2]
+/dev/vdb1  /dev/vdb2
+[root@server0 ~]# ls /dev/vdb{,[1-2]}
+/dev/vdb  /dev/vdb1  /dev/vdb2
+
+[root@server0 ~]# lsblk
+NAME   MAJ:MIN RM SIZE RO TYPE MOUNTPOINT
+vda    253:0    0  10G  0 disk 
+└─vda1 253:1    0  10G  0 part /
+vdb    253:16   0  10G  0 disk 
+├─vdb1 253:17   0   1G  0 part 
+└─vdb2 253:18   0   1G  0 part 
+
+[root@server0 ~]# mkfs.ext4 /dev/vdb1  #
+
+[root@server0 ~]# mkfs.xfs /dev/vdb2
+
+[root@server0 ~]# blkid /dev/vdb1  #查看文件系统类型
+/dev/vdb1: UUID="487daf22-4683-41c8-955c-53fe261a5035" TYPE="ext4" 
+[root@server0 ~]# blkid /dev/vdb2
+/dev/vdb2: UUID="7dc8f09d-47ac-49cd-ad64-3bf661747311" TYPE="xfs" 
+
+[root@server0 ~]# mount /dev/vdb1 /mypart
+[root@server0 ~]# mount /dev/vdb2 /mypart2
+[root@server0 ~]# df -h
+文件系统        容量  已用  可用 已用% 挂载点
+/dev/vda1        10G  3.0G  7.1G   30% /
+devtmpfs        906M     0  906M    0% /dev
+tmpfs           921M   80K  921M    1% /dev/shm
+tmpfs           921M   17M  904M    2% /run
+tmpfs           921M     0  921M    0% /sys/fs/cgroup
+/dev/vdb1       976M  2.6M  907M    1% /mypart
+/dev/vdb2      1014M   33M  982M    4% /mypart2
+[root@server0 ~]# lsblk
+NAME   MAJ:MIN RM SIZE RO TYPE MOUNTPOINT
+vda    253:0    0  10G  0 disk 
+└─vda1 253:1    0  10G  0 part /
+vdb    253:16   0  10G  0 disk 
+├─vdb1 253:17   0   1G  0 part /mypart
+└─vdb2 253:18   0   1G  0 part /mypart2
+
+[root@server0 ~]# vim /etc/fstab
+[root@server0 ~]# tail -3 /etc/fstab
+UUID=9bf6b9f7-92ad-441b-848e-0257cbb883d1    /     xfs     defaults   1   1
+/dev/vdb1   				 /mypart   ext4	   defaults   0   0
+/dev/vdb2					/mypart2   xfs     defaults   0   0  
+
+[root@server0 ~]# mount -a
+[root@server0 ~]# df -h
+文件系统        容量  已用  可用 已用% 挂载点
+/dev/vda1        10G  3.0G  7.1G   30% /
+devtmpfs        906M     0  906M    0% /dev
+tmpfs           921M   80K  921M    1% /dev/shm
+tmpfs           921M   17M  904M    2% /run
+tmpfs           921M     0  921M    0% /sys/fs/cgroup
+/dev/vdb2      1014M   33M  982M    4% /mypart2
+/dev/vdb1       976M  2.6M  907M    1% /mypart
+[root@server0 ~]# lsblk
+NAME   MAJ:MIN RM SIZE RO TYPE MOUNTPOINT
+vda    253:0    0  10G  0 disk 
+└─vda1 253:1    0  10G  0 part /
+vdb    253:16   0  10G  0 disk 
+├─vdb1 253:17   0   1G  0 part /mypart
+└─vdb2 253:18   0   1G  0 part /mypart2
+
+[root@server0 ~]# mkfs.xfs -f /dev/vdb1
+
+
+[root@server0 ~]# umount /dev/vdb1
+
+[root@server0 ~]# mkfs.xfs  /dev/vdb1
+mkfs.xfs: /dev/vdb1 appears to contain an existing filesystem (ext4).
+mkfs.xfs: Use the -f option to force overwrite.
+[root@server0 ~]# mkfs.xfs -f  /dev/vdb1
+
+[root@server0 ~]# blkid /dev/vdb1
+/dev/vdb1: UUID="738a4457-c584-4674-a939-ccf9ddce4d31" TYPE="xfs" 
+
+[root@server0 ~]# mount /dev/vdb1 /mypart
+[root@server0 ~]# df -h /mypart
+文件系统        容量  已用  可用 已用% 挂载点
+/dev/vdb1      1014M   33M  982M    4% /mypart
+
+[root@server0 ~]# lsblk /dev/vdb
+NAME   MAJ:MIN RM  SIZE RO TYPE MOUNTPOINT
+vdb    253:16   0   10G  0 disk 
+├─vdb1 253:17   0    1G  0 part /mypart
+├─vdb2 253:18   0    1G  0 part /mypart2
+├─vdb3 253:19   0  500M  0 part 
+├─vdb4 253:20   0    1K  0 part 
+├─vdb5 253:21   0  800M  0 part 
+└─vdb6 253:22   0  600M  0 part 
+
+[root@server0 ~]# tail -3 /etc/fstab
+UUID=9bf6b9f7-92ad-441b-848e-0257cbb883d1    /     xfs     defaults   1   1
+/dev/vdb1   				 /mypart   ext4	   defaults   0   0
+/dev/vdb2				/mypart2   xfs     defaults   0   0  
+[root@server0 ~]# mount -a  # -a, --all    挂载 fstab 中的所有文件系统##---------------
+
+ mount -a [选项]
+ mount [选项] [--source] <源> | [--target] <目录>
+ mount [选项] <源> <目录>
+ mount <操作> <挂载点> [<目标>]
+选项：
+ -a, --all               挂载 fstab 中的所有文件系统
+
+ -l, --show-labels       列出所有带有指定标签的挂载
+
+ -o, --options <列表>    挂载选项列表，以英文逗号分隔
+
+ -r, --read-only         以只读方式挂载文件系统(同 -o ro)
+ -t, --types <列表>      限制文件系统类型集合
+     --source <源>       指明源(路径、标签、uuid)
+     --target <目标>     指明挂载点
+ -w, --rw, --read-write  以读写方式挂载文件系统(默认)
+
+[root@server0 ~]# vim /etc/fstab
+
+[root@server0 ~]# tail -3 /etc/fstab
+UUID=9bf6b9f7-92ad-441b-848e-0257cbb883d1    /     xfs     defaults   1   1
+/dev/vdb1   				 /mypart   xfs	   defaults   0   0
+/dev/vdb2				/mypart2   xfs     defaults   0   0   
+
+
+[root@server0 ~]# partprobe  #刷新分区
+[root@server0 ~]# lsblk
+NAME   MAJ:MIN RM SIZE RO TYPE MOUNTPOINT
+vda    253:0    0  10G  0 disk 
+└─vda1 253:1    0  10G  0 part /
+vdb    253:16   0  10G  0 disk 
+├─vdb1 253:17   0   1G  0 part /mypart
+└─vdb2 253:18   0   1G  0 part /mypart2
+[root@server0 ~]# partprobe
+ls [root@server0 ~]# lsblk
+NAME   MAJ:MIN RM  SIZE RO TYPE MOUNTPOINT
+vda    253:0    0   10G  0 disk 
+└─vda1 253:1    0   10G  0 part /
+vdb    253:16   0   10G  0 disk 
+├─vdb1 253:17   0    1G  0 part /mypart
+├─vdb2 253:18   0    1G  0 part /mypart2
+├─vdb3 253:19   0  500M  0 part 
+├─vdb4 253:20   0    1K  0 part 
+├─vdb5 253:21   0  800M  0 part 
+└─vdb6 253:22   0  600M  0 part 
+
+
+[root@server0 ~]# lsblk /dev/vdb2
+NAME MAJ:MIN RM SIZE RO TYPE MOUNTPOINT
+vdb2 253:18   0   1G  0 part /mypart2
+
+[root@server0 ~]# lsblk /dev/vdc
+NAME MAJ:MIN RM SIZE RO TYPE MOUNTPOINT
+vdc  253:32   0  60G  0 disk 
+
+[root@server0 ~]# fdisk /dev/vdc
+[root@server0 ~]# lsblk /dev/vdc
+NAME   MAJ:MIN RM SIZE RO TYPE MOUNTPOINT
+vdc    253:32   0  60G  0 disk 
+├─vdc1 253:33   0   5G  0 part 
+├─vdc2 253:34   0   5G  0 part 
+├─vdc3 253:35   0  10G  0 part 
+├─vdc4 253:36   0   1K  0 part 
+├─vdc5 253:37   0  10G  0 part 
+├─vdc6 253:38   0  10G  0 part 
+└─vdc7 253:39   0  10G  0 part 
+[root@server0 ~]# blkid /dev/vdc1
+[root@server0 ~]# blkid /dev/vdc
+/dev/vdc: PTTYPE="dos" 
+
+[root@server0 ~]# fdisk -l /dev/vdc  #查看分区表
+磁盘 /dev/vdc：64.4 GB, 64424509440 字节，125829120 个扇区
+Units = 扇区 of 1 * 512 = 512 bytes
+扇区大小(逻辑/物理)：512 字节 / 512 字节
+I/O 大小(最小/最佳)：512 字节 / 512 字节
+磁盘标签类型：dos
+磁盘标识符：0xc694d5f3
+   设备 Boot      Start         End      Blocks   Id  System
+/dev/vdc1            2048    10487807     5242880   83  Linux
+/dev/vdc2        10487808    20973567     5242880   83  Linux
+/dev/vdc3        20973568    41945087    10485760   83  Linux
+/dev/vdc4        41945088   125829119    41942016    5  Extended
+/dev/vdc5        41947136    62918655    10485760   83  Linux
+/dev/vdc6        62920704    83892223    10485760   83  Linux
+/dev/vdc7        83894272   104865791    10485760   83  Linux
+-----------------------------------------------------------------------------------------------------------------
+df - 报告文件系统磁盘空间的使用情况
+-a, --all            列出包括BLOCK为0的文件系统
+ -h,--huma-readable"   用常见的格式显示出大小(例如:1K 234M 2G)
+ -t, --type=TYPE     只显示指定类型(TYPE)的文件系统
+ -T, --print-type     输出每个文件系统的类型
+[root@server0 ~]# df -h /dev/vdb
+文件系统        容量  已用  可用     已用%   挂载点
+devtmpfs    906M  0    906M    0%   /dev
+
+[root@server0 ~]# df -hT /dev/vdb
+文件系统       类型      容量    已用    可用       已用% 挂载点
+devtmpfs   devtmpfs  906M  0     906M     0%   /dev
+
+----------------------------------------------------------------------------------------------
+[root@server0 ~]# df -h /dev/vdb1
+文件系统        容量    已用   可用     已用%  挂载点
+/dev/vdb1   1014M   33M  982M    4%   /mypart
+
+[root@server0 ~]# df -hT /dev/vdb1
+文件系统       类型   容量    已用   可用    已用%  挂载点
+/dev/vdb1   xfs  1014M   33M  982M    4%  /mypart
+
+[root@server0 ~]# lsblk /dev/vdc
+NAME   MAJ:MIN RM SIZE RO TYPE MOUNTPOINT
+vdc    253:32   0  60G  0 disk 
+├─vdc1 253:33   0   5G  0 part 
+├─vdc2 253:34   0   5G  0 part 
+├─vdc3 253:35   0  10G  0 part 
+├─vdc4 253:36   0   1K  0 part 
+├─vdc5 253:37   0  10G  0 part 
+├─vdc6 253:38   0  10G  0 part 
+└─vdc7 253:39   0  10G  0 part 
+
+物理卷(PV)		卷组((VG)		逻辑卷(LV)
+将众多的物理卷PV，组成卷组VG，再从卷组VG中，划分出逻辑卷LV
+[root@server0 ~]# pvscan
+  No matching physical volumes found
+[root@server0 ~]# pvs
+
+[root@server0 ~]# pvcreate /dev/vdc1 /dev/vdc2
+  Physical volume "/dev/vdc1" successfully created
+  Physical volume "/dev/vdc2" successfully created
+[root@server0 ~]# pvs
+  PV         VG   Fmt  Attr PSize PFree
+  /dev/vdc1       lvm2 a--  5.00g 5.00g
+  /dev/vdc2       lvm2 a--  5.00g 5.00g
+[root@server0 ~]# vgcreate systemvg /dev/vdc[1-2]
+  Volume group "systemvg" successfully created
+[root@server0 ~]# vgs
+  VG       #PV #LV #SN Attr   VSize VFree
+  systemvg   2   0   0 wz--n- 9.99g 9.99g
+[root@server0 ~]# pvs
+  PV         VG       Fmt  Attr PSize PFree
+  /dev/vdc1  systemvg lvm2 a--  5.00g 5.00g
+  /dev/vdc2  systemvg lvm2 a--  5.00g 5.00g
+[root@server0 ~]# vgremove systemvg           ------------- #卷组删除
+  Volume group "systemvg" successfully removed
+[root@server0 ~]# pvremove /dev/vdc[1-2]     -----------物理卷组删除
+  Labels on physical volume "/dev/vdc1" successfully wiped
+  Labels on physical volume "/dev/vdc2" successfully wiped
+
+
+[root@server0 ~]# vgcreate systemvg /dev/vdc[1-2]   ---------#卷组创建
+  Physical volume "/dev/vdc1" successfully created
+  Physical volume "/dev/vdc2" successfully created
+  Volume group "systemvg" successfully created
+[root@server0 ~]# vgs
+  VG       #PV #LV #SN Attr   VSize VFree
+  systemvg   2   0   0 wz--n- 9.99g 9.99g
+[root@server0 ~]# pvs
+  PV         VG       Fmt  Attr PSize PFree
+  /dev/vdc1  systemvg lvm2 a--  5.00g 5.00g
+  /dev/vdc2  systemvg lvm2 a--  5.00g 5.00g
+
+[root@server0 ~]# blkid
+/dev/vda1: UUID="9bf6b9f7-92ad-441b-848e-0257cbb883d1" TYPE="xfs" 
+/dev/vdb1: UUID="738a4457-c584-4674-a939-ccf9ddce4d31" TYPE="xfs" 
+/dev/vdb2: UUID="7dc8f09d-47ac-49cd-ad64-3bf661747311" TYPE="xfs" 
+/dev/vdc1: UUID="LDiHpa-YGKk-xvY3-Iu6u-a1vg-OyMo-cpbFhI" TYPE="LVM2_member" 
+/dev/vdc2: UUID="4NX6Cc-INkt-FlCJ-jg8i-bLgl-ExLU-kUz3ID" TYPE="LVM2_member" 
+
+[root@server0 ~]# lvcreate -n mylv -L 8G systemvg 
+  Logical volume "mylv" created
+[root@server0 ~]# lvs
+  LV   VG       Attr       LSize Pool Origin Data%  Move Log Cpy%Sync Convert
+  mylv systemvg -wi-a----- 8.00g                                             
+[root@server0 ~]# vgs
+  VG       #PV #LV #SN Attr   VSize VFree
+  systemvg   2   1   0 wz--n- 9.99g 1.99g
+
+
+[root@server0 ~]# ls -l /dev/systemvg/
+总用量 0
+lrwxrwxrwx. 1 root root 7 7月   9 15:33 mylv -> ../dm-0
+[root@server0 ~]# ls -l /dev/systemvg/mylv 
+lrwxrwxrwx. 1 root root 7 7月   9 15:33 /dev/systemvg/mylv -> ../dm-0
+[root@server0 ~]# mkfs.xfs /dev/systemvg/mylv
+
+[root@server0 ~]# blkid /dev/systemvg/mylv
+/dev/systemvg/mylv: UUID="2065381a-0106-4a92-97bc-2a3aba64e990" TYPE="xfs" 
+[root@server0 ~]# mkfs.ext4 /dev/systemvg/mylv
+
+
+[root@server0 ~]# blkid /dev/systemvg/mylv
+/dev/systemvg/mylv: UUID="871d17e9-85ce-45f2-aceb-0fa0dc3ca06e" TYPE="ext4" 
+[root@server0 ~]# mkdir /lv
+[root@server0 ~]# vim /etc/fstab
+[root@server0 ~]# tail -5 /etc/fstab
+#
+UUID=9bf6b9f7-92ad-441b-848e-0257cbb883d1    /     xfs     defaults   1   1
+/dev/vdb1   				 /mypart    xfs	   defaults   0   0
+/dev/vdb2				       /mypart2   xfs      defaults   0   0   
+/dev/systemvg/mylv       		 /lv         ext4    defaults   0    0
+[root@server0 ~]# mount -a
+[root@server0 ~]# df -hT
+文件系统                  类型      容量  已用  可用 已用% 挂载点
+/dev/vda1                 xfs        10G  3.0G  7.1G   30% /
+devtmpfs                  devtmpfs  906M     0  906M    0% /dev
+tmpfs                     tmpfs     921M   80K  921M    1% /dev/shm
+tmpfs                     tmpfs     921M   17M  904M    2% /run
+tmpfs                     tmpfs     921M     0  921M    0% /sys/fs/cgroup
+/dev/vdb2                 xfs      1014M   33M  982M    4% /mypart2
+/dev/vdb1                 xfs      1014M   33M  982M    4% /mypart
+/dev/mapper/systemvg-mylv ext4      7.8G   36M  7.3G    1% /lv
+[root@server0 ~]# df -h
+文件系统                   容量  已用  可用 已用% 挂载点
+/dev/vda1                   10G  3.0G  7.1G   30% /
+devtmpfs                   906M     0  906M    0% /dev
+tmpfs                      921M   80K  921M    1% /dev/shm
+tmpfs                      921M   17M  904M    2% /run
+tmpfs                      921M     0  921M    0% /sys/fs/cgroup
+/dev/vdb2                 1014M   33M  982M    4% /mypart2
+/dev/vdb1                 1014M   33M  982M    4% /mypart
+/dev/mapper/systemvg-mylv  7.8G   36M  7.3G    1% /lv
+
+[root@server0 ~]# lsblk /dev/vdc
+NAME              MAJ:MIN RM SIZE RO TYPE MOUNTPOINT
+vdc               253:32   0  60G  0 disk 
+├─vdc1            253:33   0   5G  0 part 
+│ └─systemvg-mylv 252:0    0   8G  0 lvm  /lv
+├─vdc2            253:34   0   5G  0 part 
+│ └─systemvg-mylv 252:0    0   8G  0 lvm  /lv
+├─vdc3            253:35   0  10G  0 part 
+├─vdc4            253:36   0   1K  0 part 
+├─vdc5            253:37   0  10G  0 part 
+├─vdc6            253:38   0  10G  0 part 
+└─vdc7            253:39   0  10G  0 part 
+[root@server0 ~]# lvextend -L 9G /dev/systemvg/mylv ---扩展逻辑卷空间lvextend
+  Extending logical volume mylv to 9.00 GiB
+  Logical volume mylv successfully resized
+[root@server0 ~]# lvs
+  LV   VG       Attr       LSize Pool Origin Data%  Move Log Cpy%Sync Convert
+  mylv systemvg -wi-ao---- 9.00g   
+ 
+[root@server0 ~]# df -hT /lv/      ----------------------未刷新前7.8G 
+文件系统                  类型  容量  已用  可用 已用% 挂载点
+/dev/mapper/systemvg-mylv ext4  7.8G   36M  7.3G    1% /lv
+                                         
+[root@server0 ~]# vgs
+  VG       #PV #LV #SN Attr   VSize VFree   
+  systemvg   2   1   0 wz--n- 9.99g 1016.00m
+
+[root@server0 ~]# blkid /dev/systemvg/mylv
+/dev/systemvg/mylv: UUID="871d17e9-85ce-45f2-aceb-0fa0dc3ca06e" TYPE="ext4" 
+
+[root@server0 ~]# resize2fs /dev/systemvg/mylv  #------刷新ext4文件系统-----------------
+[root@server0 ~]# df -hT /lv        ---------------------刷新后 8.8G
+文件系统                  类型  容量  已用  可用 已用% 挂载点
+/dev/mapper/systemvg-mylv ext4  8.8G   36M  8.3G    1% /lv
+-----------------------------xfs_growfs   刷新xfs文件系统
+
+[root@server0 ~]# vgextend systemvg /dev/vdc3  -------扩展卷组空间vgextend
+  Physical volume "/dev/vdc3" successfully created
+  Volume group "systemvg" successfully extended
+[root@server0 ~]# vgs
+  VG       #PV #LV #SN Attr   VSize  VFree 
+  systemvg   3   1   0 wz--n- 19.99g 10.99g
+
+[root@server0 ~]# blkid /dev/vdc3
+/dev/vdc3: UUID="5PeIST-3rpw-WO0K-Sd2f-Q2dp-k65q-ZvpUUf" TYPE="LVM2_member" 
+
+[root@server0 ~]# lvextend -L 15G /dev/systemvg/mylv ----扩展逻辑卷空间lvextend--
+  Extending logical volume mylv to 15.00 GiB
+  Logical volume mylv successfully resized
+[root@server0 ~]# lvs
+  LV   VG       Attr       LSize  Pool Origin Data%  Move Log Cpy%Sync Convert
+  mylv systemvg -wi-ao---- 15.00g                                             
+[root@server0 ~]# vgs
+  VG       #PV #LV #SN Attr   VSize  VFree
+  systemvg   3   1   0 wz--n- 19.99g 4.99g
+
+[root@server0 ~]# resize2fs /dev/systemvg/mylv -------刷新ext4文件系统---------
+
+[root@server0 ~]# df -hT /lv
+文件系统                  类型  容量  已用  可用 已用% 挂载点
+/dev/mapper/systemvg-mylv ext4   15G   40M   14G    1% /lv
+
+[root@server0 ~]# blkid /dev/vdc3
+/dev/vdc3: UUID="5PeIST-3rpw-WO0K-Sd2f-Q2dp-k65q-ZvpUUf" TYPE="LVM2_member" 
+
+[root@server0 ~]# df -hT /lv
+文件系统                  类型  容量  已用  可用 已用% 挂载点
+/dev/mapper/systemvg-mylv ext4   15G   40M   14G    1% /lv
+[root@server0 ~]# ls -l /dev/mapper/systemvg-mylv 
+lrwxrwxrwx. 1 root root 7 7月   9 16:42 /dev/mapper/systemvg-mylv -> ../dm-0
+
+[root@server0 ~]# blkid /dev/mapper/systemvg-mylv
+/dev/mapper/systemvg-mylv: UUID="871d17e9-85ce-45f2-aceb-0fa0dc3ca06e" TYPE="ext4" 
+
+[root@server0 ~]# blkid /dev/systemvg/mylv
+/dev/systemvg/mylv: UUID="871d17e9-85ce-45f2-aceb-0fa0dc3ca06e" TYPE="ext4" 
+=====================================================
+[root@server0 ~]# df -hT
+文件系统                  类型      容量  已用  可用 已用% 挂载点
+/dev/vda1                 xfs        10G  3.0G  7.1G   30% /
+devtmpfs                  devtmpfs  906M     0  906M    0% /dev
+tmpfs                     tmpfs     921M   80K  921M    1% /dev/shm
+tmpfs                     tmpfs     921M   17M  904M    2% /run
+tmpfs                     tmpfs     921M     0  921M    0% /sys/fs/cgroup
+/dev/vdb2                 xfs      1014M   33M  982M    4% /mypart2
+/dev/vdb1                 xfs      1014M   33M  982M    4% /mypart
+/dev/mapper/systemvg-mylv ext4       15G   40M   14G    1% /lv
+[root@server0 ~]# blkid
+/dev/vda1: UUID="9bf6b9f7-92ad-441b-848e-0257cbb883d1" TYPE="xfs" 
+/dev/vdb1: UUID="738a4457-c584-4674-a939-ccf9ddce4d31" TYPE="xfs" 
+/dev/vdb2: UUID="7dc8f09d-47ac-49cd-ad64-3bf661747311" TYPE="xfs" 
+
+/dev/vdc1: UUID="LDiHpa-YGKk-xvY3-Iu6u-a1vg-OyMo-cpbFhI" TYPE="LVM2_member" 
+/dev/vdc2: UUID="4NX6Cc-INkt-FlCJ-jg8i-bLgl-ExLU-kUz3ID" TYPE="LVM2_member" 
+
+/dev/systemvg/mylv: UUID="871d17e9-85ce-45f2-aceb-0fa0dc3ca06e" TYPE="ext4" 
+/dev/vdc3: UUID="5PeIST-3rpw-WO0K-Sd2f-Q2dp-k65q-ZvpUUf" TYPE="LVM2_member" 
+
+/dev/mapper/systemvg-mylv: UUID="871d17e9-85ce-45f2-aceb-0fa0dc3ca06e" TYPE="ext4" 
+
+
+
+================卷组划分空间的单位PE
+
+[root@server0 ~]# lsblk 
+NAME              MAJ:MIN RM  SIZE RO TYPE MOUNTPOINT
+vda               253:0    0   10G  0 disk 
+└─vda1            253:1    0   10G  0 part /
+vdb               253:16   0   10G  0 disk 
+├─vdb1            253:17   0    1G  0 part /mypart
+├─vdb2            253:18   0    1G  0 part /mypart2
+├─vdb3            253:19   0  500M  0 part 
+├─vdb4            253:20   0    1K  0 part 
+├─vdb5            253:21   0  800M  0 part 
+└─vdb6            253:22   0  600M  0 part 
+vdc               253:32   0   60G  0 disk 
+├─vdc1            253:33   0    5G  0 part 
+│ └─systemvg-mylv 252:0    0   15G  0 lvm  /lv
+├─vdc2            253:34   0    5G  0 part 
+│ └─systemvg-mylv 252:0    0   15G  0 lvm  /lv
+├─vdc3            253:35   0   10G  0 part 
+│ └─systemvg-mylv 252:0    0   15G  0 lvm  /lv
+├─vdc4            253:36   0    1K  0 part 
+├─vdc5            253:37   0   10G  0 part 
+├─vdc6            253:38   0   10G  0 part 
+└─vdc7            253:39   0   10G  0 part 
+		设备路径		              挂载点   文件系统类型    参数     备份标记   检测顺序	
+/dev/mapper/rhel-root    		      /       xfs     defaults    0      0
+UUID=5d6c8afe-b75a-4e6b-9de1-1a3eeeaf23d9  /boot   xfs     defaults    0       0
+		   设备路径              	     挂载点   文件系统类型     参数     备份标记   检测顺序	
+/dev/mapper/rhel-swap                      swap    swap    defaults    0       0
+
+[root@server0 ~]# mkswap /dev/vdc7 
+正在设置交换空间版本 1，大小 = 10485756 KiB
+无标签，UUID=01f36491-8fc9-4621-89b5-84ec472532d3
+[root@server0 ~]# lsblk /dev/vdc
+
+[root@server0 ~]# blkid /dev/vdc7
+/dev/vdc7: UUID="01f36491-8fc9-4621-89b5-84ec472532d3" TYPE="swap" 
+[root@server0 ~]# swapo
+swapoff  swapon   
+[root@server0 ~]# swapon /dev/vdc7
+[root@server0 ~]# lsblk /dev/vdc7
+NAME MAJ:MIN RM SIZE RO TYPE MOUNTPOINT
+vdc7 253:39   0  10G  0 part [SWAP]
+
+[root@server0 ~]# vgdisplay systemvg 
+  --- Volume group ---
+  VG Name               systemvg
+  System ID             
+  Format                lvm2
+  VG Access             read/write
+  VG Status             resizable
+  Act PV                3
+  VG Size               19.99 GiB
+  PE Size               4.00 MiB
+  Total PE              5117
+  Alloc PE / Size       3840 / 15.00 GiB
+  Free  PE / Size       1277 / 4.99 GiB
+  VG UUID               6QRCec-LdmT-Fmb9-bc7d-WYkk-3rdC-gVJ5WW
+
+vgcreate  -s           PE             juanzu             kong xian fen qu
+vgchange    -s         PE             卷组                空闲分区
+
+[root@server0 ~]# vgchange -s  1M  systemvg 
+  Volume group "systemvg" successfully changed
+[root@server0 ~]# vgdisplay systemvg `
+  --- Volume group ---
+  VG Name               systemvg
+  System ID             
+  Format                lvm2
+  VG Access             read/write
+  VG Status             resizable
+  Act PV                3
+  VG Size               19.99 GiB
+  PE Size               1.00 MiB
+  Total PE              20468
+  Alloc PE / Size       15360 / 15.00 GiB
+  Free  PE / Size       5108 / 4.99 GiB
+  VG UUID               6QRCec-LdmT-Fmb9-bc7d-WYkk-3rdC-gVJ5WW
+[root@server0 ~]# lvcreate -l 50 -n database  systemvg
+  Logical volume "database" created
+[root@server0 ~]# lvs
+  LV       VG       Attr       LSize  Pool Origin Data%  Move Log Cpy%Sync Convert
+  database systemvg -wi-a----- 50.00m                                             
+  mylv     systemvg -wi-ao---- 15.00g  
+
+-------------------------------------------------------------------------------------------------------------------------------------------[root@server0 ~]# lvs
+  LV       VG       Attr       LSize  Pool Origin Data%  Move Log Cpy%Sync Convert
+  database systemvg -wi-a----- 50.00m                                             
+  mylv     systemvg -wi-ao---- 15.00g                                             
+[root@server0 ~]# vgs
+  VG       #PV #LV #SN Attr   VSize  VFree
+  systemvg   3   2   0 wz--n- 19.99g 4.94g
+[root@server0 ~]# pvs
+  PV         VG       Fmt  Attr PSize  PFree
+  /dev/vdc1  systemvg lvm2 a--   5.00g    0 
+  /dev/vdc2  systemvg lvm2 a--   5.00g    0 
+  /dev/vdc3  systemvg lvm2 a--  10.00g 4.94g
+[root@server0 ~]# df -hT 
+文件系统                  类型      容量  已用  可用 已用% 挂载点
+/dev/vda1                 xfs        10G  3.0G  7.1G   30% /
+devtmpfs                  devtmpfs  906M     0  906M    0% /dev
+tmpfs                     tmpfs     921M   80K  921M    1% /dev/shm
+tmpfs                     tmpfs     921M   17M  904M    2% /run
+tmpfs                     tmpfs     921M     0  921M    0% /sys/fs/cgroup
+/dev/vdb2                 xfs      1014M   33M  982M    4% /mypart2
+/dev/vdb1                 xfs      1014M   33M  982M    4% /mypart
+/dev/mapper/systemvg-mylv ext4       15G   40M   14G    1% /lv
+
+[root@server0 ~]# lvremove /dev/systemvg/database 
+Do you really want to remove active logical volume database? [y/n]: yes
+  Logical volume "database" successfully removed
+[root@server0 ~]# umount /lv
+[root@server0 ~]# lvremove /dev/systemvg/mylv 
+Do you really want to remove active logical volume mylv? [y/n]: yes
+  Logical volume "mylv" successfully removed
+[root@server0 ~]# vgremove systemvg 
+  Volume group "systemvg" successfully removed
+[root@server0 ~]# pvremove /dev/vdb[1-3]
+  No PV label found on /dev/vdb1.
+  No PV label found on /dev/vdb2.
+  No PV label found on /dev/vdb3.
+[root@server0 ~]# lvs
+  No volume groups found
+[root@server0 ~]# vgs
+  No volume groups found
+[root@server0 ~]# pvs
+  PV         VG   Fmt  Attr PSize  PFree 
+  /dev/vdc1       lvm2 a--   5.00g  5.00g
+  /dev/vdc2       lvm2 a--   5.00g  5.00g
+  /dev/vdc3       lvm2 a--  10.00g 10.00g
+
+[root@server0 ~]# vgcreate -s 1M  datebase /dev/vdc3
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
