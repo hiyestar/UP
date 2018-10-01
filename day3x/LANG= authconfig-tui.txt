@@ -1,0 +1,622 @@
+[root@room9pc01 ~]# gos
+Last login: Sat Jun 23 11:25:34 2018 from 172.25.0.250
+[root@server0 ~]# cd /etc/openldap/cacerts
+[root@server0 cacerts]# ls
+[root@server0 cacerts]# wget http://classroom.example.com/pub/example-ca.crt
+--2018-06-23 11:28:16--  http://classroom.example.com/pub/example-ca.crt
+正在解析主机 classroom.example.com (classroom.example.com)... 172.25.254.254
+正在连接 classroom.example.com (classroom.example.com)|172.25.254.254|:80... 已连接。
+已发出 HTTP 请求，正在等待回应... 200 OK
+长度：1220 (1.2K)
+正在保存至: “example-ca.crt”
+
+100%[======================================>] 1,220       --.-K/s 用时 0s      
+
+2018-06-23 11:28:16 (231 MB/s) - 已保存 “example-ca.crt” [1220/1220])
+
+[root@server0 cacerts]# 
+
+ classroom 已开始
+
+[root@room9pc01 ~]# s
+server [OK]
+域 server 已开始
+
+[root@room9pc01 ~]# d
+desktop [OK]
+域 desktop 已开始
+
+[root@room9pc01 ~]# gos
+Last login: Fri Jan 12 18:54:14 2018 from 172.25.0.250
+/usr/bin/xauth:  file /root/.Xauthority does not exist
+[root@server0 ~]# yum -y install sssd
+已加载插件：langpacks
+rhel_dvd                                                 | 4.1 kB     00:00     
+(1/2): rhel_dvd/group_gz                                   | 134 kB   00:00     
+(2/2): rhel_dvd/primary_db                                 | 3.4 MB   00:00     
+正在解决依赖关系
+--> 正在检查事务
+---> 软件包 sssd.x86_64.0.1.11.2-65.el7 将被 安装
+--> 正在处理依赖关系 python-sssdconfig = 1.11.2-65.el7，它被软件包 sssd-1.11.2-65.el7.x86_64 需要
+--> 正在处理依赖关系 sssd-ad = 1.11.2-65.el7，它被软件包 sssd-1.11.2-65.el7.x86_64 需要
+--> 正在处理依赖关系 sssd-common = 1.11.2-65.el7，它被软件包 sssd-1.11.2-65.el7.x86_64 需要
+--> 正在处理依赖关系 sssd-common-pac = 1.11.2-65.el7，它被软件包 sssd-1.11.2-65.el7.x86_64 需要
+--> 正在处理依赖关系 sssd-ipa = 1.11.2-65.el7，它被软件包 sssd-1.11.2-65.el7.x86_64 需要
+--> 正在处理依赖关系 sssd-krb5 = 1.11.2-65.el7，它被软件包 sssd-1.11.2-65.el7.x86_64 需要
+--> 正在处理依赖关系 sssd-ldap = 1.11.2-65.el7，它被软件包 sssd-1.11.2-65.el7.x86_64 需要
+--> 正在处理依赖关系 sssd-proxy = 1.11.2-65.el7，它被软件包 sssd-1.11.2-65.el7.x86_64 需要
+--> 正在检查事务
+---> 软件包 python-sssdconfig.noarch.0.1.11.2-65.el7 将被 安装
+---> 软件包 sssd-ad.x86_64.0.1.11.2-65.el7 将被 安装
+--> 正在处理依赖关系 sssd-krb5-common = 1.11.2-65.el7，它被软件包 sssd-ad-1.11.2-65.el7.x86_64 需要
+--> 正在处理依赖关系 libdhash.so.1()(64bit)，它被软件包 sssd-ad-1.11.2-65.el7.x86_64 需要
+--> 正在处理依赖关系 libsss_idmap.so.0()(64bit)，它被软件包 sssd-ad-1.11.2-65.el7.x86_64 需要
+--> 正在处理依赖关系 libsss_krb5_common.so()(64bit)，它被软件包 sssd-ad-1.11.2-65.el7.x86_64 需要
+---> 软件包 sssd-common.x86_64.0.1.11.2-65.el7 将被 安装
+--> 正在处理依赖关系 libini_config >= 1.0.0.1，它被软件包 sssd-common-1.11.2-65.el7.x86_64 需要
+--> 正在处理依赖关系 libcares.so.2()(64bit)，它被软件包 sssd-common-1.11.2-65.el7.x86_64 需要
+--> 正在处理依赖关系 libcollection.so.2()(64bit)，它被软件包 sssd-common-1.11.2-65.el7.x86_64 需要
+--> 正在处理依赖关系 libini_config.so.3()(64bit)，它被软件包 sssd-common-1.11.2-65.el7.x86_64 需要
+---> 软件包 sssd-common-pac.x86_64.0.1.11.2-65.el7 将被 安装
+---> 软件包 sssd-ipa.x86_64.0.1.11.2-65.el7 将被 安装
+--> 正在处理依赖关系 libipa_hbac(x86-64) = 1.11.2-65.el7，它被软件包 sssd-ipa-1.11.2-65.el7.x86_64 需要
+--> 正在处理依赖关系 libipa_hbac.so.0()(64bit)，它被软件包 sssd-ipa-1.11.2-65.el7.x86_64 需要
+---> 软件包 sssd-krb5.x86_64.0.1.11.2-65.el7 将被 安装
+---> 软件包 sssd-ldap.x86_64.0.1.11.2-65.el7 将被 安装
+---> 软件包 sssd-proxy.x86_64.0.1.11.2-65.el7 将被 安装
+--> 正在检查事务
+---> 软件包 c-ares.x86_64.0.1.10.0-3.el7 将被 安装
+---> 软件包 libcollection.x86_64.0.0.6.2-22.el7 将被 安装
+---> 软件包 libdhash.x86_64.0.0.4.3-22.el7 将被 安装
+---> 软件包 libini_config.x86_64.0.1.0.0.1-22.el7 将被 安装
+--> 正在处理依赖关系 libbasicobjects.so.0()(64bit)，它被软件包 libini_config-1.0.0.1-22.el7.x86_64 需要
+--> 正在处理依赖关系 libpath_utils.so.1()(64bit)，它被软件包 libini_config-1.0.0.1-22.el7.x86_64 需要
+--> 正在处理依赖关系 libref_array.so.1()(64bit)，它被软件包 libini_config-1.0.0.1-22.el7.x86_64 需要
+---> 软件包 libipa_hbac.x86_64.0.1.11.2-65.el7 将被 安装
+---> 软件包 libsss_idmap.x86_64.0.1.11.2-65.el7 将被 安装
+---> 软件包 sssd-krb5-common.x86_64.0.1.11.2-65.el7 将被 安装
+--> 正在处理依赖关系 cyrus-sasl-gssapi(x86-64)，它被软件包 sssd-krb5-common-1.11.2-65.el7.x86_64 需要
+--> 正在检查事务
+---> 软件包 cyrus-sasl-gssapi.x86_64.0.2.1.26-17.el7 将被 安装
+---> 软件包 libbasicobjects.x86_64.0.0.1.0-22.el7 将被 安装
+---> 软件包 libpath_utils.x86_64.0.0.2.1-22.el7 将被 安装
+---> 软件包 libref_array.x86_64.0.0.1.3-22.el7 将被 安装
+--> 解决依赖关系完成
+
+依赖关系解决
+
+================================================================================
+ Package                 架构         版本                 源              大小
+================================================================================
+正在安装:
+ sssd                    x86_64       1.11.2-65.el7        rhel_dvd        65 k
+为依赖而安装:
+ c-ares                  x86_64       1.10.0-3.el7         rhel_dvd        78 k
+ cyrus-sasl-gssapi       x86_64       2.1.26-17.el7        rhel_dvd        40 k
+ libbasicobjects         x86_64       0.1.0-22.el7         rhel_dvd        24 k
+ libcollection           x86_64       0.6.2-22.el7         rhel_dvd        39 k
+ libdhash                x86_64       0.4.3-22.el7         rhel_dvd        27 k
+ libini_config           x86_64       1.0.0.1-22.el7       rhel_dvd        49 k
+ libipa_hbac             x86_64       1.11.2-65.el7        rhel_dvd        71 k
+ libpath_utils           x86_64       0.2.1-22.el7         rhel_dvd        27 k
+ libref_array            x86_64       0.1.3-22.el7         rhel_dvd        25 k
+ libsss_idmap            x86_64       1.11.2-65.el7        rhel_dvd        76 k
+ python-sssdconfig       noarch       1.11.2-65.el7        rhel_dvd        96 k
+ sssd-ad                 x86_64       1.11.2-65.el7        rhel_dvd       167 k
+ sssd-common             x86_64       1.11.2-65.el7        rhel_dvd       1.2 M
+ sssd-common-pac         x86_64       1.11.2-65.el7        rhel_dvd       120 k
+ sssd-ipa                x86_64       1.11.2-65.el7        rhel_dvd       271 k
+ sssd-krb5               x86_64       1.11.2-65.el7        rhel_dvd       108 k
+ sssd-krb5-common        x86_64       1.11.2-65.el7        rhel_dvd       201 k
+ sssd-ldap               x86_64       1.11.2-65.el7        rhel_dvd       202 k
+ sssd-proxy              x86_64       1.11.2-65.el7        rhel_dvd       115 k
+
+事务概要
+================================================================================
+安装  1 软件包 (+19 依赖软件包)
+
+总下载量：2.9 M
+安装大小：6.7 M
+Downloading packages:
+(1/20): c-ares-1.10.0-3.el7.x86_64.rpm                     |  78 kB   00:00     
+(2/20): libbasicobjects-0.1.0-22.el7.x86_64.rpm            |  24 kB   00:00     
+(3/20): cyrus-sasl-gssapi-2.1.26-17.el7.x86_64.rpm         |  40 kB   00:00     
+(4/20): libcollection-0.6.2-22.el7.x86_64.rpm              |  39 kB   00:00     
+(5/20): libini_config-1.0.0.1-22.el7.x86_64.rpm            |  49 kB   00:00     
+(6/20): libipa_hbac-1.11.2-65.el7.x86_64.rpm               |  71 kB   00:00     
+(7/20): libpath_utils-0.2.1-22.el7.x86_64.rpm              |  27 kB   00:00     
+(8/20): libref_array-0.1.3-22.el7.x86_64.rpm               |  25 kB   00:00     
+(9/20): libsss_idmap-1.11.2-65.el7.x86_64.rpm              |  76 kB   00:00     
+(10/20): python-sssdconfig-1.11.2-65.el7.noarch.rpm        |  96 kB   00:00     
+(11/20): sssd-1.11.2-65.el7.x86_64.rpm                     |  65 kB   00:00     
+(12/20): sssd-ad-1.11.2-65.el7.x86_64.rpm                  | 167 kB   00:00     
+(13/20): sssd-common-1.11.2-65.el7.x86_64.rpm              | 1.2 MB   00:00     
+(14/20): sssd-common-pac-1.11.2-65.el7.x86_64.rpm          | 120 kB   00:00     
+(15/20): sssd-ipa-1.11.2-65.el7.x86_64.rpm                 | 271 kB   00:00     
+(16/20): sssd-krb5-1.11.2-65.el7.x86_64.rpm                | 108 kB   00:00     
+(17/20): sssd-krb5-common-1.11.2-65.el7.x86_64.rpm         | 201 kB   00:00     
+(18/20): sssd-ldap-1.11.2-65.el7.x86_64.rpm                | 202 kB   00:00     
+(19/20): sssd-proxy-1.11.2-65.el7.x86_64.rpm               | 115 kB   00:00     
+(20/20): libdhash-0.4.3-22.el7.x86_64.rpm                  |  27 kB   00:00     
+--------------------------------------------------------------------------------
+总计                                               6.1 MB/s | 2.9 MB  00:00     
+Running transaction check
+Running transaction test
+Transaction test succeeded
+Running transaction
+  正在安装    : libdhash-0.4.3-22.el7.x86_64                               1/20 
+  正在安装    : libsss_idmap-1.11.2-65.el7.x86_64                          2/20 
+  正在安装    : libcollection-0.6.2-22.el7.x86_64                          3/20 
+  正在安装    : libbasicobjects-0.1.0-22.el7.x86_64                        4/20 
+  正在安装    : libpath_utils-0.2.1-22.el7.x86_64                          5/20 
+  正在安装    : c-ares-1.10.0-3.el7.x86_64                                 6/20 
+  正在安装    : cyrus-sasl-gssapi-2.1.26-17.el7.x86_64                     7/20 
+  正在安装    : libref_array-0.1.3-22.el7.x86_64                           8/20 
+  正在安装    : libini_config-1.0.0.1-22.el7.x86_64                        9/20 
+  正在安装    : sssd-common-1.11.2-65.el7.x86_64                          10/20 
+  正在安装    : sssd-krb5-common-1.11.2-65.el7.x86_64                     11/20 
+  正在安装    : sssd-common-pac-1.11.2-65.el7.x86_64                      12/20 
+  正在安装    : sssd-ad-1.11.2-65.el7.x86_64                              13/20 
+  正在安装    : sssd-ldap-1.11.2-65.el7.x86_64                            14/20 
+  正在安装    : sssd-krb5-1.11.2-65.el7.x86_64                            15/20 
+  正在安装    : sssd-proxy-1.11.2-65.el7.x86_64                           16/20 
+  正在安装    : python-sssdconfig-1.11.2-65.el7.noarch                    17/20 
+  正在安装    : libipa_hbac-1.11.2-65.el7.x86_64                          18/20 
+  正在安装    : sssd-ipa-1.11.2-65.el7.x86_64                             19/20 
+  正在安装    : sssd-1.11.2-65.el7.x86_64                                 20/20 
+  验证中      : libcollection-0.6.2-22.el7.x86_64                          1/20 
+  验证中      : sssd-krb5-common-1.11.2-65.el7.x86_64                      2/20 
+  验证中      : libdhash-0.4.3-22.el7.x86_64                               3/20 
+  验证中      : sssd-common-pac-1.11.2-65.el7.x86_64                       4/20 
+  验证中      : sssd-ldap-1.11.2-65.el7.x86_64                             5/20 
+  验证中      : sssd-ad-1.11.2-65.el7.x86_64                               6/20 
+  验证中      : libipa_hbac-1.11.2-65.el7.x86_64                           7/20 
+  验证中      : sssd-proxy-1.11.2-65.el7.x86_64                            8/20 
+  验证中      : python-sssdconfig-1.11.2-65.el7.noarch                     9/20 
+  验证中      : libref_array-0.1.3-22.el7.x86_64                          10/20 
+  验证中      : sssd-1.11.2-65.el7.x86_64                                 11/20 
+  验证中      : cyrus-sasl-gssapi-2.1.26-17.el7.x86_64                    12/20 
+  验证中      : libini_config-1.0.0.1-22.el7.x86_64                       13/20 
+  验证中      : sssd-krb5-1.11.2-65.el7.x86_64                            14/20 
+  验证中      : c-ares-1.10.0-3.el7.x86_64                                15/20 
+  验证中      : sssd-common-1.11.2-65.el7.x86_64                          16/20 
+  验证中      : sssd-ipa-1.11.2-65.el7.x86_64                             17/20 
+  验证中      : libpath_utils-0.2.1-22.el7.x86_64                         18/20 
+  验证中      : libsss_idmap-1.11.2-65.el7.x86_64                         19/20 
+  验证中      : libbasicobjects-0.1.0-22.el7.x86_64                       20/20 
+
+已安装:
+  sssd.x86_64 0:1.11.2-65.el7                                                   
+
+作为依赖被安装:
+  c-ares.x86_64 0:1.10.0-3.el7                                                  
+  cyrus-sasl-gssapi.x86_64 0:2.1.26-17.el7                                      
+  libbasicobjects.x86_64 0:0.1.0-22.el7                                         
+  libcollection.x86_64 0:0.6.2-22.el7                                           
+  libdhash.x86_64 0:0.4.3-22.el7                                                
+  libini_config.x86_64 0:1.0.0.1-22.el7                                         
+  libipa_hbac.x86_64 0:1.11.2-65.el7                                            
+  libpath_utils.x86_64 0:0.2.1-22.el7                                           
+  libref_array.x86_64 0:0.1.3-22.el7                                            
+  libsss_idmap.x86_64 0:1.11.2-65.el7                                           
+  python-sssdconfig.noarch 0:1.11.2-65.el7                                      
+  sssd-ad.x86_64 0:1.11.2-65.el7                                                
+  sssd-common.x86_64 0:1.11.2-65.el7                                            
+  sssd-common-pac.x86_64 0:1.11.2-65.el7                                        
+  sssd-ipa.x86_64 0:1.11.2-65.el7                                               
+  sssd-krb5.x86_64 0:1.11.2-65.el7                                              
+  sssd-krb5-common.x86_64 0:1.11.2-65.el7                                       
+  sssd-ldap.x86_64 0:1.11.2-65.el7                                              
+  sssd-proxy.x86_64 0:1.11.2-65.el7                                             
+
+完毕！
+[root@server0 ~]# LANG= authconfigtui
+bash: authconfigtui: command not found...
+[root@server0 ~]# LANG= authconfig-tui
+[root@server0 ~]# systemctl restart sssd
+[root@server0 ~]# id ldapuser0
+uid=1700(ldapuser0) gid=1700(ldapuser0) 组=1700(ldapuser0)
+[root@server0 ~]# showmount -e classroom.example.com 
+Export list for classroom.example.com:
+/home/guests 172.25.0.0/255.255.0.0
+[root@server0 ~]# yum -y install autofs
+已加载插件：langpacks
+正在解决依赖关系
+--> 正在检查事务
+---> 软件包 autofs.x86_64.1.5.0.7-40.el7 将被 安装
+--> 正在处理依赖关系 libhesiod.so.0()(64bit)，它被软件包 1:autofs-5.0.7-40.el7.x86_64 需要
+--> 正在检查事务
+---> 软件包 hesiod.x86_64.0.3.2.1-3.el7 将被 安装
+--> 解决依赖关系完成
+
+依赖关系解决
+
+================================================================================
+ Package        架构           版本                      源                大小
+================================================================================
+正在安装:
+ autofs         x86_64         1:5.0.7-40.el7            rhel_dvd         550 k
+为依赖而安装:
+ hesiod         x86_64         3.2.1-3.el7               rhel_dvd          30 k
+
+事务概要
+================================================================================
+安装  1 软件包 (+1 依赖软件包)
+
+总下载量：579 k
+安装大小：3.6 M
+Downloading packages:
+(1/2): autofs-5.0.7-40.el7.x86_64.rpm                      | 550 kB   00:00     
+(2/2): hesiod-3.2.1-3.el7.x86_64.rpm                       |  30 kB   00:00     
+--------------------------------------------------------------------------------
+总计                                               2.2 MB/s | 579 kB  00:00     
+Running transaction check
+Running transaction test
+Transaction test succeeded
+Running transaction
+  正在安装    : hesiod-3.2.1-3.el7.x86_64                                   1/2 
+  正在安装    : 1:autofs-5.0.7-40.el7.x86_64                                2/2 
+  验证中      : hesiod-3.2.1-3.el7.x86_64                                   1/2 
+  验证中      : 1:autofs-5.0.7-40.el7.x86_64                                2/2 
+
+已安装:
+  autofs.x86_64 1:5.0.7-40.el7                                                  
+
+作为依赖被安装:
+  hesiod.x86_64 0:3.2.1-3.el7                                                   
+
+完毕！
+[root@server0 ~]# vim /etc/auto
+autofs_ldap_auth.conf  auto.master.d/         auto.net
+auto.master            auto.misc              auto.smb
+[root@server0 ~]# vim /etc/auto
+autofs_ldap_auth.conf  auto.master.d/         auto.net
+auto.master            auto.misc              auto.smb
+[root@server0 ~]# vim /etc/auto.master
+[root@server0 ~]# mkdir /home/guests
+[root@server0 ~]# vim /etc/auto.master
+[root@server0 ~]# vim /etc/auto.master
+[root@server0 ~]# vim /etc/auto.guests
+[root@server0 ~]# systemctl restart autofs
+[root@server0 ~]# systemctl enable autofs
+ln -s '/usr/lib/systemd/system/autofs.service' '/etc/systemd/system/multi-user.target.wants/autofs.service'
+[root@server0 ~]# su - ldapuser0
+[ldapuser0@server0 ~]$ touch 1.txt
+[ldapuser0@server0 ~]$ exit
+logout
+[root@server0 ~]# ls /home/guests/
+ldapuser0
+[root@server0 ~]# ls /home/guests/ldapuser0/
+ls: 无法打开目录/home/guests/ldapuser0/: 权限不够
+[root@server0 ~]# 
+
+  203  [root@room9pc01 ~]# gos
+  204  Last login: Fri Jan 12 18:54:14 2018 from 172.25.0.250
+  205  /usr/bin/xauth:  file /root/.Xauthority does not exist
+  206  [root@server0 ~]# yum -y install sssd
+  207  已加载插件：langpacks
+  208  rhel_dvd                                                 | 4.1 kB     00:00     
+  209  (1/2): rhel_dvd/group_gz                                   | 134 kB   00:00     
+  210  (2/2): rhel_dvd/primary_db                                 | 3.4 MB   00:00     
+  211  正在解决依赖关系
+  212  --> 正在检查事务
+  213  ---> 软件包 sssd.x86_64.0.1.11.2-65.el7 将被 安装
+  214  --> 正在处理依赖关系 python-sssdconfig = 1.11.2-65.el7，它被软件包 sssd-1.11.2-65.el7.x86_64 需要
+  215  --> 正在处理依赖关系 sssd-ad = 1.11.2-65.el7，它被软件包 sssd-1.11.2-65.el7.x86_64 需要
+  216  --> 正在处理依赖关系 sssd-common = 1.11.2-65.el7，它被软件包 sssd-1.11.2-65.el7.x86_64 需要
+  217  --> 正在处理依赖关系 sssd-common-pac = 1.11.2-65.el7，它被软件包 sssd-1.11.2-65.el7.x86_64 需要
+  218  --> 正在处理依赖关系 sssd-ipa = 1.11.2-65.el7，它被软件包 sssd-1.11.2-65.el7.x86_64 需要
+  219  --> 正在处理依赖关系 sssd-krb5 = 1.11.2-65.el7，它被软件包 sssd-1.11.2-65.el7.x86_64 需要
+  220  --> 正在处理依赖关系 sssd-ldap = 1.11.2-65.el7，它被软件包 sssd-1.11.2-65.el7.x86_64 需要
+  221  --> 正在处理依赖关系 sssd-proxy = 1.11.2-65.el7，它被软件包 sssd-1.11.2-65.el7.x86_64 需要
+  222  --> 正在检查事务
+  223  ---> 软件包 python-sssdconfig.noarch.0.1.11.2-65.el7 将被 安装
+  224  ---> 软件包 sssd-ad.x86_64.0.1.11.2-65.el7 将被 安装
+  225  --> 正在处理依赖关系 sssd-krb5-common = 1.11.2-65.el7，它被软件包 sssd-ad-1.11.2-65.el7.x86_64 需要
+  226  --> 正在处理依赖关系 libdhash.so.1()(64bit)，它被软件包 sssd-ad-1.11.2-65.el7.x86_64 需要
+  227  --> 正在处理依赖关系 libsss_idmap.so.0()(64bit)，它被软件包 sssd-ad-1.11.2-65.el7.x86_64 需要
+  228  --> 正在处理依赖关系 libsss_krb5_common.so()(64bit)，它被软件包 sssd-ad-1.11.2-65.el7.x86_64 需要
+  229  ---> 软件包 sssd-common.x86_64.0.1.11.2-65.el7 将被 安装
+  230  --> 正在处理依赖关系 libini_config >= 1.0.0.1，它被软件包 sssd-common-1.11.2-65.el7.x86_64 需要
+  231  --> 正在处理依赖关系 libcares.so.2()(64bit)，它被软件包 sssd-common-1.11.2-65.el7.x86_64 需要
+  232  --> 正在处理依赖关系 libcollection.so.2()(64bit)，它被软件包 sssd-common-1.11.2-65.el7.x86_64 需要
+  233  --> 正在处理依赖关系 libini_config.so.3()(64bit)，它被软件包 sssd-common-1.11.2-65.el7.x86_64 需要
+  234  ---> 软件包 sssd-common-pac.x86_64.0.1.11.2-65.el7 将被 安装
+  235  ---> 软件包 sssd-ipa.x86_64.0.1.11.2-65.el7 将被 安装
+  236  --> 正在处理依赖关系 libipa_hbac(x86-64) = 1.11.2-65.el7，它被软件包 sssd-ipa-1.11.2-65.el7.x86_64 需要
+  237  --> 正在处理依赖关系 libipa_hbac.so.0()(64bit)，它被软件包 sssd-ipa-1.11.2-65.el7.x86_64 需要
+  238  ---> 软件包 sssd-krb5.x86_64.0.1.11.2-65.el7 将被 安装
+  239  ---> 软件包 sssd-ldap.x86_64.0.1.11.2-65.el7 将被 安装
+  240  ---> 软件包 sssd-proxy.x86_64.0.1.11.2-65.el7 将被 安装
+  241  --> 正在检查事务
+  242  ---> 软件包 c-ares.x86_64.0.1.10.0-3.el7 将被 安装
+  243  ---> 软件包 libcollection.x86_64.0.0.6.2-22.el7 将被 安装
+  244  ---> 软件包 libdhash.x86_64.0.0.4.3-22.el7 将被 安装
+  245  ---> 软件包 libini_config.x86_64.0.1.0.0.1-22.el7 将被 安装
+  246  --> 正在处理依赖关系 libbasicobjects.so.0()(64bit)，它被软件包 libini_config-1.0.0.1-22.el7.x86_64 需要
+  247  --> 正在处理依赖关系 libpath_utils.so.1()(64bit)，它被软件包 libini_config-1.0.0.1-22.el7.x86_64 需要
+  248  --> 正在处理依赖关系 libref_array.so.1()(64bit)，它被软件包 libini_config-1.0.0.1-22.el7.x86_64 需要
+  249  ---> 软件包 libipa_hbac.x86_64.0.1.11.2-65.el7 将被 安装
+  250  ---> 软件包 libsss_idmap.x86_64.0.1.11.2-65.el7 将被 安装
+  251  ---> 软件包 sssd-krb5-common.x86_64.0.1.11.2-65.el7 将被 安装
+  252  --> 正在处理依赖关系 cyrus-sasl-gssapi(x86-64)，它被软件包 sssd-krb5-
+  253  --> 正在检查事务
+  254  ---> 软件
+  255  ---> 软件包 libba
+  256  ---> 软件包 libpath
+  257  ---> 软件
+  258  �--> 解决依赖关
+  259  ��依赖关系解决
+  260  ===
+  261   Package                 架构         版本        
+  262  ======================================================
+  263  正在安装:
+  264   sssd                  
+  265  为依赖而安装:
+  266   c-ares
+  267   cyrus-sasl-gssapi       x86_64       2.1.26-17.el7        rhel_dvd        40 k
+  268   libbasicobjects         x86_64       0.1.0-22.el7         rhel_dvd        24 k
+  269   libcollection           x86_64       0.6.2-22.el7         rhel_dvd        39 k
+  270   libdhash                x8
+  271   libini_config        
+  272   libipa_hbac             x86_64       1.11.2-65.el7     
+  273   libpath_utils           x86_64       0.2.1-22.el7         rhel_dvd        27 k
+  274   libref_array            x86_64  
+  275   libsss_idmap            x86_64       1.11.2-65.el7        rhel_dvd        76 k
+  276   python-sssdconfig     
+  277   sssd-ad                 x86_64       1.11.2-65.el7        rhel_dvd       167 k
+  278   sssd-common             x8
+  279   sssd-common-pac         x86_64       1.11.2-65.el7        rhel_dvd       120 k
+  280   sssd-ipa                x86_64
+  281   sssd-krb5               x86_64       1.11.2-65.el7        rhel_dvd       108 k
+  282   sssd-krb5-common       
+  283   sssd-ldap               x86_64       1.11.2-65.el7        rhel_dvd       202 k
+  284   sssd-proxy              
+  285  事务概要
+  286  ================================================================================
+  287  安装  1 
+  288  总下载量：2.9 M
+  289  安装大小：6.7 M
+  290  Downloading packages:
+  291  (1/20): c-ares-1.10.0-3.el7.x86_64.rpm   
+  292  (2/20): libbasicobject
+  293  (3/20): cyrus-sasl-gssapi-2.1.26-17.el7.x86_64.rpm         |  40 kB  
+  294  (4/20): libcollection-0.6.2-22.el7.x86_64.rpm              
+  295  (5/20): libini_config-1.0.0.1-22.el7.x86_64.rpm            |  49 kB   00:00     
+  296  (6/20): libipa_hbac-1.11.2-65.el7.
+  297  (7/20): libpath_utils-0.2.1-22.el7.x86_64.rpm              |  27 kB   00:00     
+  298  (8/20): libref_array-0.1.3-22.el7.x86_64.rpm               |  25 kB   00:00     
+  299  (9/20): libsss_idmap-1.11.2-65.el7.x86_64.rpm              |  76 kB   00:00     
+  300  (10/20): python-sssdconfig-1.11.2-65.el7.noarch.rpm        |  96 kB   00:00     
+  301  (11/20): sssd-1.11.2-65.el7.x86_64.rpm                     |  65 kB  
+  302  (12/20): sssd-ad-1.11.2-65.el7.x86_64.rpm                  | 167 kB   00:00     
+  303  (13/20): sssd-common-1.11.2-65
+  304  (14/20): sssd-common-pac-1.11.2-65.el7.x86_64.rpm          | 120 kB   00:00     
+  305  (15/20): sssd-ipa-1.11.2-65.el7.x86_64.rpm                 | 271 kB   00:00     
+  306  (16/20): sssd-krb5-1.11.2-65.el7.x86_64.rpm                | 108 kB   00:00     
+  307  (17/20): sssd-krb5-common-1.11.2-65.el7.x86_64.rpm         | 201 kB   00:00     
+  308  (18/20): sssd-ldap-1.11.2-65.el7.x86_64.rpm                | 202 kB   00:00     
+  309  (1; (20/20): libdhash-0.4.3-22.el7.x86_64.rpm                  |
+  310  --------------------------------------------------------------------------------
+  311  总计                                               6.1 MB/s | 2.9 MB  00:00     
+  312  Running transaction check
+  313  Running transaction test
+  314  Transaction test succeeded
+  315  Running transaction
+  316    正在安装    : libdhash-
+  317    正在安装    : libsss_idmap-1.11.2-65.el7.x86_64        
+  318    正在安装    : libcollection-0.6.2-22.el7.x86_64         
+  319    正在安装    : li
+  320    正在安装    : libpath_utils-0.2.1-22.el7.x86_64    
+  321    正在安装    : c-ares-1.10.0-3.el7.x86_64                  
+  322    正在安装    : cyrus-sasl-gssapi-2.1.26-17.el7.x86_64 
+  323    正在安装    : libref_array-0.1.3-22.el7.x86_64              
+  324    正在安装    : libini_config-1.0.0.1-22.el7.x86_64                        9/20 
+  325    正在安装    : sssd-common-1.11.2-65.el7.x86_64                          10/20 
+  326    正在安装    : sssd-krb5-common-1.11.2-65.el7.x86_64                     11/20 
+  327    正在安装    : sssd-common-pac-1.11.2-65.el7.x86_64                      12/20 
+  328    正在安装    : sssd-ad-1.11.2-65.el7.x86_64                              
+  329    正在安装    : sssd-ldap-1.11.2-65.el7.x86_64              
+  330    正在安装    : sssd-krb5-1.11.2-65.el7.x86_64                  
+  331    正在安装    : sssd-proxy-1.11.2-65.el7.x86_64                           16/20 
+  332    正在安装    : p
+  333    正在安
+  334    正在安装    : 
+  335    正在安装    : ss
+  336    验证中 
+  337    验证中      : ss
+  338    验证中      : 
+  339    
+  340  ��  验证中      : sssd-ldap-1.11.2-65.el7.x86_64     
+  341    验证中      : sssd-ad-1.11.2-65.el7.x86_64       
+  342    验证中  
+  343    验证中      : sssd
+  344    验证中      : 
+  345    验
+  346  ��  验证中      : sssd-1.11.2-65.el7.x86_64                                 11
+  347    验证中      : cyrus-sasl-gssapi-2.1.26-17.el7.x86_64                    12
+  348    验证中      : libini_config-1.0.0.1-22.el7.x86_64                       13
+  349    验证中      : sssd-krb
+  350    验证中      : c-a
+  351    验证中      : sssd-common-1.11.2-65.el7.x86_64     
+  352    验证中      : sssd-ipa-1.11.2-65.el7.x86_64                             17
+  353    验证中      : libpath_utils-
+  354    验证中      : libsss_idmap-1.11.2-65.el7.x86_64                         19
+  355    验证中      : libb
+  356  已安装:
+  357    sssd.x86_64 0:1.11.2-65.el7                                      
+  358  作为依赖被安装:
+  359    c
+  360    cyrus-sasl-gssapi.x86_64 0:2.1.26-17.el7                                     
+  361    libbasicobjects.x86_64 0:0.1.
+  362    libcollection.x86_64 0:0.6.2-22.el7                                          
+  363    libdhash.x86_64 0:0.4.
+  364    libini_config.x86_64 0:1.0.0.1-22.el7                                        
+  365    libipa_hbac.x86_64 0:1.
+  366    libpath_uti
+  367    libref_array.x86_64 0:0.1.3-22.el7                                            
+  368    libsss_i
+  369    python-sssdconfig.n
+  370    sssd-ad.x86_64 0:1
+  371    sssd-common.x86_64 
+  372    sssd-common-pac.x86_64 0:1.11.2-65.el7                                        
+  373    sssd-ipa.x86_64 0:1.11.2-65.el7                                               
+  374    sssd-krb5.x86_64 0:1.11.2-65.el7                                              
+  375    sssd-krb5-common.x86_64 0:1.11.2-65.el7                                       
+  376    sssd-ldap.x86_64 0:1.11.2-65.el7                                              
+  377    sssd-proxy.x86_64 0:1.11.2-65.el7                                             
+  378  完毕！
+  379  [root@server0 ~]# LANG= authconfigtui
+  380  bash: authconfigtui: command not found...
+  381  [root@server0 ~]# LANG= authconfig-tui
+  382  [root@server0 ~]# systemctl restart sssd
+  383  [root@server0 ~]# id ldapuser0
+  384  uid=1700(ldapuser0) gid=1700(ldapuser0) 组=1700(ldapuser0)
+  385  [root@server0 ~]# showmount -e classroom.example.com 
+  386  Export list for classroom.example.com:
+  387  /home/guests 172.25.0.0/255.255.0.0
+  388  [root@server0 ~]# yum -y install autofs
+  389  已加载插件：langpacks
+  390  正在解决依赖关系
+  391  --> 正在检查事务
+  392  ---> 软件包 autofs.x86_64.1.5.0.7-40.el7 将被 安装
+  393  --> 正在处理依赖关系 libhesiod.so.0()(64bit)，它被软件包 1:autofs-5.0.7-40.el7.x86_64 需要
+  394  --> 正在检查事务
+  395  ---> 软件包 hesiod.x86_64.0.3.2.1-3.el7 将被 安装
+  396  --> 解决依赖关系完成
+  397  依赖关系解决
+  398  ==============================================================================
+  399   Package        架构           版本                      源                
+  400  ��=========================
+  401  正在安装:
+  402   autofs   
+  403  为依赖而安装:
+  404   hesio
+  405  事务概要
+  406  =====
+  407  安装  1 软件包 (+1 依
+  408  ��总下载量：579 k
+  409  安装大小：3.6 M
+  410  Downloading packag
+  411  (1/2): autofs-5.0.7-40.el7.x86_64.rpm                      | 5
+  412  (2/2): hesiod-3.2.1-3.
+  413  ---------------------------------------------------------
+  414  总计                                               2.2 MB/s |  Running transaction check
+  415  Running transaction test
+  416  Transact
+  417  Running transaction
+  418    正在安装    : hesiod-3.2.1-3.el7.x86_64 
+  419    正在安装    : 1:autofs-5.0.7-40.el7.x86_64                                2/2 
+  420    验证中      : hesiod-3.2.1-3.el7.x86_64                                   1/2 
+  421    验证中      : 1:autofs-5.0.7-40.el7.x86_64                                2/2 
+  422  已安装:
+  423    autofs.x86_64 1:5.0.7-40.el7                                            
+  424  作为依赖被安装:
+  425    hesiod.x86_64 0:3.2.1-3.el7                         
+  426  完毕！
+  427  [root@server0 ~]# vim /etc/auto
+  428  autofs_ldap_auth.conf
+  429  auto.master            auto.misc              auto.smb
+  430  [root@server0
+  431  autofs_ldap_auth.conf  auto.master.d/         auto.net
+  432  auto.master            auto.m
+  433  [root@server0 ~]# vim
+  434  [root@serve
+  435  [root@server0 ~]# vi
+  436  [root@server0 ~]# vim 
+  437  [root@server
+  438  [root@server0 ~]# sys
+  439  [root@server0 ~]# s
+  440  ln -s '/usr/lib/systemd/system/autofs.service' '/etc/system
+[root@server0 ~]# su - ldapuser0
+[ldapuser0@server0 ~]
+[ldapuser0@se
+logout
+[root@server0 ~]
+ldapuser0
+[root@ser
+ls: 无
+[root@server0 ~]# 
+[root@server0 ~]# history
+  441  history
+[root@server0 ~]# 
+
+
+[root@server0 ~]# cat /etc/auto.master
+#
+# Sample auto.master file
+# This is an automounter map and it has the following format
+# key [ -mount-options-separated-by-comma ] location
+# For details of the format look at autofs(5).
+#
+/misc	/etc/auto.misc
+#
+# NOTE: mounts done from a hosts map will be mounted with the
+#	"nosuid" and "nodev" options unless the "suid" and "dev"
+#	options are explicitly given.
+#
+/net	-hosts
+#
+# Include /etc/auto.master.d/*.autofs
+#
++dir:/etc/auto.master.d
+#
+# Include central master map if it can be found using
+# nsswitch sources.
+#
+# Note that if there are entries for /net or /misc (as
+# above) in the included master map any keys that are the
+# same will not be seen as the first read key seen takes
+# precedence.
+#
++auto.master
+/home/guests /etc/auto.guests
+[root@server0 ~]# 
+[root@server0 ~]# cat /etc/auto.guests
+ldapuser0 -rw,v3 classroom.example.com:/home/guests/ldapuser0
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

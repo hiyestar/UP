@@ -1,0 +1,1163 @@
+
+[root@server0 ~]# systemctl 
+is-active             is-enabled        restart
+daemon-reload          kill              set-default
+default                show	          disable              
+enable                 start	          status             
+stop			   get-default         poweroff        
+help                 reboot              reload    
+[root@server0 ~]# systemctl is-active  firewalld
+active
+[root@server0 ~]# systemctl is-enabled firewalld
+enabled
+
+
+[root@server0 ~]# vim /root/for01.sh
+[root@server0 ~]# chmod +x /root/for01.sh
+[root@server0 ~]# /root/for01.sh
+正在创建用户...一秒后按回车键
+zhangsan is ok
+lisi is ok
+wangwu is ok
+peri is ok
+[root@server0 ~]# cat /root/for01.sh
+#!/bin/bash
+read -p '正在创建用户...一秒后按回车键'
+for a in zhangsan lisi wangwu peri
+do
+  useradd $a &> /dev/null
+  echo $a is ok
+done    
+
+[root@server0 ~]# touch /root/$(date +%R){1..4}.txt
+[root@server0 ~]# ls /root/*.txt
+/root/10:001.txt  /root/10:002.txt  /root/10:003.txt  /root/10:004.txt
+
+[root@server0 ~]# vim /opt/for01.sh
+[root@server0 ~]# chmod +x /opt/for01.sh
+[root@server0 ~]# /opt/for01.sh
+输入0～4之间的数字:3
+猜测大了，可以小
+[root@server0 ~]# cat /opt/for01.sh
+#!/bin/bash
+num=$[$RANDOM%5]
+for a in {0..4}
+do 
+ read -p '输入0～4之间的数字:' num2
+ if [ $num2  -eq $num ];then
+   echo You are lucky
+   echo the number is $num
+   exit 0
+ elif [ $num2 -gt $num ];then
+   echo 猜测大了，可以小
+   exit 1
+ elif [ $num2 -lt $num ];then
+   echo 猜测小了 the right is $num
+   exit 2
+ else
+   echo gameover
+   exit 3
+ fi
+done 
+[root@server0 ~]# /opt/for01.sh
+输入0～4之间的数字:4
+猜测大了，可以小
+[root@server0 ~]# echo $?
+1
+[root@server0 ~]# /opt/for01.sh
+输入0～4之间的数字:0
+猜测小了 the right is 1
+[root@server0 ~]# echo $?
+2
+[root@server0 ~]# /opt/for01.sh
+输入0～4之间的数字:2
+You are lucky
+the number is 2
+[root@server0 ~]# echo $?
+0
+[root@server0 ~]# /opt/for01.sh
+输入0～4之间的数字:
+/opt/for01.sh: 第 6 行:[: -eq: 期待一元表达式
+/opt/for01.sh: 第 10 行:[: -gt: 期待一元表达式
+/opt/for01.sh: 第 13 行:[: -lt: 期待一元表达式
+gameover
+[root@server0 ~]# echo $?
+3
+
+[root@desktop0 ~]# vim /opt/user.sh
+[root@desktop0 ~]# chmod +x /opt/user.sh
+[root@desktop0 ~]# /opt/user.sh
+输入测试用户:huli
+用户 huli 已经创建成功
+[root@desktop0 ~]# ls /home/
+huli  student
+[root@desktop0 ~]# /opt/user.sh
+输入测试用户:huli
+useradd：用户“huli”已存在
+uid=1001(huli) gid=1001(huli) 组=1001(huli)
+huli is old user
+[root@desktop0 ~]# cat /opt/user.sh
+#!/bin/bash
+read -p '输入测试用户:' u
+useradd $u 
+if [ $? -eq 0 ];then
+  echo 用户 $u  已经创建成功
+else
+  id $u
+  echo $u is old user
+fi
+
+---------------------------------------------------------------------
+[root@server0 ~]# vim /opt/for01.sh
+[root@server0 ~]# /opt/for01.sh
+输入0～4之间的数字:1
+猜测小了 the right is 2
+输入0～4之间的数字:0
+猜测小了 the right is 2
+输入0～4之间的数字:2
+You are lucky
+the number is 2
+输入0～4之间的数字:3
+猜测大了，可以小
+已经猜测了 4 次，游戏结束
+[root@server0 ~]# echo $?
+4
+[root@server0 ~]# cat /opt/for01.sh
+#!/bin/bash
+num=$[$RANDOM%5]
+for a in {1..4}
+do 
+ read -p '输入0～4之间的数字:' num2
+ if [ $num2  -eq $num ];then
+   echo You are lucky
+   echo the number is $num
+   #exit 0
+ elif [ $num2 -gt $num ];then
+   echo 猜测大了，可以小
+   #exit 1
+ elif [ $num2 -lt $num ];then
+   echo 猜测小了 the right is $num
+   #exit 2
+ else
+   echo gameover
+   #exit 3
+ fi
+ if [ $a -eq 4 ];then
+    echo 已经猜测了 $a 次，游戏结束
+    exit 4
+ fi
+done 
+
+[root@desktop0 ~]# /opt/user.sh
+输入测试用户:haha
+haha 创建成功
+[root@desktop0 ~]# cat /opt/user.sh
+#!/bin/bash
+read -p '输入测试用户:' x
+for u in belle  huli  peri  student
+do
+if [ $x == $u ];then
+  echo 用户 $x  已经存在old
+  exit 0
+else
+  useradd $x
+  echo $x 创建成功
+  #exit 1
+fi
+done
+
+====================================
+[root@server0 ~]# systemctl is-active  firewalld
+active
+[root@server0 ~]# systemctl is-enabled firewalld
+enabled
+
+
+
+ SELinux运行模式
+ Enforcing（强制）
+ Permissive（宽松）
+ disabled（彻底禁用）
+[root@server0 ~]# getenforce   #Enforcing-----1
+Enforcing
+[root@server0 ~]# setenforce 0  #关闭0------打开1
+[root@server0 ~]# getenforce    #Permissive------0
+Permissive
+[root@server0 ~]# firewall-cmd --get-default-zone 
+public
+
+[root@desktop0 ~]# firewall-cmd --get-active-zones 
+ROL
+  sources: 172.25.0.252/32
+public
+  interfaces: eth0
+---------------------------------------------------
+[root@server0 ~]# firewall-cmd --
+--get-active-zones       
+--get-default-zone  
+[root@server0 ~]# firewall-cmd --set-default-zone=
+block     drop      home      public    trusted   
+------------------------------------------------------------------------------------------------------------
+[root@server0 ~]# head -8 /etc/selinux/config | tail -3
+#     disabled - No SELinux policy is loaded.
+SELINUX=enforcing
+# SELINUXTYPE= can take one of these two values:
+[root@server0 ~]# vim /etc/selinux/config   --------#修改防火墙配置文件
+[root@server0 ~]# head -8 /etc/selinux/config | tail -3
+#     disabled - No SELinux policy is loaded.
+SELINUX=permissive
+# SELINUXTYPE= can take one of these two values:
+-------------------------------------------------------------------------------------------------------------
+[root@desktop0 ~]# vim /etc/selinux/config   ----#修改防火墙配置文件
+[root@desktop0 ~]# head -8 /etc/selinux/config | tail -2
+SELINUX=permissive
+# SELINUXTYPE= can take one of these two values:
+
+[root@desktop0 ~]# grep -v '^#' /etc/bashrc | grep -v '^$'
+
+[root@desktop0 ~]# vim /etc/bashrc
+[root@desktop0 ~]# head -2 /etc/bashrc
+# /etc/bashrc
+alias hi='echo hihi/etc/bashrc'
+
+[root@desktop0 ~]# vim /root/.bashrc
+[root@desktop0 ~]# head -2 /root/.bashrc
+# .bashrc
+alias roothi='echo hi/root/.bashrc'
+
+[root@desktop0 ~]# echo $USER 
+root
+
+[root@desktop0 ~]# vim  ~/.bashrc
+[root@desktop0 ~]# head -2 ~/.bashrc
+# .bashrc
+alias roothi='echo hi/root/.bashrc'
+
+[root@server0 ~]# rpm -q httpd
+未安装软件包 httpd 
+[root@server0 ~]# yum repolist
+[root@server0 ~]# yum -y install httpd
+[root@server0 ~]# rpm -q httpd
+httpd-2.4.6-17.el7.x86_64
+
+[root@server0 ~]# systemctl status httpd
+[root@server0 ~]# systemctl start httpd
+[root@server0 ~]# systemctl enable httpd
+[root@server0 ~]# systemctl status httpd.service 
+[root@server0 ~]# firefox http://172.25.0.11
+This page is used to test the proper operation of the Apache HTTP server after it has been installed. If you can read this page, it means that the Apache HTTP server installed at this site is working properly.
+http://httpd.apache.org/
+
+[root@server0 ~]# ls -ld /var/www/html
+drwxr-xr-x. 2 root root 6 3月  20 2014 /var/www/html
+[root@server0 ~]# vim /var/www/html/index.html
+
+[root@server0 ~]# firefox http://172.25.0.11
+
+[root@server0 ~]# cat /var/www/html/index.html
+<h1><font color=purple><marquee>NSD1806 All are right !
+day after day always ok!</marquee></font></h1>
+
+[root@server0 ~]# yum -y install vsftpd
+[root@server0 ~]# yum info vsftpd
+简介    ： Very Secure Ftp Daemon
+[root@server0 ~]# systemctl status vsftpd
+[root@server0 ~]# systemctl start vsftpd
+[root@server0 ~]# systemctl enable vsftpd
+
+[root@server0 ~]# history | tail -5
+   82  systemctl start vsftpd
+   83  systemctl enable vsftpd
+
+[root@server0 ~]# systemctl status NetworkManager
+NetworkManager.service - Network Manager
+   Loaded: loaded (/usr/lib/systemd/system/NetworkManager.service; enabled)
+   Active: active (running) since 三 2018-07-11 14:02:59 CST; 28min ago
+[root@server0 ~]# ls /var/
+account  crash  ftp    gopher    local  mail  preserve  tmp  yp
+adm      db     games  kerberos  lock   nis   run       var
+cache    empty  gdm    lib       log    opt   spool     www
+[root@server0 ~]# ls /var/ftp
+pub
+[root@server0 ~]# mkdir /var/ftp/test1 /var/ftp/test2 /var/ftp/test3
+[root@server0 ~]# ls /var/ftp/
+pub  test1  test2  test3
+[root@server0 ~]# firefox ftp://172.25.0.11/test1
+[root@server0 ~]# firefox http://172.25.0.11/index.html
+[root@server0 ~]# ls /var/www/html
+index.html
+----------------------------------------------严进宽出------------防火墙------------------------
+硬件防火墙
+软件防火墙---------------redhat7-----rhel7防火墙
+
+[root@server0 ~]# systemctl status firewalld
+firewalld.service - firewalld - dynamic firewall daemon
+   Loaded: loaded (/usr/lib/systemd/system/firewalld.service; enabled)
+   Active: active (running) since 三 2018-07-11 14:02:58 CST; 1h 7min ago
+
+[root@server0 ~]# systemctl 
+is-active             is-enabled        restart
+daemon-reload          kill              set-default
+default                show	          disable              
+enable                 start	          status             
+stop			   get-default         poweroff        
+help                 reboot              reload    
+
+----Permissive（宽松运行模式）    disabled(彻底禁用运行模式)   Enforcing（强制运行模式）---------
+-----[root@server0 ~]# head -7 /etc/selinux/config | tail -1
+SELINUX=permissive
+----------[root@server0 ~]# setenforce 0
+[root@server0 ~]# getenforce
+Permissive
+
+public --------默认区域---------仅仅允许访问本机的sshd ，  ping ， DHCP 服务
+
+trusted --------------允许任何访问
+
+block -------------阻塞任何来访请求,明确拒绝，有回应
+
+drop -------------丢弃任何来访的数据包，不给任何回应
+
+
+[root@room11pc13 ~]# ssh -X root@172.25.0.21
+[root@partprobe ~]# systemctl status firewalld
+● firewalld.service - firewalld - dynamic firewall daemon
+   Loaded: loaded (/usr/lib/systemd/system/firewalld.service; disabled; vendor preset: enabled)
+   Active: inactive (dead)
+     Docs: man:firewalld(1)
+
+[root@partprobe ~]# systemctl is-active firewalld
+unknown
+[root@partprobe ~]# systemctl start firewalld
+[root@partprobe ~]# systemctl is-active firewalld
+active
+[root@partprobe ~]# systemctl is-enabled firewalld  ---#disabled(彻底禁用运行模式) 
+disabled
+[root@partprobe ~]# systemctl enable firewalld
+[root@partprobe ~]# systemctl is-enabled firewalld
+enabled
+[root@partprobe ~]# firewall-cmd --get-default-zone 
+public
+[root@partprobe ~]# getenforce
+Permissive
+[root@partprobe ~]# firewall-cmd --get-default-zone    -------public------
+public
+[root@partprobe ~]# getenforce    ---------------
+Permissive
+[root@partprobe ~]# firewall-cmd --set-default-zone=drop
+success
+[root@partprobe ~]# firewall-cmd --get-default-zone
+drop                                                  -------drop---------
+[root@partprobe ~]# firewall-cmd --set-default-zone=block
+success
+[root@partprobe ~]# firewall-cmd --get-default-zone
+block                                              -----------block------------
+[root@partprobe ~]# systemctl stop firewalld.service 
+[root@partprobe ~]# systemctl is-active firewalld.service 
+inactive
+[root@partprobe ~]# systemctl disable firewalld.service 
+
+[root@partprobe ~]# systemctl is-enabled firewalld.service 
+disabled
+[root@partprobe ~]# systemctl status firewalld.service 
+● firewalld.service - firewalld - dynamic firewall daemon
+   Loaded: loaded (/usr/lib/systemd/system/firewalld.service; disabled; vendor preset: enabled)
+   Active: inactive (dead)
+
+[root@partprobe ~]# firewall-cmd --zone=public --list-all 
+public
+  target: default
+  icmp-block-inversion: no
+  interfaces: 
+  sources: 
+  services: ssh dhcpv6-client
+  ports: 
+  protocols: 
+  masquerade: no
+  forward-ports: 
+  source-ports: 
+  icmp-blocks: 
+  rich rules: 
+
+[root@server0 ~]# firewall-cmd --get-default-zone 
+public
+[root@server0 ~]# firewall-cmd --zone=public  --add-service=http
+success
+[root@server0 ~]# firewall-cmd --zone=public  --list-all 
+public (default, active)
+  interfaces: eth0
+  sources: 
+  services: dhcpv6-client http ssh
+  ports: 
+  masquerade: no
+  forward-ports: 
+  icmp-blocks: 
+  rich rules: 
+
+[root@server0 ~]# firewall-cmd  --zone=public  --add-service=ftp
+success
+[root@server0 ~]# firewall-cmd  --zone=public  --list-all 
+public (default, active)
+  interfaces: eth0
+  sources: 
+  services: dhcpv6-client ftp http ssh
+  ports: 
+  masquerade: no
+  forward-ports: 
+  icmp-blocks: 
+  rich rules: 
+[root@partprobe ~]# firewall-cmd --set-default-zone=trusted
+success
+[root@partprobe ~]# firewall-cmd --get-default-zone
+trusted                                   ------------------trusted
+[root@partprobe ~]# getenforce
+Permissive
+
+[root@partprobe ~]# firefox ftp://172.25.0.11
+[root@partprobe ~]# firefox http://172.25.0.11
+
+
+ http---------------超文本传输协议-------80
+ https-----------安全超文本传输协议------443
+ DNS ---------------- 域名解析协议-------53
+ FTP------------------文件传输协议-------21
+ tftp -------------简单文件传输协议------69
+
+ telnet---远程管理协议(传输加密不安全)-----23
+ smtp--------------------发邮件协议----161
+ pop3--------------------收邮件协议----110
+ snmp-----------------互联网管理协议----161
+ SMB(TCP 139)协议
+ CIFS(TCP 445)协议 (数据传输)
+
+	数据包 ： 源IP地址    目标IP地址      数据       访问的端口号
+
+======================永久配置规则（permanent）
+[root@partprobe ~]# firewall-cmd --permanent  --zone=public --add-service=http
+success
+[root@partprobe ~]# firewall-cmd --zone=public --list-all 
+public
+  target: default
+  icmp-block-inversion: no
+  interfaces: 
+  sources: 
+  services: ssh dhcpv6-client
+  ports: 
+  protocols: 
+  masquerade: no
+  forward-ports: 
+  source-ports: 
+  icmp-blocks: 
+  rich rules: 
+[root@partprobe ~]# firewall-cmd --zone=public --list-all
+public
+  target: default
+  icmp-block-inversion: no
+  interfaces: 
+  sources: 
+  services: ssh dhcpv6-client http
+  ports: 
+  protocols: 
+  masquerade: no
+  forward-ports: 
+  source-ports: 
+  icmp-blocks: 
+  rich rules: 
+	
+[root@partprobe ~]# firewall-cmd --reload 
+success
+[root@partprobe ~]# firewall-cmd --zone=public --list-
+--list-all            --list-ports          --list-source-ports
+--list-forward-ports  --list-protocols      --list-sources
+--list-icmp-blocks    --list-rich-rules     
+--list-interfaces     --list-services       
+[root@partprobe ~]# firewall-cmd --zone=public --list-all
+public
+  target: default
+  icmp-block-inversion: no
+  interfaces: 
+  sources: 
+  services: ssh dhcpv6-client http
+  ports: 
+  protocols: 
+  masquerade: no
+  forward-ports: 
+  source-ports: 
+  icmp-blocks: 
+  rich rules: 
+[root@desktop0 ~]# firewall-cmd --permanent --zone=public --add-service=ftp 
+success
+[root@desktop0 ~]# firewall-cmd --reload 
+success
+[root@desktop0 ~]# firewall-cmd --zone=public --list-all 
+public (default, active)
+  interfaces: eth0
+  sources: 
+  services: dhcpv6-client ftp http ssh
+  ports: 
+  masquerade: no
+  forward-ports: 
+  icmp-blocks: 
+  rich rules: 
+	
+[root@partprobe ~]# rpm -q firewalld
+firewalld-0.4.4.4-6.el7.noarch
+	
+[root@server0 ~]# rpm -q firewalld
+firewalld-0.3.9-7.el7.noarch
+
+[root@partprobe ~]# firefox http://172.25.0.11:80/
+[root@partprobe ~]# firefox http://172.25.0.11:/
+[root@partprobe ~]# firefox http://172.25.0.11/
+[root@desktop0 ~]# rpm -q httpd vsftpd
+httpd-2.4.6-17.el7.x86_64
+vsftpd-3.0.2-9.el7.x86_64
+[root@desktop0 ~]# firewall-cmd --permanent  --zone=public --add-forward-port=port=5323:proto=tcp:toport=80
+success
+[root@desktop0 ~]# firewall-cmd --reload
+success
+[root@desktop0 ~]# firewall-cmd --zone=public --list-all 
+public (default, active)
+  interfaces: eth0
+  sources: 
+  services: dhcpv6-client ftp http ssh
+  ports: 
+  masquerade: no
+  forward-ports: port=5323:proto=tcp:toport=80:toaddr=
+  icmp-blocks: 
+  rich rules: 
+[root@desktop0 ~]# firefox http://172.25.0.10:80/
+	
+[root@partprobe ~]# firefox http://172.25.0.10:80/
+[root@partprobe ~]# firefox http://172.25.0.10:5323/
+[root@desktop0 ~]# vim /var/www/html/index.html
+[root@desktop0 ~]# cat /var/www/html/index.html
+ <h1><font color=pink><marquee>NSD1806 All are right !
+day after day always ok!</marquee></font></h1>
+<h1><font color=purple><marquee>NSD1806 All are right !
+day after day always ok!</marquee></font></h1>
+<h1><font color=pink><marquee>NSD1806 All are right !
+day after day always ok!</marquee></font></h1>
+==============================================
+
+[root@server0 ~]# firewall-cmd --zone=block --add-source=172.25.0.10
+success
+[root@server0 ~]# firewall-cmd --zone=block --list-all 
+block
+  interfaces: 
+  sources: 172.25.0.10
+  services: 
+  ports: 
+  masquerade: no
+  forward-ports: 
+  icmp-blocks: 
+  rich rules: 
+
+
+[root@server0 ~]# firewall-cmd --zone=block --remove-source=172.25.0.10
+success
+[root@server0 ~]# firewall-cmd --zone=block --list-all 
+block
+  interfaces: 
+  sources: 
+  services: 
+  ports: 
+  masquerade: no
+  forward-ports: 
+  icmp-blocks: 
+  rich rules: 
+	
+[root@partprobe ~]# firewall-cmd --zone=public --add-service=ftp --permanent
+success
+[root@partprobe ~]# firewall-cmd --zone=public --list-all 
+public
+  target: default
+  icmp-block-inversion: no
+  interfaces: 
+  sources: 
+  services: ssh dhcpv6-client http
+  ports: 
+  protocols: 
+  masquerade: no
+  forward-ports: 
+  source-ports: 
+  icmp-blocks: 
+  rich rules: 
+	
+[root@partprobe ~]# firewall-cmd --reload 
+success
+[root@partprobe ~]# firewall-cmd --zone=public --list-all 
+public
+  target: default
+  icmp-block-inversion: no
+  interfaces: 
+  sources: 
+  services: ssh dhcpv6-client http ftp
+  ports: 
+  protocols: 
+  masquerade: no
+  forward-ports: 
+  source-ports: 
+  icmp-blocks: 
+  rich rules: 
+#--add-service=          --list-sources          
+--add-source=             --remove-port=
+--change-source=           --remove-service=
+--change-zone=              --remove-source=
+#
+=============Samba  ===========================================
+ http---------------超文本传输协议-------80
+ https-----------安全超文本传输协议------443
+ DNS ---------------- 域名解析协议-------53
+ FTP------------------文件传输协议-------21
+ tftp -------------简单文件传输协议------69
+
+ telnet---远程管理协议(传输加密不安全)-----23
+ smtp--------------------发邮件协议----161
+ pop3--------------------收邮件协议----110
+ snmp-----------------互联网管理协议----161
+ SMB(TCP 139)协议
+ CIFS(TCP 445)协议
+ NFS(TCP/UDP 2049)
+ RPC(TCP/UDP 111)
+	数据包 ： 源IP地址    目标IP地址      数据       访问的端口号
+
+[root@partprobe ~]# firefox http://172.25.0.11/
+[root@desktop0 ~]# rpm -q httpd vsftpd
+httpd-2.4.6-17.el7.x86_64
+vsftpd-3.0.2-9.el7.x86_64
+[root@desktop0 ~]# firewall-cmd --permanent  --zone=public --add-forward-port=port=5323:proto=tcp:toport=80
+success
+[root@desktop0 ~]# firewall-cmd --reload
+success
+[root@desktop0 ~]# firewall-cmd --zone=public --list-all 
+
+-----------------------------------------------------------------------
+[root@server0 ~]# firewall-cmd --set-default-zone=trusted 
+success
+[root@server0 ~]# setenforce 0
+[root@server0 ~]# getenforce
+Permissive
+[root@server0 ~]# vim /etc/selinux/config
+[root@server0 ~]# head -7 /etc/selinux/config | tail -2
+#     disabled - No SELinux policy is loaded.
+SELINUX=permissive
+[root@server0 ~]# yum -y install samba  #1.安装软件包
+[root@server0 ~]# rpm -q samba
+samba-4.1.1-31.el7.x86_64
+-----------------2创建SAMBA共享验证用户(Samba共享帐号)-------------
+
+[root@server0 ~]# useradd -s /sbin/nologin harry
+[root@server0 ~]# useradd -s /sbin/nologin kenji
+[root@server0 ~]# useradd -s /sbin/nologin chihiro
+[root@server0 ~]# pdbedit -a harry  ---添加Samba共享帐号验证用户
+[root@server0 ~]# pdbedit -x harry  ---删除Samba共享帐号验证用户
+[root@server0 ~]# pdbedit -L
+[root@server0 ~]# pdbedit -a harry
+[root@server0 ~]# pdbedit -a kenji
+[root@server0 ~]# pdbedit -a chihiro
+[root@server0 ~]# pdbedit -L    ----------查看列出所有Samba共享帐号验证用户
+kenji:1002:
+harry:1001:
+chihiro:1003:
+[root@server0 ~]# mkdir /common   ------创建共享文件夹
+[root@server0 ~]# mkdir /common
+[root@server0 ~]# echo 123111 > /common/1.txt
+[root@server0 ~]# vim /etc/samba/smb.conf   -------3修改配置文件/etc/samba/smb.conf
+[root@server0 ~]# tail -2 /etc/samba/smb.conf
+[common]
+path = /common
+[root@server0 ~]# vim /etc/samba/smb.conf 
+
+[root@server0 ~]# head -90 /etc/samba/smb.conf | tail -2
+	workgroup = STAFF   ---========--STAFF----工作组windows XP 旧技术,仅仅面试应用
+	server string = Samba Server Version %v
+[root@partprobe ~]# vim /etc/samba/smb.conf
+[root@partprobe ~]# head -9 /etc/samba/smb.conf | tail -3
+       #workgroup = SAMBA
+        workgroup = STAFF
+	security = user
+
+
+[root@server0 ~]# systemctl restart smb  -----开启服务smb
+[root@server0 ~]# systemctl enable smb    -----------
+
+----------------------------------------客户端,访问
+[root@desktop0 ~]# yum -y install samba-client.x86_64 
+
+[root@desktop0 ~]# rpm -q samba-client
+samba-client-4.1.1-31.el7.x86_64
+[root@desktop0 ~]# smbclient -L 172.25.0.11  ----------列出共享资源
+Enter root's password:    -----------不需要输入密码登陆
+Anonymous login successful
+Domain=[STAFF] OS=[Unix] Server=[Samba 4.1.1]
+
+	Sharename       Type      Comment
+	---------       ----      -------
+	common          Disk      
+	IPC$            IPC       IPC Service (Samba Server Version 4.1.1)
+Anonymous login successful
+Domain=[STAFF] OS=[Unix] Server=[Samba 4.1.1]
+	---------            -------
+[root@desktop0 ~]# smbclient -U harry //172.25.0.11/common  #--连接到服务端共享文件夹
+Enter harry's password:     -------------输入密码123登陆server服务端
+Domain=[STAFF] OS=[Unix] Server=[Samba 4.1.1]
+smb: \> LS
+  1.txt                               N        7  Thu Jul 12 10:55:01 2018
+smb: \> ls
+  .                                   D        0  Thu Jul 12 10:55:01 2018
+  ..                                  D        0  Thu Jul 12 10:53:18 2018
+  1.txt                               N        7  Thu Jul 12 10:55:01 2018
+----------------------------# SELinux运行模式--- Enforcing（强制）
+[root@server0 ~]# setenforce 1
+[root@server0 ~]# getenforce    
+Enforcing
+
+[root@server0 ~]# getsebool -a | grep samba
+
+
+[root@server0 ~]# setsebool samba_export_all_ro on
+########[root@server0 ~]# setsebool -P samba_export_all_ro on  #  -P 耗费至少2G内存
+[root@server0 ~]# getsebool samba_export_all_ro   ------查看是否已经开启布尔值
+samba_export_all_ro --> on     ---------------只读共享功能开启_ro  on
+
+[root@server0 ~]# getsebool -a | grep samba_export_all_ro ----查看是否已经开启布尔值
+samba_export_all_ro --> on
+
+[root@partprobe ~]# getsebool -a | grep  samba_export
+samba_export_all_ro --> off
+samba_export_all_rw --> off
+[root@partprobe ~]# setsebool samba_export_all_ro on
+[root@partprobe ~]# setsebool samba_export_all_rw on
+[root@partprobe ~]# mkdir /devops
+[root@partprobe ~]# echo partprobe-172.25.0.21 > /devops/part21.txt
+[root@partprobe ~]# ls /home
+chihiro  harry  kenji  lisi
+[root@partprobe ~]# pdbedit -L
+harry:1001:
+chihiro:1003:
+kenji:1002:
+[root@partprobe ~]# setfacl -m u:chihiro:rwx /devops
+[root@partprobe ~]# getfacl /devops | grep chihiro
+getfacl: Removing leading '/' from absolute path names
+user:chihiro:rwx
+
+
+[root@desktop0 ~]# smbclient -U harry //172.25.0.11/common
+Enter harry's password: 
+Domain=[STAFF] OS=[Unix] Server=[Samba 4.1.1]
+smb: \> ls
+  .                                   D        0  Thu Jul 12 10:55:01 2018
+  ..                                  D        0  Thu Jul 12 10:53:18 2018
+  1.txt                               N        7  Thu Jul 12 10:55:01 2018
+
+		40913 blocks of size 262144. 28562 blocks available
+smb: \> quit
+
+[root@partprobe ~]# ls /common
+1.txt  x2.txt
+[root@partprobe ~]# echo "I'm partprobe172.25.0.21" > /common/x2.txt 
+
+
+================ SMB(TCP 139)协议 ----------- CIFS(TCP 445)协议 (数据传输)====
+[root@desktop0 ~]# mkdir /mnt/nsd   ---1,创建挂载点/mnt/nsd
+[root@desktop0 ~]# ls /mnt/nsd
+[root@desktop0 ~]# yum install -y cifs-utils.x86_64 
+
+[root@desktop0 ~]# rpm -q cifs-utils    ----------------cifs-utils 
+cifs-utils-6.2-6.el7.x86_64
+[root@desktop0 ~]# mount -o user=harry,pass=123 //172.25.0.11/common /mnt/nsd
+[root@desktop0 ~]# ls /mnt/nsd
+1.txt
+[root@server0 ~]# touch /common/2.txt
+[root@server0 ~]# ls /common/
+1.txt  2.txt
+
+[root@desktop0 ~]# ls /mnt/nsd
+1.txt  2.txt
+
+[root@desktop0 ~]# mkdir /mnt/nsdkenji
+[root@desktop0 ~]# mount -o username=kenji,password=123 //172.25.0.11/common /mnt/nsdkenji
+[root@desktop0 ~]# ls /mnt/nsdkenji
+1.txt  2.txt
+-------------------------------------------------------------------------------------------------------------------------------------
+UUID=9bf6b9f7-92ad-441b-848e-0257cbb883d1 /         xfs     defaults          1   1
+//172.25.0.11/common   /mnt/nsd   cifs   defaults,user=harry,pass=123,_netdev  0  0
+-----------------------------------_netdev声明网络设备
+--------------在开机时,需要将网络服务部署完成,自己具备IP地址后进行挂载------------------------------------
+[root@desktop0 ~]# vim /etc/fstab 
+[root@desktop0 ~]# tail -2 /etc/fstab    -----------------实现客户机开机自动挂载
+UUID=9bf6b9f7-92ad-441b-848e-0257cbb883d1 /         xfs     defaults          1   1
+//172.25.0.11/common   /mnt/nsd   cifs   defaults,user=harry,pass=123,_netdev  0  0
+[root@desktop0 ~]# umount /mnt/nsd
+[root@desktop0 ~]# df -h /mnt/nsd
+文件系统        容量  已用  可用 已用% 挂载点
+/dev/vda1        10G  3.1G  7.0G   31% /
+[root@desktop0 ~]# mount -a
+[root@desktop0 ~]# df -h /mnt/nsd
+文件系统              容量  已用  可用 已用% 挂载点
+//172.25.0.11/common   10G  3.1G  7.0G   31% /mnt/nsd
+[root@desktop0 ~]# df -hT
+文件系统             类型      容量  已用  可用 已用% 挂载点
+/dev/vda1            xfs        10G  3.1G  7.0G   31% /
+devtmpfs             devtmpfs  906M     0  906M    0% /dev
+tmpfs                tmpfs     921M   80K  921M    1% /dev/shm
+tmpfs                tmpfs     921M   17M  904M    2% /run
+tmpfs                tmpfs     921M     0  921M    0% /sys/fs/cgroup
+//172.25.0.11/common cifs       10G  3.1G  7.0G   31% /mnt/nsdkenji
+//172.25.0.11/common cifs       10G  3.1G  7.0G   31% /mnt/nsd
+
+[root@server0 ~]# vim /etc/samba/smb.conf
+[root@server0 ~]# tail -5 /etc/samba/smb.conf
+[common]
+path = /common
+[devops]
+path = /devops
+write list = chihiro
+[root@partprobe ~]# vim /etc/samba/smb.conf
+[root@partprobe ~]# tail -5 /etc/samba/smb.conf
+	directory mask = 0775
+[common]
+path = /common
+[devops]
+write list = chihiro
+
+[root@server0 ~]# mkdir /devops
+[root@server0 ~]# systemctl restart smb
+[root@server0 ~]# setsebool samba_export_all_rw on
+[root@server0 ~]# getsebool samba_export_all_rw
+samba_export_all_rw --> on
+
+[root@desktop0 ~]# vim /etc/fstab 
+[root@desktop0 ~]# tail -2 /etc/fstab
+//172.25.0.11/common   /mnt/nsd   cifs   defaults,user=harry,pass=123,_netdev  0  0
+//172.25.0.11/devops   /mnt/pub   cifs   defaults,user=chihiro,pass=123,_netdev  0  0
+
+[root@desktop0 ~]# mkdir  /mnt/pub
+[root@desktop0 ~]# mount -a
+[root@desktop0 ~]# ls /mnt
+nsd  nsdkenji  pub
+[root@desktop0 ~]# mkdir /mnt/part
+[root@desktop0 ~]# vim /etc/fstab 
+[root@desktop0 ~]# tail -3 /etc/fstab
+//172.25.0.11/common   /mnt/nsd   cifs   defaults,user=harry,pass=123,_netdev  0  0
+//172.25.0.11/devops   /mnt/pub   cifs   defaults,user=chihiro,pass=123,_netdev  0  0
+//172.25.0.21/devops   /mnt/part   cifs   defaults,user=chihiro,pass=111,_netdev  0  0
+
+[root@server0 ~]# echo server-123-devops  > /devops/ser.txt
+[root@server0 ~]# setfacl -m u:chihiro:rwx /devops
+[root@server0 ~]# getfacl /devops | grep chihiro
+getfacl: Removing leading '/' from absolute path names
+user:chihiro:rwx
+
+[root@desktop0 ~]# ls /mnt/pub/
+ser.txt
+[root@desktop0 ~]# cat /mnt/pub/ser.txt 
+server-123-devops
+
+[root@desktop0 ~]# touch /mnt/pub/desk-chihiro.txt
+[root@desktop0 ~]# ls /mnt/pub/
+desk-chihiro.txt  ser.txt
+[root@server0 ~]# ls /devops
+desk-chihiro.txt  ser.txt
+
+[root@desktop0 ~]# history | tail -50
+26  firewall-cmd --set-default-zone=trusted
+   28  setenforce 0
+   29  getenforce
+
+   31  vim /etc/selinux/config 
+   32  head -7 /etc/selinux/config | tail -2
+
+   35  yum -y install samba-client.x86_64 
+   36  rpm -q samba-client
+   37  smbclient -L
+   38  smbclient -L 172.25.0.11
+   39  systemctl start samba-client
+   40  smbclient -L 172.25.0.11
+   43  smbclient -U harry //172.25.0.11/common
+   44  mkdir /mnt/nsd
+   45  ls /mnt/nsd
+
+   46  yum install -y cifs-utils.x86_64 
+   47  rpm -q cifs-utils
+   48  mount -o user=harry,pass=123 //172.25.0.11/common /mnt/nsd
+   49  ls /mnt/nsd
+   50  mount -o username=kenji,password=123 //172.25.0.11/common /mnt/nsdkenji
+   51  mkdir /mnt/nsdkenji
+   52  mount -o username=kenji,password=123 //172.25.0.11/common /mnt/nsdkenji
+   53  ls /mnt/nsdkenji
+   54  vim /etc/fstab 
+   55  tail -2 /etc/fstab
+   56  umount /mnt/nsd
+   57  df -h /mnt/nsd
+   58  mount -a
+   59  df -h /mnt/nsd
+   60  lsblk
+   61  df -hT
+   62  mkdir /partprobe
+   63  smbclient -U harry //172.25.0.21/common
+   64  vim /etc/fstab 
+   66  tail -2 /etc/fstab
+   67  mount -a
+   68  mkdir  /mnt/pub
+   69  mount -a
+   70  ls /mnt/pub/
+   71  cat /mnt/pub/ser.txt 
+   72  touch /mnt/pub/desk-chihiro.txt
+   73  ls /mnt/pub/
+   74  ls /mnt
+   75  mkdir /mnt/part
+   76  vim /etc/fstab 
+   77  tail -3 /etc/fstab
+   78  mount -a
+   79  ls /mnt
+   80  ping -c 2 172.25.0.21
+
+[root@desktop0 ~]# vim /etc/fstab   -------------无需卸载,重新挂载multiuser
+//172.25.0.11/common   /mnt/nsd   cifs   defaults,user=harry,pass=123,_netdev  0  0
+//172.25.0.11/devops   /mnt/pub   cifs   defaults,user=kenji,pass=123,multiuser,sec=ntlmssp,_netdev  0  0
+[root@desktop0 ~]#umount /mnt/pub
+[root@desktop0 ~]#mount -a
+[root@desktop0 ~]#mount  /mnt/pub
+[root@desktop0 ~]#mount -a
+
+[root@desktop0 ~]# vim /etc/fstab 
+[root@desktop0 ~]# tail -1 /etc/fstab
+//172.25.0.11/devops   /mnt/part2   cifs   defaults,user=kenji,pass=123,multiuser,sec=ntlmssp,_netdev  0  0
+
+[root@desktop0 ~]# mkdir /mnt/part2
+[root@desktop0 ~]# mount -a
+[root@desktop0 ~]# df -hT /mnt/part2
+文件系统             类型  容量  已用  可用 已用% 挂载点
+//172.25.0.11/devops cifs   10G  3.1G  7.0G   31% /mnt/part2
+[root@desktop0 ~]#su - student
+[root@desktop0 ~]$ cifscreds add -u chihiro 172.25.0.11
+Password: 123
+[root@server0 ~]# ls /devops/
+desk-chihiro.txt  ser.txt
+[student@desktop0 ~]$ pwd
+/home/student
+[student@desktop0 ~]$ ls /mnt/part2
+desk-chihiro.txt  ser.txt
+[student@desktop0 ~]$ ls /mnt/part2
+desk-chihiro.txt  ser.txt
+[student@desktop0 ~]$ touch /mnt/part2/deskt.txt
+[student@desktop0 ~]$ echo 123 > /mnt/part2/deskt.txt
+[student@desktop0 ~]$ cat /mnt/part2/deskt.txt
+123
+[student@desktop0 ~]$  echo 'desktop---' >> /mnt/part2/ser.txt 
+-bash: /mnt/part2/ser.txt: Permission denied
+
+--------------接着可以创建文件,又有读写权限了
+
+[root@server0 ~]# history | tail -70
+ 11  firewall-cmd --set-default-zone=trusted 
+   15  setenforce 0
+   16  getenforce
+   17  head -7 /etc/selinux/config | tail -2
+   18  vim /etc/selinux/config
+   19  head -7 /etc/selinux/config | tail -2
+   20  yum -y install samba
+   21  rpm -q samba
+   22  useradd -s /sbin/nologin harry
+   23  useradd -s /sbin/nologin kenji
+   24  useradd -s /sbin/nologin chihiro
+   25  pdbedit -a harry
+   26  pdbedit -x harry
+   27  pdbedit -L
+   28  pdbedit -a harry
+   29  pdbedit -a kenji
+   30  pdbedit -a chihiro
+   31  bdbedit -L 
+   32  pdbedit -L
+   33  vim /etc/samba/smb.conf 
+   34  mkdir /common
+   35  echo 123111 > /common/1.txt
+   36  vim /etc/samba/smb.conf 
+   37  tail -2 /etc/samba/smb.conf
+   38  vim /etc/samba/smb.conf 
+   39  head -90 /etc/samba/smb.conf | tail -2
+   40  systemctl restart smb
+   41  systemctl enable smb
+   42  systemctl status smb
+   43  echo 123 | passwd --stdin root
+   44  setenforce 1
+   46  getenforce 
+   47  getsebool -a | grep samba
+   48  setsebool samba_export_all_ro on
+   49  getsebool samba_export_all_ro
+   50  getsebool -a | grep samba_export_all_ro
+   52  touch /common/2.txt
+   53  ls /common/
+   54  vim /etc/samba/smb.conf
+   55  tail -4 /etc/samba/smb.conf
+   56  vim /etc/samba/smb.conf
+   57  tail -5 /etc/samba/smb.conf
+   59  systemctl restart smb
+   60  setsebool samba_export_all_rw on
+   61  getsebool samba_export_all_rw
+   62  vim /etc/samba/smb.conf
+   63  systemctl restart smb
+   64  vim /etc/samba/smb.conf
+   65  ls /devops
+   66  mkdir /devops
+   67  ls -ld /devops
+   68  ls /home
+   70  echo server-123-devops  > /devops/ser.txt
+   71  setfacl -m u:chihiro:rwx /devops
+   73  getfacl /devops | grep chihiro
+   74  ls /devops
+---------------------------------------------------------------------------------------
+
+案例2:配置Samba文件夹共享，防火墙默认区域设置为trusted，修改SElinux状态为Enforcing
+在 server0 上发布共享文件夹
+ 1）此服务器必须是 STAFF 工作组的一个成员 
+ 2）发布目录 /devops，共享名为 devops 
+ 5）用户 harry 对共享 devops可读可写，密码是 123
+[root@server0 ~]# firewall-cmd --set-default-zone=trusted 
+[root@server0 ~]# setenforce 1
+[root@server0 ~]# getenforce 
+Enforcing
+[root@server0 ~]# yum install  -y samba
+[root@server0 ~]# rpm -q samba
+samba-4.1.1-31.el7.x86_64
+[root@server0 ~]# vim /etc/samba/smb.conf 
+[root@server0 ~]# head -90 /etc/samba/smb.conf | tail -2
+	workgroup = STAFF
+	server string = Samba Server Version %v
+[root@server0 ~]# mkdir /devops
+[root@server0 ~]# vim /etc/samba/smb.conf 
+[root@server0 ~]# tail -2 /etc/samba/smb.conf
+[devops]
+path = /devops
+[root@server0 ~]# useradd harry
+[root@server0 ~]# pdbedit -a harry
+new password:   123回车
+[root@server0 ~]# usermod -s /sbin/nologin harry 
+
+[root@server0 ~]# ls -ld /devops/
+drwxr-xr-x. 2 root root 6 7月  12 17:44 /devops/
+[root@server0 ~]# setfacl -m u:harry:rwx /devops/
+[root@server0 ~]# getfacl /devops/ | grep harry
+getfacl: Removing leading '/' from absolute path names
+user:harry:rwx
+[root@server0 ~]# ls -ld /devops/
+drwxrwxr-x+ 2 root root 6 7月  12 17:44 /devops/
+
+[root@server0 ~]# getsebool -a | grep samba_export_all_rw
+samba_export_all_rw --> off
+[root@server0 ~]# setsebool samba_export_all_rw on
+[root@server0 ~]# getsebool samba_export_all_rw
+samba_export_all_rw --> on
+
+[root@server0 ~]# systemctl start smb
+[root@server0 ~]# systemctl enable smb
+[root@server0 ~]# systemctl status smb | head -3
+smb.service - Samba SMB Daemon
+   Loaded: loaded (/usr/lib/systemd/system/smb.service; enabled)
+   Active: active (running) since 四 2018-07-12 17:50:12 CST; 1min 35s ago
+[root@server0 ~]# echo server172.25.0.11devices > /devops/serv.txt
+
+在 desktop0 上访问共享文件夹
+ 1）访问 server0 上发布共享文件夹,实现开机自动挂载到/mnt/smb
+ 2）实现对/mnt/smb目录可以读和写
+[root@desktop0 ~]# yum -y install samba-client
+[root@desktop0 ~]# yum install -y cifs-utils
+[root@desktop0 ~]# vim /etc/fstab 
+[root@desktop0 ~]# tail -1 /etc/fstab
+//172.25.0.11/devops   /mnt/smb   cifs  defaults,user=harry,pass=123,_netdev  0  0
+[root@desktop0 ~]# mkdir /mnt/smb
+[root@desktop0 ~]# smbclient -L //172.25.0.11/devops
+[root@desktop0 ~]# smbclient -U harry //172.25.0.11/devops
+[root@desktop0 ~]# mount -a
+[root@desktop0 ~]# df -hT /mnt/smb/
+文件系统             类型  容量  已用  可用 已用% 挂载点
+//172.25.0.11/devops cifs   10G  3.1G  7.0G   31% /mnt/smb
+[root@desktop0 ~]# ls /mnt/smb/
+serv.txt
+[root@desktop0 ~]# cat /mnt/smb/serv.txt
+server172.25.0.11devices
+[root@desktop0 ~]# ls -l /mnt/smb/serv.txt
+-rw-r--r--. 1 root root 25 7月  12 18:32 /mnt/smb/serv.txt
+[root@desktop0 ~]# touch /mnt/smb/desktop.txt
+touch: 无法创建"/mnt/smb/desktop.txt": 权限不够
+[root@server0 ~]# vim /etc/samba/smb.conf 
+[root@server0 ~]# tail -3 /etc/samba/smb.conf
+[devops]
+path = /devops
+write list = harry
+[root@server0 ~]# systemctl restart smb
+[root@desktop0 ~]# echo desktop123 > /mnt/smb/desktop.txt
+[root@desktop0 ~]# mkdir /mnt/smb/desktop
+[root@server0 ~]# ls /devops/
+desktop  desktop.txt  serv.txt
+[root@server0 ~]# cat /devops/desktop.txt 
+desktop123
+
+
+------------------------------------------------------------------------------------------
+
+ http---------------超文本传输协议-------80
+ https-----------安全超文本传输协议------443
+ DNS ---------------- 域名解析协议-------53
+ FTP------------------文件传输协议-------21
+ tftp -------------简单文件传输协议------69
+
+ telnet---远程管理协议(传输加密不安全)-----23
+ smtp--------------------发邮件协议----161
+ pop3--------------------收邮件协议----110
+ snmp-----------------互联网管理协议----161
+ SMB(TCP 139)协议
+ CIFS(TCP 445)协议
+ NFS(TCP/UDP 2049)   nfs-utils软件包     nfs-server系统服务
+ RPC(TCP/UDP 111)
+	数据包 ： 源IP地址    目标IP地址      数据       访问的端口号
+
+--------------------------------------NFS共享
+[root@server0 ~]# rpm -q nfs-utils
+nfs-utils-1.3.0-0.el7.x86_64
+
+[root@server0 ~]# systemctl status nfs-server
+nfs-server.service - NFS Server
+   Loaded: loaded (/usr/lib/systemd/system/nfs-server.service; disabled)
+   Active: inactive (dead)
+
+[root@server0 ~]# systemctl start nfs-server
+[root@server0 ~]# systemctl status nfs-server.service 
+nfs-server.service - NFS Server
+   Loaded: loaded (/usr/lib/systemd/system/nfs-server.service; disabled)
+   Active: active (exited) since 四 2018-07-12 16:07:09 CST; 15s ago
+[root@server0 ~]# mkdir  /nsd
+[root@server0 ~]# echo nfsserver172.0.11 > /nsd/abc.txt
+[root@server0 ~]# ls /nsd/
+abc.txt
+[root@server0 ~]# vim /etc/exports
+[root@server0 ~]# cat /etc/exports
+/nsd   172.25.0.10(ro)
+/nsd   *(ro)
+[root@server0 ~]# systemctl restart nfs-server.service 
+[root@server0 ~]# systemctl enable nfs-server
+
+[root@desktop0 ~]# vim /etc/fstab 
+[root@desktop0 ~]# tail -1 /etc/fstab     声明网络设备_netdev
+172.25.0.11:/nsd  /mnt/test   nfs  defaults,_netdev  0  0
+[root@desktop0 ~]# mkdir /mnt/test
+[root@desktop0 ~]# mount -a
+[root@desktop0 ~]# df -hT /mnt/test
+文件系统         类型  容量  已用  可用 已用% 挂载点
+172.25.0.11:/nsd nfs4   10G  3.1G  7.0G   31% /mnt/test
+[root@desktop0 ~]# ls /mnt/test
+abc.txt
+
+
+
+
+
+
+
+
+
+
+
+
