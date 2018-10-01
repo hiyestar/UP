@@ -1,0 +1,137 @@
+大家好!我是工程师胡海龙.
+下面由我来为大家讲解'"ACL策略"':
+
+ACL
+中文解释就是"访问列表控制技术".
+适用于中小规模的企业网络安全控制.
+
+对于办公室内网络,
+如果希望做到“允许外来的网页流量通过，
+拒绝外来的其他通信流量”，
+那么可以使用扩展ACL来达到目的.
+"扩展ACL访问"技术
+ 涉及源IP地址、
+目的IP地址、指定协议、端口等匹配要求,
+提供了更广泛的控制范围.
+我们可以通过设置 "允许,拒绝" 来 "精确控制流量".
+
+我们搭建的教学办公网络是一个较小规模的企业内部网络,
+
+由于我们只需要实现每个教室之间不能通信,办公室能够和教室通信,
+办公室可以访问外网,教室不能访问外网,
+仅仅涉及源IP地址匹配要求 ,
+
+所以最后我们只需要使用
+"ACL标准访问"技术来
+来限制某台计算机,或者某个网段的计算机访问外网,
+也可以限制外网访问教学办公网络某些网段
+实现了信息安全的控制.
+
+"标准与扩展型ACL"这两种技术都能够实现"流量监控",
+不仅仅实现了网络安全控制,也节约了大量数据流量,节约了运营成本,
+广大企业的非常欢迎这类网络技术.
+
+由于时间有限,
+接下来有请工程师陈俊杰介绍NAT技术,大家掌声有请!鼓掌.
+=============================
+
+
+
+
+例如
+1 对于教室学员,内部资源已经够用,不需要连接外网,
+可以设置ACL拒绝技术
+
+##使用标准acl限制--全局指定主机---拒绝主机 1.1 的数据流量流出
+R1(config)#access-list  1  deny  192.168.1.1  0.0.0.0
+##使用标准acl限制--全局指定网段---拒绝主机网段 1.0 的数据流量流出
+R1(config)#access-list  1  deny  192.168.1.0  0.0.0.255
+
+#放行其他数据
+#Router(config)#access-list 1 permit any
+
+##在路由器接口中应用acl
+R1(config)#interface gigabitEthernet 0/0{面向内网的接口0/0}
+
+#接口模式：ip  access-group  列表号 {in或out}
+R1(config-if)#ip access-group 1 in #{阻止教室网络进入外网}
+
+
+2 对于办公室内网络,工作需要外网,
+可以设置ACL允许技术
+
+##使用标准acl限制--全局指定主机---允许主机 2.1 的数据流量流出
+R1(config)#access-list  1 permit  192.168.2.1  0.0.0.0
+##使用标准acl限制--全局指定网段---允许主机网段 1.0 的数据流量流出
+R1(config)#access-list  1  permit  192.168.2.0  0.0.0.255
+
+#拒绝其他数据{ 默认拒绝}
+Router(config)#access-list 1 deny  any
+
+##在路由器接口中应用acl
+R1(config)#interface gigabitEthernet 0/0{面向内网的接口0/0}
+
+#接口模式：ip  access-group  列表号 {in或out}
+R1(config-if)#ip access-group 1 in #{允许办公室网络进入外网}
+
+标准ACL只检查数据包的源地址; 
+
+扩展ACL既检查数据包的源地址，也检查数据包的目的地址，
+同时还可以检查数据包的特定协议类型、端口号等
+
+扩展ACL比标准ACL提供了更广泛的控制范围.
+如果希望做到“允许外来的Web通信流量通过，
+拒绝外来的FTP和Telnet等通信流量”，
+那么可以使用扩展ACL来达到目的，标准ACL不能控制这么精确。
+
+##使用扩展ACL拒绝ftp服务,允许主机192.168.2.2访问www服务
+
+Router(config)#access-list 100 deny tcp  any  any eq 21
+Router(config)#access-list 100 permit tcp  192.168.2.2 0.0.0.0  any eq 80
+
+  #        协议    源地址  反掩码       目标地址  目标地址反掩码 eq  相应端口   
+ # deny  tcp   host 192.168.2.1 host  192.168.1.1   eq   21
+
+-将ACL置于网络中时:
+
+      *标准ACL应靠近目的地址
+
+      *扩展ACL应靠近源地址。
+常见的协议端口号：
+http   80
+dhcp   server67 client68
+tftp    69
+DNS   tcp的53号端口和udp的53号端口，而我们平时上网的时候都是用的UDP的53号端口。
+
+      只有在DNS服务器之间同步DNS服务的时候，才会用到基于TCP的53号端口。或者发的报文比较大的时候也才会用到DNS的第53号端口。
+
+NTP   是网络时间协议，使用的是123号端口
+Email  一个是SMTP的25号端口，还有一个是POP3的110号端口。
+FTP    一个是20号端口，一个是21号端口，通常情况下被动模式是使用的是21号端口来建立连接的，而传输数据的是随机端口，而如果设置的是主动模式的话，则是用21号端口来建立连接，用20号端口来传输数据。
+
+=======================================
+SELinux(Security-Enhanced Linux) 是美国国家安全局（NAS）对于强制访问控制的实现，是 Linux上最杰出的新安全子系统.
+Security-Enhanced Linux
+SELinux是 Security-Enhanced Linux的简称，
+是一种内核强制访问控制安全系统
+[root@server0 ~]# firewall-cmd --get-default-zone 
+trusted
+[root@server0 ~]# firewall-cmd --permanent  --add-source=172.34.0.0/24  --zone=block
+-----------------------------------------------------------------------
+#vim /etc/selinux/config
+SELINUX=enforcing/permissive/disabled
+SELinux不是杀毒软件
+SELinux不是口令密码、防火墙或者其他安全系统的替代物
+SELinux不是一体化的安全解决方案
+SELinux是在已有的安全解决方案基础之上，增强安全性，而不是替代原有的安全解决方案。
+工作状态
+Enforcing(启用状态)：
+Permissive（自由状态）：
+Disabled(禁用状态)：SELinux不启用
+#semanage fcontext -l | grep /var/www/ 
+##修改文件的SELinux安全上下文
+#chcon -R --reference=/var/www/ /webroot
+
+[root@server0 ~]# firewall-cmd --permanent  --add-source=172.34.0.0/24  --zone=block
+==========================================
+
