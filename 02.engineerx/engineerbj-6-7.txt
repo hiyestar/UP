@@ -1,0 +1,762 @@
+[root@server0 ~]# rpm -q nfs-utils
+nfs-utils-1.3.0-0.el7.x86_64
+[root@server0 ~]# vim /etc/exports
+[root@server0 ~]# cat /etc/exports
+/public *(rw)
+[root@server0 ~]# mkdir /public
+[root@server0 ~]# echo Server public > /public/serv.txt
+[root@server0 ~]# systemctl start nfs-server
+[root@server0 ~]# chmod -R 777 /public/
+[root@desktop0 ~]# tail -1 /etc/fstab 
+172.25.0.11:/public  /pubdesk   nfs  defaults,_netdev  0   0
+
+    iSCISI
+
+dev=/dev/vdb1(设备名称=冰箱)  -------------1
+/> /backstores/block create name=zhixiangnsd dev=/dev/vdb1
+backstore 后端存储( | | o- zhixiangnsd 纸箱子)
+
+/> iscsi/ create iqn.2018-07.example.com:server0   ------------2
+target  磁盘组 ( iscsi | o- iqn.2018-07.example.com:server0 木箱子)
+
+luns  create  建立逻辑单元(关联 /> iscsi/iqn.2018-07.example.com:server0/tpg1/luns create /backstores/block/zhixiangnsd  )   -----------------------------------------3
+
+acl — Access Control Lists
+[root@desktop0 ~]# hostname
+desktop0.example.com
+
+
+[root@server0 ~]# firewall-cmd --set-default-zone=trusted 
+[root@server0 ~]# setenforce 0
+[root@desktop0 ~]# firewall-cmd --get-default-zone 
+trusted
+
+[root@server0 ~]# lsblk /dev/vdb
+NAME   MAJ:MIN RM SIZE RO TYPE MOUNTPOINT
+vdb    253:16   0  10G  0 disk 
+└─vdb1 253:17   0  10G  0 part 
+
+[root@server0 ~]# yum install -y targetcli
+[root@server0 ~]# rpm -q targetcli
+targetcli-2.1.fb34-1.el7.noarch
+[root@server0 ~]# targetcli 
+/> ls
+o- / .................................................................. [...]
+  o- backstores ....................................................... [...]
+  | o- block ........................................... [Storage Objects: 0]
+  o- iscsi ..................................................... [Targets: 0]
+  o- loopback .................................................. [Targets: 0]
+
+/> /backstores/block create name=zhixiangnsd dev=/dev/vdb1     --------------1
+Created block storage object zhixiangnsd using /dev/vdb1.
+/> ls
+  o- backstores ....................................................... [...]
+  | o- block ........................................... [Storage Objects: 1]
+  | | o- zhixiangnsd ........... [/dev/vdb1 (10.0GiB) write-thru deactivated]
+
+/> iscsi/ create iqn.2018-07.example.com:server0     ------------------------2
+Created target iqn.2018-07.example.com:server0.
+Created TPG 1.
+/> ls
+  o- iscsi ..................................................... [Targets: 1]
+  | o- iqn.2018-07.example.com:server0 ............................ [TPGs: 1]
+  |   o- tpg1 ........................................ [no-gen-acls, no-auth]
+
+/> iscsi/iqn.2018-07.example.com:server0/tpg1/
+iscsi/iqn.2018-07.example.com:server0/tpg1/*         
+iscsi/iqn.2018-07.example.com:server0/tpg1/acls/     
+iscsi/iqn.2018-07.example.com:server0/tpg1/luns/     
+iscsi/iqn.2018-07.example.com:server0/tpg1/portals/ 
+
+/> iscsi/iqn.2018-07.example.com:server0/tpg1/luns create /backstores/block/zhixiangnsd 
+Created LUN 0.      ----------------------------------------------------3
+/> ls
+  o- backstores ....................................................... [...]
+  | o- block ........................................... [Storage Objects: 1]
+  | | o- zhixiangnsd ............. [/dev/vdb1 (10.0GiB) write-thru activated]
+  o- iscsi ..................................................... [Targets: 1]
+  | o- iqn.2018-07.example.com:server0 ............................ [TPGs: 1]
+  |   o- tpg1 ........................................ [no-gen-acls, no-auth]
+  |     o- acls ................................................... [ACLs: 0]
+  |     o- luns ................................................... [LUNs: 1]
+  |     | o- lun0 ........................... [block/zhixiangnsd (/dev/vdb1)]
+
+/> iscsi/iqn.2018-07.example.com:server0/tpg1/acls create  iqn.2018-07.example.com:desktop0
+Created Node ACL for iqn.2018-07.example.com:desktop0    ------------4  设置客户端声称的名字
+Created mapped LUN 0.
+/> ls
+  o- backstores ....................................................... [...]
+  | o- block ........................................... [Storage Objects: 1]
+  | | o- zhixiangnsd ............. [/dev/vdb1 (10.0GiB) write-thru activated]
+  | o- fileio .......................................... [Storage Objects: 0]
+  | o- pscsi ........................................... [Storage Objects: 0]
+  | o- ramdisk ......................................... [Storage Objects: 0]
+  o- iscsi ..................................................... [Targets: 1]
+  | o- iqn.2018-07.example.com:server0 ............................ [TPGs: 1]
+  |   o- tpg1 ........................................ [no-gen-acls, no-auth]
+  |     o- acls ................................................... [ACLs: 1]
+  |     | o- iqn.2018-07.example.com:desktop0 .............. [Mapped LUNs: 1]
+  |     |   o- mapped_lun0 .................... [lun0 block/zhixiangnsd (rw)]
+  |     o- luns ................................................... [LUNs: 1]
+  |     | o- lun0 ........................... [block/zhixiangnsd (/dev/vdb1)]
+/> iscsi/iqn.2018-07.example.com:server0/tpg1/portals create 
+0.0.0.0               ::0                   ip_address=           
+127.0.0.1             ::1                   ip_port=              
+172.25.0.11           fe80::5054:ff:fe00:b  
+.............................................................ip_address|keyword=
+/> iscsi/iqn.2018-07.example.com:server0/tpg1/portals create 172.25.0.11
+Using default IP port 3260                   -------------------5开放网络接口
+Created network portal 172.25.0.11:3260.  
+/> ls
+  |     o- portals ............................................. [Portals: 1]
+  |       o- 172.25.0.11:3260 .......................................... [OK]
+
+/> exit
+[root@server0 ~]# systemctl restart target      -----------------7开启target服务
+[root@server0 ~]# targetcli ls
+o- / ..................................................................... [...]
+  o- backstores .......................................................... [...]
+  | o- block .............................................. [Storage Objects: 1]
+  | | o- zhixiangnsd ................ [/dev/vdb1 (10.0GiB) write-thru activated]
+  | o- fileio ............................................. [Storage Objects: 0]
+  | o- pscsi .............................................. [Storage Objects: 0]
+  | o- ramdisk ............................................ [Storage Objects: 0]
+  o- iscsi ........................................................ [Targets: 1]
+  | o- iqn.2018-07.example.com:server0 ............................... [TPGs: 1]
+  |   o- tpg1 ........................................... [no-gen-acls, no-auth]
+  |     o- acls ...................................................... [ACLs: 1]
+  |     | o- iqn.2018-07.example.com:desktop0 ................. [Mapped LUNs: 1]
+  |     |   o- mapped_lun0 ....................... [lun0 block/zhixiangnsd (rw)]
+  |     o- luns ...................................................... [LUNs: 1]
+  |     | o- lun0 .............................. [block/zhixiangnsd (/dev/vdb1)]
+  |     o- portals ................................................ [Portals: 1]
+  |       o- 172.25.0.11:3260 ............................................. [OK]
+  o- loopback ..................................................... [Targets: 0]
+[root@server0 ~]# 
+
+[root@desktop0 ~]# yum repolist
+[root@desktop0 ~]# yum install -y iscsi-initiator-utils.i686    ------------1
+[root@desktop0 ~]# rpm -q iscsi-initiator-utils
+iscsi-initiator-utils-6.2.0.873-21.el7.x86_64  ---64位使用安装的软件包
+iscsi-initiator-utils-6.2.0.873-21.el7.i686  ----32位
+[root@desktop0 ~]# ls /etc/iscsi/
+initiatorname.iscsi  iscsid.conf
+[root@desktop0 ~]# vim /etc/iscsi/initiatorname.iscsi   -------------2
+[root@desktop0 ~]# cat /etc/iscsi/initiatorname.iscsi
+InitiatorName=iqn.2018-07.example.com:desktop0
+[root@desktop0 ~]# systemctl restart iscsi
+iscsid.service    iscsi.service     iscsiuio.service  
+[root@desktop0 ~]# systemctl restart iscsid
+Warning: Unit file of iscsid.service changed on disk, 'systemctl daemon-reload' recommended.
+
+[root@desktop0 ~]# systemctl daemon-reload
+[root@desktop0 ~]# systemctl restart iscsid   ---------3-刷新IQN标示
+
+[root@room11pc13 ~]# man iscsiadm
+iscsiadm --mode discoverydb --type sendtargets --portal 172.25.0.11 --discover
+
+[root@desktop0 ~]# iscsiadm --mode discoverydb --type sendtargets --portal 172.25.0.11 --discover
+172.25.0.11:3260,1 iqn.2018-07.example.com:server0
+---------------------发现磁盘iSCSI
+[root@desktop0 ~]# iscsiadm -m  discovery  -t    st  -p 172.25.0.11:3260
+172.25.0.11:3260,1 iqn.2018-07.example.com:server0
+
+[root@desktop0 ~]# lsblk
+NAME   MAJ:MIN RM SIZE RO TYPE MOUNTPOINT
+vda    253:0    0  10G  0 disk 
+└─vda1 253:1    0  10G  0 part /
+vdb    253:16   0  10G  0 disk 
+vdc    253:32   0  80G  0 disk 
+[root@desktop0 ~]# systemctl restart iscsi   #客户端服务
+[root@desktop0 ~]# lsblk
+NAME   MAJ:MIN RM SIZE RO TYPE MOUNTPOINT
+sda      8:0    0  10G  0 disk 
+vda    253:0    0  10G  0 disk 
+└─vda1 253:1    0  10G  0 part /
+vdb    253:16   0  10G  0 disk 
+vdc    253:32   0  80G  0 disk 
+------------------------------------------------------------------------------------------------------
+[root@desktop0 ~]# iscsiadm -m discovery -t st -p server0
+172.25.0.11:3260,1 iqn.2018-07.example.com:server0
+[root@desktop0 ~]# iscsiadm -m node -L all
+
+==================================================
+[root@server0 ~]# rpm -q mariadb
+未安装软件包 mariadb 
+[root@server0 ~]# yum -y install mariadb
+[root@server0 ~]# rpm -q  mariadb
+mariadb-5.5.35-3.el7.x86_64
+
+
+[root@server0 ~]# yum install -y mariadb-server
+[root@server0 ~]# rpm -q mariadb-server
+mariadb-server-5.5.35-3.el7.x86_64
+
+[root@server0 ~]# systemctl start mariadb
+[root@server0 ~]# systemctl enable mariadb
+
+[root@server0 ~]# mysql
+Welcome to the MariaDB monitor.  Commands end with ; or \g.
+MariaDB [(none)]> show databases;
++--------------------+
+| Database           |
++--------------------+
+| information_schema |
+| mysql              |
+| performance_schema |
+| test               |
++--------------------+
+4 rows in set (0.00 sec)
+MariaDB [(none)]> create database nsd1806; -----创建数据库
+MariaDB [(none)]> show databases;
+MariaDB [(none)]> drop database nsd1806;  ----删除数据库
+MariaDB [(none)]> show databases;      ------查看数据库
+
+-------------| mysql              |   user表    root-------------数据库管理员root
+
+[root@server0 ~]# mysqladmin -u root password '123' 为数据库root帐号设置密码123
+
+[root@server0 ~]# mysql -u root -p 交互式登陆设置密码
+Enter password: 
+
+[root@server0 ~]# mysql -u root  -p123  非交互式设置密码
+[root@server0 ~]# vim /etc/my.cnf
+[root@server0 ~]# head -2 /etc/my.cnf
+[mysqld]
+skip-networking     --------------跳过网络监听
+[root@server0 ~]# systemctl restart mariadb.service 
+
+MariaDB [(none)]> create database nsd;  ---创建数据库
+MariaDB [(none)]> show databases;   ---查看数据库
+| nsd                |
+[root@server0 ~]# pwd
+/root
+[root@server0 ~]# wget http://classroom.example.com/pub/materials/users.sql
+[root@server0 ~]# ls
+anaconda-ks.cfg  Documents  Music     Public     users.sql
+
+[root@server0 ~]# mysql -u root -p123 nsd < users.sql
+[root@server0 ~]# mysql -u root -p123
+MariaDB [(none)]> use nsd;
+MariaDB [nsd]> show tables;
++---------------+
+| Tables_in_nsd |
++---------------+
+| base          |
+| location      |
++---------------+
+2 rows in set (0.00 sec)
+insert增加   delete删    update改   select查
+
+
+
+[root@server0 ~]# mysql -u root -p123
+
+MariaDB [(none)]> use nsd;
+
+MariaDB [nsd]> show tables;
+
+MariaDB [nsd]> select * from base;
+MariaDB [nsd]> select id,name from base;
+MariaDB [nsd]> select * from location;
+
+
+
+MariaDB [mysql]> show tables;
++---------------------------+
+| Tables_in_mysql           |
++---------------------------+
+| columns_priv              |
+| time_zone_transition_type |
+| user                      |
++---------------------------+
+
+MariaDB [mysql]> desc user;
++------------------------+---------------+------------+--------+---------------+------------+
+| Field        | Type    | Null | Key | Default | Extra |
++------------------------+-----------------------------------+------+-----+---------+-------+
+| Host         | char(60)  | NO   | PRI |         |       |
+| User         | char(16)  | NO   | PRI |         |       |
+
+MariaDB [mysql]> select user,host,password from user;
++------+---------------------+-------------------------------------------+
+| user | host                | password                                  |
++------+---------------------+-------------------------------------------+
+| root | localhost           | *23AE809DDACAF96AF0FD78ED04B6A265E05AA257 |
+| root | server0.example.com |                                           |
+| root | 127.0.0.1           |                                           |
+| root | ::1                 |                                           |
+|      | localhost           |                                           |
+|      | server0.example.com |                                           |
++------+---------------------+-------------------------------------------+
+
+MariaDB [mysql]> select * from nsd.base;
++------+---------+------------+
+| id   | name    | password   |
++------+---------+------------+
+|    1 | Tom     | 123        |
+|    2 | Barbara | 456        |
+|    3 | James   | solicitous |
+|    4 | Smith   | tarena     |
+|    5 | Barbara | pwd123     |
++------+---------+------------+
+
+MariaDB [mysql]> use nsd;  ----切换数据库nsd
+MariaDB [nsd]> show tables;
++---------------+
+| Tables_in_nsd |
++---------------+
+| base          |
+| location      |
++---------------+
+MariaDB [nsd]> desc base;
++----------+-------------+------+-----+---------+-------+
+| Field    | Type        | Null | Key | Default | Extra |
++----------+-------------+------+-----+---------+-------+
+| id       | int(11)     | YES  |     | NULL    |       |
+| name     | varchar(20) | YES  |     | NULL    |       |
+| password | varchar(24) | YES  |     | NULL    |       |
++----------+-------------+------+-----+---------+-------+
+MariaDB [nsd]> select * from base where name='barbara';
++------+---------+----------+
+| id   | name    | password |
++------+---------+----------+
+|    2 | Barbara | 456      |
+|    5 | Barbara | pwd123   |
++------+---------+----------+
+
+MariaDB [(none)]> grant select on nsd.* to lisi@localhost identified by '123'; ----给用户lisi 授权查看,使用密码123登陆数据库nsd,可以查看所有的表
+
+MariaDB [(none)]> select user,host,password from mysql.user where user='lisi';
++------+-----------+-------------------------------------------+
+| user | host      | password                                  |
++------+-----------+-------------------------------------------+
+| lisi | localhost | *23AE809DDACAF96AF0FD78ED04B6A265E05AA257 |
++------+-----------+-------------------------------------------+
+
+MariaDB [nsd]> select name from base where password='solicitous';
+
+
+MariaDB [nsd]> insert base values('6','Barbar','789');
+Query OK, 1 row affected (0.03 sec)
+
+MariaDB [nsd]> insert nsd.location values ('6','Sunnyvale');
+
+MariaDB [nsd]> select count(*) from nsd.base,nsd.location where base.name='Barbara' and location.city='Sunnyvale' and base.id=location.id;
++----------+
+| count(*) |
++----------+
+|        1 |
++----------+
+
+MariaDB [mysql]> desc user;
++------------------------+-----------------------------------+------+-----+---------+-------+
+| Field        | Type        | Null | Key | Default | Extra |
++------------------------+-----------------------------------+------+-----+---------+-------+
+| Host        | char(60)     | NO   | PRI |         |       |
+| User        | char(16)     | NO   | PRI |         |       |
+| Password    | char(41)     | NO   |     |         |       |
+
+MariaDB [mysql]> select user,host,password from user;
++------+---------------------+-------------------------------------------+
+| user | host                | password                                  |
++------+---------------------+-------------------------------------------+
+| root | localhost           | *23AE809DDACAF96AF0FD78ED04B6A265E05AA257 |
+| root | server0.example.com |                                           |
+| root | 127.0.0.1           |                                           |
+| root | ::1                 |                                           |
+|      | localhost           |                                           |
+|      | server0.example.com |                                           |
+| lisi | localhost           | *23AE809DDACAF96AF0FD78ED04B6A265E05AA257 |
++------+---------------------+-------------------------------------------+
+
+
+MariaDB [mysql]> delete from user where password='';
+Query OK, 5 rows affected (0.00 sec)
+
+MariaDB [mysql]> select user,host,password from user;
+
+MariaDB [mysql]> flush privileges;
+Query OK, 0 rows affected (0.00 sec)
+MariaDB [mysql]> exit
+Bye
+[root@server0 ~]# mysql -u  root -h  server0.example.com
+ERROR 2003 (HY000): Can't connect to MySQL server on 'server0.example.com' (111)
+[root@server0 ~]# mysql -u root -p123
+Welcome to the MariaDB monitor.  Commands end with ; or \g.
+
+• 禁止监听,只服务于本机
+[root@server0 ~]# vim /etc/my.cnf   #数据库主配置文件
+[mysqld]
+skip-networking    #跳过网络监听
+
+-------------------------------------------------------------------------------------------------------------------------
+B/S  Browser/Server
+
+Hyper Text Markup Language 超文本标记语言(html)
+Hyper Text Transfer Protocol 超文本传输协议
+server0.example.com  -------------
+www0.example.com     -------------
+webapp0.example.com  -------------
+Linten:监听地址:端口(80)
+[root@server0 ~]# vim /etc/httpd/conf/httpd.conf
+
+[root@server0 ~]# head -95 /etc/httpd/conf/httpd.conf | tail -1
+ServerName server0.example.com:80
+
+DocumentRoot:网页文件根目录(/var/www/html/)
+[root@server0 ~]# vim /etc/httpd/conf/httpd.conf (主配置文件)
+   ==================##     /etc/httpd/conf.d/*.conf (调用配置文件)
+[root@server0 ~]# head -119 /etc/httpd/conf/httpd.conf | tail -1
+DocumentRoot "/var/www/myweb"
+
+DirectoryIndex:起始页面(/var/www/html/index.html)
+[root@server0 ~]# vim /etc/httpd/conf/httpd.conf 
+
+[root@server0 ~]# head -165 /etc/httpd/conf/httpd.conf | tail -3
+<IfModule dir_module>
+    DirectoryIndex index.html
+</IfModule>
+
+
+#killall httpd  杀死所有的httpd进程
+
+1、导入一个文件
+键入冒号：进入末行格式
+命令：r 绝对路径/文件
+例如   :r !date   （执行一个命令）
+	:r !ls -l
+:r /root/桌面/lingxing.txt                /root/桌面/adminbj-5.txt
+
+2、替换
+:%s/old/new/g
+
+3另存为
+：w/test.bak 另存为
+
+4、查找（忽略大小写）
+/string
+：set ic 忽略大小写
+
+小写u撤销---命令模式下
+----------------------------------------------------------------
+[root@server0 ~]# echo '<marquee><h2><font color=blue>Myweb</font></h2></marquee>' >> /var/www/myweb/index.html
+[root@server0 ~]# cat /var/www/myweb/index.html
+
+------------------------------------------------------------------------------------------------------
+[root@desktop0 ~]# firefox http://server0.example.com:80
+
+[root@desktop0 ~]# firewall-cmd --set-default-zone=trusted
+success
+[root@desktop0 ~]# getenforce
+Enforcing
+[root@server0 ~]# firewall-cmd --set-default-zone=trusted
+success
+[root@server0 ~]# getenforce
+Enforcing
+
+[root@desktop0 ~]# yum clean all
+[root@desktop0 ~]# yum repolist
+[root@server0 ~]# yum clean all
+[root@server0 ~]# yum repolist
+[root@server0 ~]# yum install -y httpd
+[root@server0 ~]# rpm -q httpd
+httpd-2.4.6-17.el7.x86_64
+[root@server0 ~]# systemctl start httpd
+[root@server0 ~]# systemctl enable httpd
+[root@server0 ~]# vim /var/www/html/index.html
+[root@server0 ~]# cat /var/www/html/index.html
+
+[root@desktop0 ~]# firefox http://172.25.0.11
+[root@server0 ~]# tail -1 /etc/resolv.conf
+nameserver 172.25.254.254
+[root@server0 ~]# route -n | head -3 | tail -2
+Destination     Gateway         Genmask         Flags Metric Ref    Use Iface
+0.0.0.0         172.25.0.254    0.0.0.0         UG    1024   0        0 eth0
+[root@server0 ~]# 
+
+server0.example.com
+www0.example.com
+webapp0.example.com
+ServerName 本站点注册的DNS名称
+
+[root@server0 ~]# vim /etc/httpd/conf/httpd.conf
+[root@server0 ~]# head -95 /etc/httpd/conf/httpd.conf | tail -1
+ServerName server0.example.com:80
+[root@server0 ~]# systemctl restart httpd
+
+[root@desktop0 ~]# firefox http://server0.example.com:80
+
+[root@server0 ~]# mkdir /var/www/myweb
+[root@server0 ~]# ls /var/www/myweb/
+
+-------------------------------------------------------------------------------------------------------------------------
+[root@server0 ~]# vim /etc/httpd/conf.d/nsd01.conf
+[root@server0 ~]# mkdir /var/www/nsd01  /var/www/nsd02  /var/www/nsd03
+[root@server0 ~]# ls /var/www/
+cgi-bin  html  myweb  nsd01  nsd02  nsd03
+[root@server0 ~]# cat /etc/httpd/conf.d/nsd01.conf
+
+-------------
+[root@server0 ~]# rpm -q httpd
+httpd-2.4.6-17.el7.x86_64
+[root@server0 ~]# cat /var/www/html/index.html
+<marquee><h1><font color=purple>服务器文件文本</font></h1></marquee>
+<marquee><h1><font color=pink>服务器文件文本</font></h1></marquee>
+<marquee><h1><font color=purple>服务器文件文本</font></h1></marquee>
+[root@server0 ~]# tail -1 /etc/resolv.conf
+nameserver 172.25.254.254
+
+[root@server0 ~]# head -95 /etc/httpd/conf/httpd.conf | tail -1
+ServerName server0.example.com:80
+
+[root@server0 ~]# ls /var/www/html
+index.html
+[root@server0 ~]# ls /var/www/myweb/
+index.html
+
+[root@server0 ~]# head -165 /etc/httpd/conf/httpd.conf | tail -3
+<IfModule dir_module>
+    DirectoryIndex index.html
+</IfModule>
+
+[root@server0 ~]# head -119 /etc/httpd/conf/httpd.conf | tail -1
+DocumentRoot "/var/www/myweb"
+
+[root@server0 ~]# cat /var/www/myweb/index.html   ----------server0.example.com
+<marquee><h1><font color=pink>服务器文件文本</font></h1></marquee>
+<marquee><h2><font color=blue>Myweb</font></h2></marquee>
+<marquee><h1><font color=purple>I am myweb</font></h1></marquee>
+
+[root@server0 ~]# cat /var/www/nsd01/index.html     -----------www0.example.com
+<marquee><h1><font color=purple>Wo I am nsd01</font></h1></marquee>
+
+[root@server0 ~]# cat /var/www/nsd02/index.html    ----------webapp0.example.com
+<marquee><h1><font color=purple>I am nsd02</font></h1></marquee>
+
+[root@server0 ~]# cat /etc/httpd/conf.d/nsd01.conf 
+<VirtualHost *:80>
+  ServerName www0.example.com
+  DocumentRoot /var/www/nsd01
+</VirtualHost>
+<VirtualHost *:80>
+  ServerName webapp0.example.com
+  DocumentRoot /var/www/nsd02
+</VirtualHost>
+<VirtualHost *:80>
+  ServerName server0.example.com
+  DocumentRoot /var/www/myweb
+</VirtualHost>
+
+[root@server0 ~]# systemctl restart httpd
+[root@server0 ~]# firefox server0.example.com
+[root@desktop0 ~]# firefox http://server0.example.com:80
+[root@desktop0 ~]# firefox http://www0.example.com:80
+[root@desktop0 ~]# firefox http://webapp0.example.com:80
+[root@desktop0 ~]# nslookup  server0.example.com
+Server:		172.25.254.254
+Address:	172.25.254.254#53
+Name:	server0.example.com
+Address: 172.25.0.11
+
+[root@desktop0 ~]# nslookup  www0.example.com
+Server:		172.25.254.254
+Address:	172.25.254.254#53
+www0.example.com	canonical name = server0.example.com.
+Name:	server0.example.com
+Address: 172.25.0.11
+
+[root@desktop0 ~]# nslookup  webapp0.example.com
+Server:		172.25.254.254
+Address:	172.25.254.254#53
+webapp0.example.com	canonical name = server0.example.com.
+Name:	server0.example.com
+Address: 172.25.0.11
+[root@server0 ~]# mkdir /var/www/myweb/private
+[root@server0 ~]# echo '<marquee><h1><font color=blue>wo shi private</font></h1></marquee>' > /var/www/myweb/private/index.html
+[root@server0 ~]# cat /var/www/myweb/private/index.html    ---server0.example.com
+<marquee><h1><font color=blue>wo shi private</font></h1></marquee>
+
+[root@server0 ~]# firefox http://server0.example.com:80/private
+
+[root@desktop0 ~]# firefox http://server0.example.com:80/private
+
+[root@server0 ~]# vim /etc/httpd/conf.d/nsd02.conf
+[root@server0 ~]# cat /etc/httpd/conf.d/nsd02.conf
+<Directory "/var/www/myweb/private">
+    Require ip 172.25.0.11
+</Directory>
+[root@server0 ~]# systemctl restart httpd.service 
+[root@server0 ~]# firefox http://server0.example.com:80/private
+
+[root@desktop0 ~]# firefox http://server0.example.com:80/private
+Forbidden
+You don't have permission to access /private on this server.
+
+
+[root@server0 ~]# vim /etc/httpd/conf.d/nsd01.conf
+[root@server0 ~]# tail -3 /etc/httpd/conf.d/nsd01.conf
+  ServerName server0.example.com
+  DocumentRoot /myweb
+</VirtualHost>
+[root@server0 ~]# mkdir /myweb
+[root@server0 ~]# vim /etc/httpd/conf.d/nsd02.conf
+[root@server0 ~]# cat /etc/httpd/conf.d/nsd02.conf
+<Directory "/var/www/myweb/private">
+    Require ip 172.25.0.11
+</Directory>
+<Directory "/myweb">
+    Require all granted
+</Directory>
+
+[root@server0 ~]# echo '<marquee><font color=green>MYWebMyweb</marquee></font>' > /myweb/index.html
+[root@server0 ~]# cat /myweb/index.html   ----server0.example.com
+<marquee><font color=green>MYWebMyweb</marquee></font>
+[root@server0 ~]# systemctl restart httpd.service
+[root@server0 ~]# getenforce 
+Enforcing
+[root@server0 ~]# semanage fcontext --list | head -7
+SELinux fcontext                    类型                 上下文
+/                                directory          system_u:object_r:root_t:s0 
+/.*                              all files          system_u:object_r:default_t:s0 
+/[^/]+                           regular file       system_u:object_r:etc_runtime_t:s0
+/\.autofsck                      regular file       system_u:object_r:etc_runtime_t:s0 
+/\.autorelabel                   regular file       system_u:object_r:etc_runtime_t:s0 
+
+[root@server0 ~]# ls -lZ /var/www
+drwxr-xr-x. root root system_u:object_r:httpd_sys_script_exec_t:s0 cgi-bin
+drwxr-xr-x. root root system_u:object_r:httpd_sys_content_t:s0 html
+drwxr-xr-x. root root unconfined_u:object_r:httpd_sys_content_t:s0 myweb
+drwxr-xr-x. root root unconfined_u:object_r:httpd_sys_content_t:s0 nsd01
+drwxr-xr-x. root root unconfined_u:object_r:httpd_sys_content_t:s0 nsd02
+[root@server0 ~]# ls -lZd /var/www
+drwxr-xr-x. root root system_u:object_r:httpd_sys_content_t:s0 /var/www
+
+[root@server0 ~]# ls -Zd /myweb/
+drwxr-xr-x. root root unconfined_u:object_r:default_t:s0 /myweb/
+
+[root@server0 ~]# chcon -R --reference=/var/www/  /myweb
+
+[root@server0 ~]# ls -Zd /myweb       ---server0.example.com
+drwxr-xr-x. root root system_u:object_r:httpd_sys_content_t:s0 /myweb
+[root@server0 ~]# firefox http://server0.example.com:80
+
+
+[root@server0 ~]# cd /var/www/nsd02
+[root@server0 nsd02]# wget http://classroom.example.com/pub/materials/webinfo.wsgi
+[root@server0 ~]# ls /var/www/nsd02/
+index.html  webinfo.wsgi
+[root@server0 ~]# cat /etc/httpd/conf.d/nsd01.conf 
+<VirtualHost *:80>
+  ServerName www0.example.com
+  DocumentRoot /var/www/nsd01
+</VirtualHost>
+<VirtualHost *:80>
+  ServerName webapp0.example.com
+  DocumentRoot /var/www/nsd02  ------------
+</VirtualHost>
+
+<VirtualHost *:80>
+  ServerName server0.example.com
+  DocumentRoot /var/www/myweb
+</VirtualHost>
+[root@server0 ~]# vim /etc/httpd/conf.d/nsd01.conf
+[root@server0 ~]# cat /etc/httpd/conf.d/nsd01.conf
+<VirtualHost *:80>
+  ServerName www0.example.com
+  DocumentRoot /var/www/nsd01
+</VirtualHost>
+<VirtualHost *:80>
+  ServerName webapp0.example.com
+  DocumentRoot /var/www/nsd02    ---------
+  Alias /  /var/www/nsd02/webinfo.wsgi
+</VirtualHost>
+
+<VirtualHost *:80>
+  ServerName server0.example.com
+  DocumentRoot /myweb
+</VirtualHost>
+[root@server0 ~]# systemctl restart httpd
+[root@server0 ~]# yum install -y  mod_wsgi
+[root@server0 ~]# rpm -q mod_wsgi
+mod_wsgi-3.4-11.el7.x86_64
+[root@server0 ~]# vim /etc/httpd/conf.d/nsd01.conf
+[root@server0 ~]# cat /etc/httpd/conf.d/nsd01.conf
+<VirtualHost *:80>
+  ServerName www0.example.com
+  DocumentRoot /var/www/nsd01
+</VirtualHost>
+<VirtualHost *:80>
+  ServerName webapp0.example.com
+  DocumentRoot /var/www/nsd02     ------------
+  WsgiScriptAlias /  /var/www/nsd02/webinfo.wsgi
+</VirtualHost>
+<VirtualHost *:80>
+  ServerName server0.example.com
+  DocumentRoot /myweb
+</VirtualHost>
+[root@server0 ~]# !s
+systemctl restart httpd
+
+[root@desktop0 ~]# !f
+firefox http://webapp0.example.com
+[root@server0 ~]# vim /etc/httpd/conf.d/nsd01.conf 
+[root@server0 ~]# cat /etc/httpd/conf.d/nsd01.conf
+<VirtualHost *:80>
+  ServerName www0.example.com
+  DocumentRoot /var/www/nsd01
+</VirtualHost>
+Listen 8909                  --------------
+<VirtualHost *:8909>
+  ServerName webapp0.example.com
+  DocumentRoot /var/www/nsd02   ----------
+  WsgiScriptAlias /  /var/www/nsd02/webinfo.wsgi
+</VirtualHost>
+<VirtualHost *:80>
+  ServerName server0.example.com
+  DocumentRoot /myweb
+</VirtualHost>
+----------------semanage  port  -a添加   -t类型  http_port_t   -p协议 tcp 8909
+[root@server0 ~]# semanage port  -a  -t  http_port_t  -p  tcp  8909
+[root@server0 ~]# systemctl restart httpd
+[root@desktop0 ~]# firefox http://webapp0.example.com:8909
+ UNIX EPOCH time is now: 1531734660.37
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+192.168.122.1/ftp

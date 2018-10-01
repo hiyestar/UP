@@ -1,0 +1,369 @@
+[root@server0 ~]# yum install -y httpd   elinks
+[root@desktop0 ~]# rpm -q elinks
+elinks-0.12-0.36.pre6.el7.x86_64
+
+[root@server0 ~]# elinks -dump http://server0.example.com
+   Default Site.
+[root@server0 ~]# firefox http://server0.example.com
+[root@server0 ~]# vim /etc/httpd/conf/httpd.conf
+[root@server0 ~]# head -95 /etc/httpd/conf/httpd.conf | tail -1
+ServerName server0.example.com:80
+[root@server0 ~]# systemctl start httpd
+[root@desktop0 ~]# firewall-cmd --get-default-zone 
+trusted
+[root@server0 ~]# firewall-cmd --get-default-zone
+trusted
+
+[root@server0 ~]# echo '<marquee><font color=red>/var/www/html/index.html' > /var/www/html/index.html
+[root@server0 ~]# cat /var/www/html/index.html
+<marquee><font color=red>/var/www/html/index.html
+
+[root@server0 ~]# vim /etc/httpd/conf.d/nsd01.conf
+[root@server0 ~]# cat /etc/httpd/conf.d/nsd01.conf
+<VirtualHost *:80>
+ ServerName www0.example.com
+ DocumentRoot /var/www/html
+</VirtualHost>
+[root@server0 ~]# cd /var/www/html
+[root@server0 html]# httpd -t
+Syntax OK
+[root@server0 html]# systemctl restart httpd
+[root@server0 html]# elinks -dump http://www0.example.com
+   /var/www/html/index.html
+[root@server0 html]# firefox http://www0.example.com
+[root@desktop0 ~]# elinks -dump http://www0.example.com
+   /var/www/html/index.html
+
+[root@server0 ~]# ls /etc/pki
+CA        consumer     java   product  rsyslog
+ca-trust  entitlement  nssdb  rpm-gpg  tls
+
+[root@server0 ~]# cd /etc/pki/tls
+[root@server0 tls]# ls
+cert.pem  certs  misc  openssl.cnf  private
+
+[root@server0 tls]# cd /etc/pki/tls/certs/
+[root@server0 certs]# ls
+ca-bundle.crt        make-dummy-cert  renew-dummy-cert
+ca-bundle.trust.crt  Makefile
+[root@server0 ~]# firefox http://classroom.example.com
+
+           ---------------------------/etc/pki/tls/certs/
+[root@server0 certs]# wget http://classroom.example.com/pub/tls/certs/server0.crt
+           ---100 SSLCertificateFile /etc/pki/tls/certs/server0.crt  -指定网站证书位置
+
+[root@server0 certs]# ls       
+ca-bundle.crt        make-dummy-cert  renew-dummy-cert
+ca-bundle.trust.crt  Makefile         server0.crt
+
+           ---------------------------/etc/pki/tls/certs/
+[root@server0 certs]# wget http://classroom.example.com/pub/example-ca.crt
+ -----122 SSLCACertificateFile /etc/pki/tls/certs/example-ca.crt  ----指定根证书位置
+
+[root@server0 certs]# ls
+ca-bundle.crt        example-ca.crt   Makefile          server0.crt
+ca-bundle.trust.crt  make-dummy-cert  renew-dummy-cert
+
+[root@server0 private]# ls /etc/pki/tls/
+cert.pem  certs  misc  openssl.cnf  private
+
+                    ------------------/etc/pki/tls/private/
+[root@server0 private]# wget http://classroom.example.com/pub/tls/private/server0.key
+   ----107 SSLCertificateKeyFile /etc/pki/tls/private/server0.key  ----指定私钥的位置
+
+[root@server0 private]# ls /etc/pki/tls/private/
+server0.key
+
+[root@server0 ~]# vim /etc/httpd/conf.d/ssl.conf
+  5 Listen 443 https
+ 59 DocumentRoot "/var/www/html"
+ 60 ServerName www0.example.com:443
+100 SSLCertificateFile /etc/pki/tls/certs/server0.crt    ------指定网站证书位置
+
+122 SSLCACertificateFile /etc/pki/tls/certs/example-ca.crt  ----指定根证书位置
+
+107 SSLCertificateKeyFile /etc/pki/tls/private/server0.key  ----指定私钥的位置
+
+[root@server0 ~]# systemctl restart httpd
+
+[root@server0 ~]# firefox https://www0.example.com
+[root@desktop0 ~]# firefox https://www0.example.com
+[root@desktop0 ~]# elinks -dump  https://www0.example.com
+ELinks: SSL error
+
+SMTP 发邮件
+
+IMAP 收邮件
+
+[root@server0 ~]# rpm -q postfix
+postfix-2.10.1-6.el7.x86_64
+[root@server0 ~]# yum install -y postfix
+
+[root@server0 ~]# vim /etc/postfox/main.cf
+
+ 99 myorigin = server0.example.com  默认补全的域名后缀
+116 inet_interfaces = all   允许所有人使用邮件服务
+164 mydestination = server0.example.com  判断为本域邮件
+
+[root@server0 ~]# head -99  /etc/postfix/main.cf |tail -1
+myorigin = server0.example.com
+[root@server0 ~]# head -116  /etc/postfix/main.cf |tail -1
+inet_interfaces = all
+[root@server0 ~]# head -164  /etc/postfix/main.cf |tail -1
+mydestination = server0.example.com
+[root@server0 ~]# systemctl restart postfix
+[root@server0 ~]# useradd yangg
+[root@server0 ~]# useradd xlnv
+     mail  -s  'youjian biaoti'   -r  fajianren    shoujianren
+[root@server0 ~]# mail -s '邮件主题标题'  -r yangg  xlnv
+juti内容............注意英文.与中文.的区别.
+. 
+..
+. 
+EOT
+[root@server0 ~]# mail -u xlnv
+Heirloom Mail version 12.5 7/5/10.  Type ? for help.
+"/var/mail/xlnv": 1 message 1 new
+>N  1 yangg@server0.exampl  Tue Jul 17 14:29  20/669   "邮件主题标题"
+& 1
+Message  1:
+From yangg@server0.example.com  Tue Jul 17 14:29:26 2018
+Return-Path: <yangg@server0.example.com>
+X-Original-To: xlnv
+Delivered-To: xlnv@server0.example.com
+Date: Tue, 17 Jul 2018 14:29:26 +0800
+From: yangg@server0.example.com
+To: xlnv@server0.example.com
+Subject: 邮件主题标题
+User-Agent: Heirloom mailx 12.5 7/5/10
+Content-Type: text/plain; charset=utf-8
+Status: R
+
+juti内容............注意英文.与中文.的区别.
+. 
+..
+
+& exit
+   
+[root@server0 ~]# useradd fajianren
+[root@server0 ~]# useradd shoujianren
+[root@server0 ~]# echo  '具体内容' | mail -s  '邮件主题'  -r fajianren shoujianren
+[root@server0 ~]# mail -u shoujianren
+
+"/var/mail/shoujianren": 1 message 1 new
+>N  1 fajianren@server0.ex  Tue Jul 17 14:37  18/645   "邮件主题"
+& 1
+Message  1:
+From fajianren@server0.example.com  Tue Jul 17 14:37:28 2018
+Return-Path: <fajianren@server0.example.com>
+X-Original-To: shoujianren
+Delivered-To: shoujianren@server0.example.com
+
+From: fajianren@server0.example.com
+To: shoujianren@server0.example.com
+Subject: 邮件主题
+
+Content-Type: text/plain; charset=utf-8
+Status: R
+
+具体内容
+
+& q
+Held 1 message in /var/mail/shoujianren
+
+
+[root@server0 ~]# parted /dev/vdb
+
+(parted)                                                                  
+align-check  help         mktable      quit         select       unit
+disk_set     mklabel      name         rescue       set          version
+disk_toggle  mkpart       print        rm           toggle   
+------------------------------mktable gpt----------------------------------
+(parted) mktable gpt   指定分区模式(只能第一次使用新磁盘的时候启用,格式化gpt)
+
+(parted) print  输出分区表信息
+
+Number  Start  End  Size  File system  Name  标志
+
+
+(parted) mkpart      划分新分区                                                     
+分区名称？  []? primary        自定义分区名字                                           
+文件系统类型？  [ext2]?  ext4    分区的文件系统,暂时技术不成熟,形式过程                                  
+起始点？ 0                                                                
+结束点？ 2G   
+忽略/Ignore/放弃/Cancel? i   选择忽略
+(parted) print  
+
+Number  Start   End     Size    File system  Name     标志
+ 1      17.4kB  2000MB  2000MB               primary
+
+(parted) unit 
+parted: invalid token: unit
+Unit?  [compact]? GB   选择容量单位GB
+
+(parted) mkpart                                                           
+分区名称？  []? lv                                                        
+文件系统类型？  [ext2]? ext4                                              
+起始点？ 2G                                                               
+结束点？ 4G   
+
+(parted) print
+
+Number  Start   End     Size    File system  Name     标志
+ 1      0.00GB  2.00GB  2.00GB               primary
+ 2      2.00GB  4.00GB  2.00GB               lv
+
+  mklabel,mktable LABEL-TYPE        create a new disklabel (partition  table)
+
+  rm NUMBER                         delete partition NUMBER
+/etc/httpd/conf.d/ssl2.conf
+  rescue START END                  rescue a lost partition near START  and END
+ 
+  unit UNIT                         set the default unit to UNIT
+
+  quit                              exit program
+
+(parted) rm 2                                                             
+(parted) print  
+Number  Start   End     Size    File system  Name     标志
+ 1      0.00GB  2.00GB  2.00GB               primary
+
+(parted) mkpart
+分区名称？  []? vgx                                                       
+文件系统类型？  [ext2]? ext4                                              
+起始点？ 2G                                                               
+结束点？ 4G                                                               
+(parted) print  
+
+Number  Start   End     Size    File system  Name     标志
+ 1      0.00GB  2.00GB  2.00GB               primary
+ 2      2.00GB  4.00GB  2.00GB               vgx
+
+(parted) quit                                                             
+信息: You may need to update /etc/fstab.
+
+[root@server0 ~]# lsblk                                                   
+NAME   MAJ:MIN RM  SIZE RO TYPE MOUNTPOINT
+vda    253:0    0   10G  0 disk 
+└─vda1 253:1    0   10G  0 part /
+vdb    253:16   0   10G  0 disk 
+├─vdb1 253:17   0  1.9G  0 part 
+└─vdb2 253:18   0  1.9G  0 part 
+vdc    253:32   0   15G  0 disk 
+vdd    253:48   0   20G  0 disk 
+
+[root@server0 ~]# mkswap /dev/vdb1
+[root@server0 ~]# mkswap /dev/vdb2
+[root@server0 ~]# blkid /dev/vdb1  /dev/vdb2
+/dev/vdb1: UUID="5f4081be-c991-47e9-9035-e96db38dcd3a" TYPE="swap" PARTLABEL="primary" PARTUUID="93055300-fdee-4238-b880-39e3c32f9054" 
+/dev/vdb2: UUID="1c8f2ac3-a36c-442f-955f-cb2da8ed2a86" TYPE="swap" PARTLABEL="vgx" PARTUUID="056fc3f9-d8b0-426f-b9a6-d1ac79ff3f4b" 
+[root@server0 ~]# swapon /dev/vdb1
+[root@server0 ~]# swapon /dev/vdb2
+[root@server0 ~]# swapon -s
+文件名				类型		大小	已用	权限
+/dev/vdb1                              	partition	1953104	0	-1
+/dev/vdb2                              	partition	1952764	0	-2
+[root@server0 ~]# swapoff  /dev/vdb2
+[root@server0 ~]# swapon -s
+文件名				类型		大小	已用	权限
+/dev/vdb1                              	partition	1953104	0	-1
+
+[root@server0 ~]# vim /etc/fstab
+[root@server0 ~]# tail -1 /etc/fstab
+/dev/vdb1   swap      swap  defaults   0   0
+
+[root@server0 ~]# swapon  -a   ---- 启用 /etc/fstab 中的所有交换区
+[root@server0 ~]# mount -a  
+[root@server0 ~]# lsblk
+NAME   MAJ:MIN RM  SIZE RO TYPE MOUNTPOINT
+vda    253:0    0   10G  0 disk 
+└─vda1 253:1    0   10G  0 part /
+vdb    253:16   0   10G  0 disk 
+├─vdb1 253:17   0  1.9G  0 part [SWAP]
+└─vdb2 253:18   0  1.9G  0 part 
+
+[root@server0 ~]# parted -l
+
+Number  Start   End     Size    Type     File system  标志
+ 1      1049kB  10.7GB  10.7GB  primary  xfs          启动
+Number  Start   End     Size    File system     Name     标志
+ 1      17.4kB  2000MB  2000MB  linux-swap(v1)  primary
+ 2      2001MB  4000MB  2000MB  linux-swap(v1)  vgx
+
+
+[root@server0 ~]# swapon -h
+ swapon [选项] [<指定>]
+选项：
+ -a, --all              启用 /etc/fstab 中的所有交换区
+ -d, --discard          在释放的页重新使用前忽略它们
+ -e, --ifexists         直接跳过不存在的设备
+ -f, --fixpgsz          需要时重新初始化交换空间
+ -p, --priority <prio>  指定交换设备的优先级为 <prio>
+ -s, --summary          显示已使用交换设备的摘要
+     --show[=<列>]      定义所显示摘要表格中的列
+     --noheadings       不打印标题，与 --show 一起使用
+     --raw              使用原生输出格式，与 --show 一起使用
+     --bytes            在 --show 选项输出中以字节显示交换区大小
+ -v, --verbose          详尽模式
+ -h, --help     显示此帮助并退出
+<spec> 参数：
+ -L <标签>              同 LABEL=<标签>
+ -U <uuid>              同 UUID=<uuid>
+ LABEL=<标签>           按交换区标签指定设备
+ UUID=<uuid>            按交换区 UUID 指定设备
+ PARTLABEL=<标签>       按分区标签指定设备
+ PARTUUID=<uuid>        按分区 UUID 指定设备
+ <设备>                 要使用设备的名称
+ <文件>                 要使用文件的名称
+
+可用列(用于 --show)：
+ NAME  设备文件或分区路径
+ TYPE  设备的类型
+ SIZE  交换区大小
+ USED  已使用字节数
+ PRIO  交换优先级
+
+
+[root@server0 ~]# man yum -y
+NAME
+       yum - Yellowdog Updater Modified
+
+       yum [options] [command] [package ...]
+       -y, --assumeyes
+              Assume  yes;  assume that the answer to any question which would
+              be asked is yes.
+              Configuration Option: assumeyes
+
+[root@server0 ~]# find /boot -size +9M -exec ls -l  {} \;
+-rw-r--r--. 1 root root 30676364 5月   7 2014 /boot/initramfs-0-rescue-946cb0e817ea4adb916183df8c4fc817.img
+-rw-r--r--. 1 root root 30299761 5月   7 2014 /boot/initramfs-3.10.0-123.el7.x86_64.img
+
+[root@server0 ~]# cat /etc/shells
+/bin/sh
+/bin/bash
+/sbin/nologin
+/usr/bin/sh
+/usr/bin/bash
+/usr/sbin/nologin
+/bin/tcsh
+/bin/csh
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

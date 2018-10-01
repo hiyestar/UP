@@ -1,0 +1,447 @@
+#!/bin/bash         -----------#!环境声明
+
+[root@server0 ~]# vim /root/txt.sh
+[root@server0 ~]# /root/txt.sh
+-bash: /root/txt.sh: 权限不够
+[root@server0 ~]# ls -l /root/txt.sh
+-rw-r--r--. 1 root root 32 7月  10 09:09 /root/txt.sh
+[root@server0 ~]# chmod u+x /root/txt.sh
+[root@server0 ~]# /root/txt.sh
+hello world
+[root@server0 ~]# ls  -l /root/txt.sh
+-rwxr--r--. 1 root root 32 7月  10 09:09 /root/txt.sh
+[root@server0 ~]# chmod +x /root/txt.sh
+[root@server0 ~]# ls  -l /root/txt.sh
+-rwxr-xr-x. 1 root root 32 7月  10 09:09 /root/txt.sh
+[root@server0 ~]# cat /root/txt.sh
+#!/bin/bash 
+echo 'hello world'
+
+[root@server0 ~]# vim /root/hello.sh
+[root@server0 ~]# ls -l /root/hello.sh
+-rw-r--r--. 1 root root 103 7月  10 09:28 /root/hello.sh
+[root@server0 ~]# chmod 755 /root/hello.sh
+[root@server0 ~]# ls -l /root/hello.sh
+-rwxr-xr-x. 1 root root 103 7月  10 09:28 /root/hello.sh
+[root@server0 ~]# /root/hello.sh
+hello world
+Red Hat Enterprise Linux Server release 7.0 (Maipo)
+server0.example.com
+3.10.0-123.el7.x86_64
+eth0: flags=4163<UP,BROADCAST,RUNNING,MULTICAST>  mtu 1500
+        inet 172.25.0.11  netmask 255.255.255.0  broadcast 172.25.0.255
+[root@server0 ~]# cat /root/hello.sh
+#!/bin/bash
+echo hello world
+head -2 /etc/redhat-release
+/usr/bin/hostname
+uname -r
+ifconfig | head -2
+
+
+   $[ ] 运算
+  ‘ ’ 单引号，取消所有特殊（通配）符号的作用
+[root@server0 ~]# a=100
+[root@server0 ~]# echo a
+a
+[root@server0 ~]# echo $a
+100
+[root@server0 ~]# echo $[a%3]
+1
+[root@server0 ~]# echo $[a/3]
+33
+
+[root@server0 ~]# echo $[2/2]  $[2%2]
+1 0
+[root@server0 opt]# echo $[3/2]  $[1%2]
+1 1
+[root@server0 opt]# a=3
+[root@server0 opt]# echo $[a/2] $[a%2]
+1 1
+[root@server0 opt]# echo $[a/2] $[a/2]%2
+1 1%2
+
+
+[root@server0 opt]# date 
+2018年 07月 10日 星期二 10:35:44 CST
+
+[root@server0 opt]# date +%F
+2018-07-10
+
+[root@server0 opt]# mkdir $(hostname)-$`date +%F`
+[root@server0 opt]# ls
+nsd-2018-07-10  nsd-yyyy-mm-dd  rh  server0.example.com-$2018-07-10
+
+[root@server0 ~]# echo $`date +%F`
+$2018-07-10
+[root@server0 ~]# echo $(date +%F)
+2018-07-10
+
+[root@server0 opt]# vim /opt/a.sh
+[root@server0 opt]# chmod +x /opt/a.sh
+[root@server0 opt]# /opt/a.sh
+nsd02 all are right
+[root@server0 opt]# cat /opt/a.sh
+#!/bin/bash
+a=nsd02
+useradd $a &> /dev/null
+echo 123 | passwd --stdin $a &> /dev/null
+echo $a  all are right
+
+
+4/2=2----0
+2/2=1---0
+1/2=0---1
+4=(100)
+5=(101)
+6=(110)
+[root@server0 ~]# echo $[a%2]
+0
+[root@server0 ~]# echo $[(1+a)%2]
+1
+[root@server0 ~]# a=4
+[root@server0 ~]# echo $a
+4
+[root@server0 ~]# echo ${a}7
+47
+[root@server0 ~]# echo USER
+USER
+[root@server0 ~]# echo $USER   -----------#环境变量$USER, $PATH,$LOGNAME,
+root
+[root@server0 ~]# ls /home
+belle  nsd02  peri  peri2  student
+
+[root@server0 ~]# su - belle
+[belle@server0 ~]$ echo $USER
+belle
+[belle@server0 ~]$ exit
+logout
+[root@server0 ~]# su - peri
+[peri@server0 ~]$ echo - $USER
+- peri
+[peri@server0 ~]$ exit
+logout
+[root@server0 ~]# echo $USER  ---------#环境变量$USER, $PATH,$LOGNAME,
+root
+[root@server0 ~]# su - peri2
+[peri2@server0 ~]$ echo $USER
+peri2
+[peri2@server0 ~]$ echo $RANDOM
+23169
+[root@server0 ~]# echo $RANDOM   ---------#环境变量$USER, $PATH,$LOGNAME,RANDOM
+18482
+[root@server0 ~]# echo $[RANDOM%10]
+6
+
+[root@server0 ~]# vim /opt/abc.sh
+[root@server0 ~]# /opt/abc.sh pper peri3
+-bash: /opt/abc.sh: 权限不够
+[root@server0 ~]# chmod +x /opt/abc.sh 
+[root@server0 ~]# /opt/abc.sh pper peri3
+pper is right
+peri3 is ok
+
+[root@server0 ~]# cat /opt/abc.sh
+#!/bin/bash
+useradd $1
+echo $1 is right
+useradd $2
+echo $2 is ok
+
+
+[root@server0 ~]# vim /root/2.sh
+[root@server0 ~]# cat /root/2.sh
+#!/bin/bash
+cat -n $1 | head -$2
+[root@server0 ~]# chmod +x /root/2.sh
+[root@server0 ~]# /root/2.sh /etc/passwd 3
+     1	root:x:0:0:root:/root:/bin/bash
+     2	bin:x:1:1:bin:/bin:/sbin/nologin
+     3	daemon:x:2:2:daemon:/sbin:/sbin/nologin
+
+[root@server0 ~]# vim /root/1.sh
+[root@server0 ~]# cat /root/1.sh
+#!/bin/bash
+useradd $1 &> /dev/null
+echo $1 is ok
+echo 123 | passwd --stdin $1 &> /dev/null
+echo mima $1 is ok
+[root@server0 ~]# chmod +x /root/1.sh
+[root@server0 ~]# /root/1.sh
+is ok
+mima is ok
+[root@server0 ~]# /root/1.sh xixi
+xixi is ok
+mima xixi is ok
+
+$#
+$*
+$?
+[root@server0 ~]# ping -c 2 172.25.0.11
+PING 172.25.0.11 (172.25.0.11) 56(84) bytes of data.
+64 bytes from 172.25.0.11: icmp_seq=1 ttl=64 time=0.062 ms
+64 bytes from 172.25.0.11: icmp_seq=2 ttl=64 time=0.064 ms
+
+--- 172.25.0.11 ping statistics ---
+2 packets transmitted, 2 received, 0% packet loss, time 999ms
+rtt min/avg/max/mdev = 0.062/0.063/0.064/0.001 ms
+[root@server0 ~]# echo $?        --------#环境变量$USER, $PATH,$LOGNAME,RANDOM
+0
+[root@server0 ~]# vim /root/1.sh      -------#位置变量$1,$2,$3,$4,....$n
+[root@server0 ~]# chmod +x /root/1.sh     
+[root@server0 ~]# /root/1.sh haha  xiix dollor wenwen xixiya wuwu
+haha
+xiix
+dollor
+6
+0
+  -----------预定义变量$#,$?,$*
+[root@server0 ~]# vim /root/1.sh
+[root@server0 ~]# cat /root/1.sh
+#!/bin/bash
+echo $1
+echo $2
+echo $#    -----统计加载的位置变量的个数值
+echo $?    -------程序退出后的状态值 0真，其他数字为假
+echo $*    ---------表示所有的位置变量的值
+[root@server0 ~]# /root/1.sh  a1 b2 c3 d4 e5 f6 g7
+a1
+b2
+7
+0
+a1 b2 c3 d4 e5 f6 g7
+
+
+  [-e /etc ] ------------文档存在为真
+
+[root@server0 ~]# [ -e /etc ]  -------文档存在为真
+[root@server0 ~]# echo $?
+0
+[root@server0 ~]# [ -e /rightor ] -------文档不存在为假
+[root@server0 ~]# echo $?
+1
+[root@server0 ~]# [ -d /etc ]  -------目录存在为真
+[root@server0 ~]# echo $?
+0
+[root@server0 ~]# [ -d /etc/passwd ] -------目录不存在为假
+[root@server0 ~]# echo $?
+1
+[root@server0 ~]# [ -f /etc/passwd ]  --------文本文件存在为真
+[root@server0 ~]# echo $? 
+0
+[root@server0 ~]# [ -f /etc/xx.txt ]  -----文本文件不存在为假
+[root@server0 ~]# echo $?
+1
+
+[root@server0 ~]# echo $RANDOM%10
+9997%10
+[root@server0 ~]# echo $[$RANDOM%10]
+7
+-----------------------------------------------
+  	-gt  大于  giant
+	-ge  大于等于 giant equal
+	-eq  等于   equal 
+		[root@server0 ~]# [ 1 -eq 1 ]
+		[root@server0 ~]# echo $? 
+		      0
+	-ne  不等于  	no equal
+	-le 小于等于  less
+	-lt 小于      less-than
+[root@server0 ~]# [ 1 -lt 2 ]
+[root@server0 ~]# echo $?
+0
+
+[root@server0 ~]# [ root != student ] 
+[root@server0 ~]# echo $?
+0
+[root@server0 ~]# [ root == root ]
+[root@server0 ~]# echo $?
+0
+[root@server0 ~]# echo $USER
+root
+[root@server0 ~]# [ root == $USER ]
+[root@server0 ~]# echo $?
+0
+[root@server0 ~]# [ root != $USER ]
+[root@server0 ~]# echo $?
+1
+
+4/2=2----0
+2/2=1---0
+1/2=0---1
+4=(100)
+5=(101)
+6=(110)
+[root@server0 ~]# a=4
+[root@server0 ~]# echo $[a/2]
+2
+[root@server0 ~]# echo $[a/2/2]
+1
+[root@server0 ~]# echo $[a/2/2/2]
+0
+[root@server0 ~]# echo $[a/2/2%2]
+1
+
+[root@server0 ~]# vim /root/ping.sh
+[root@server0 ~]# chmod +x /root/ping.sh
+[root@server0 ~]# /root/ping.sh 172.25.0.20
+PING 172.25.0.20 (172.25.0.20) 56(84) bytes of data.
+64 bytes from 172.25.0.20: icmp_seq=1 ttl=64 time=0.415 ms
+64 bytes from 172.25.0.20: icmp_seq=2 ttl=64 time=0.501 ms
+
+--- 172.25.0.20 ping statistics ---
+2 packets transmitted, 2 received, 0% packet loss, time 999ms
+rtt min/avg/max/mdev = 0.415/0.458/0.501/0.043 ms
+172.25.0.20 可以通信
+[root@server0 ~]# cat /root/ping.sh
+#!/bin/bash
+ping -c 2 $1
+if [ $? -eq 0 ];then
+  echo $1 可以通信
+else
+  echo $1 is wrong
+fi
+[root@server0 ~]# vim /root/ping.sh
+[root@server0 ~]# cat /root/ping.sh
+#!/bin/bash
+ping -c 2 $1 &> /dev/null   -----------
+if [ $? -eq 0 ];then
+  echo $1 可以通信
+else
+  echo $1 is wrong
+fi
+[root@server0 ~]# /root/ping.sh 192.168.4.21
+192.168.4.21 is wrong
+
+[root@server0 ~]# vim /root/ip.sh
+[root@server0 ~]# chmod +x /root/ip.sh
+
+[root@server0 ~]# /root/ip.sh 
+Please input ip addresses:172.25.0.20
+/root/ip.sh: 第 4 行:[: eq: 期待二元表达式
+172.25.0.20 is denied
+[root@server0 ~]# vim /root/ip.sh 
+[root@server0 ~]# /root/ip.sh
+Please input ip addresses:172.25.0.20
+172.25.0.20 可以通信
+[root@server0 ~]# cat /root/ip.sh
+#!/bin/bash
+read  -p  'Please input ip addresses:'  a
+ping -c 3  $a  &> /dev/null
+if [ $? -eq 0 ];then
+ echo $a 可以通信
+else
+ echo $a is denied
+fi
+[ro
+
+[root@server0 ~]# vim /root/random.sh
+[root@server0 ~]# chmod +x /root/random.sh
+[root@server0 ~]# /root/random.sh
+Please input number 0 ~ 9 :0
+You are lucky
+[root@server0 ~]# /root/random.sh
+Please input number 0 ~ 9 :1
+Oh I'm sorry
+the right number is 0
+[root@server0 ~]# cat /root/random.sh
+#!/bin/bash
+num=$[$RANDOM%2]
+read -p 'Please input number 0 ~ 9 :' num2
+if [ $num -eq $num2 ];then
+ echo You are lucky
+else 
+ echo "Oh I'm sorry"
+ echo the right number is $num
+fi
+
+[root@server0 ~]# vim /root/if.sh
+[root@server0 ~]# chmod +x /root/if.sh
+[root@server0 ~]# /root/if.sh
+请输入分数:87
+better
+[root@server0 ~]# /root/if.sh
+请输入分数:59
+NB
+[root@server0 ~]# cat /root/if.sh
+#!/bin/bash
+read -p '请输入分数:' num
+if [ $num -ge 90 ];then
+  echo Goodalisan
+elif [ $num -ge 80 ];then
+  echo better
+elif [ $num -ge 70 ];then
+  echo normal
+else 
+  echo NB
+fi
+-------------------------------------------------------------------------
+read -p '请输入分数:' num
+if [ $num -ge 90 ];then
+-------------------------------------------------------------------------------
+read  -p  'Please input ip addresses:'  a
+ping -c 3  $a  &> /dev/null
+if [ $? -eq 0 ];then
+-------------------------------------------------------------------
+[root@server0 ~]# vim /root/if.sh
+[root@server0 ~]#  /root/if.sh
+请输入数字0-2:0
+猜测小了
+[root@server0 ~]#  /root/if.sh
+请输入数字0-2:2
+猜测大了
+0 is right
+[root@server0 ~]#  /root/if.sh
+请输入数字0-2:
+/root/if.sh: 第 4 行:[: -eq: 期待一元表达式
+/root/if.sh: 第 6 行:[: -gt: 期待一元表达式
+/root/if.sh: 第 9 行:[: -lt: 期待一元表达式
+NB没有数字输入或者不是数字输入
+[root@server0 ~]# vim /root/if.sh
+[root@server0 ~]# vim /root/if.sh
+[root@server0 ~]#  /root/if.sh
+请输入数字0-2:
+/root/if.sh: 第 4 行:[: -eq: 期待一元表达式
+/root/if.sh: 第 6 行:[: -gt: 期待一元表达式
+/root/if.sh: 第 9 行:[: -lt: 期待一元表达式
+NB没有数字输入或者不是数字输入
+[root@server0 ~]#  /root/if.sh
+请输入数字0-2:^[[A^[[A^C
+[root@server0 ~]# cat /root/if.sh 
+#!/bin/bash
+num=$[$RANDOM%3]
+read -p '请输入数字0-2:' x
+if [ $x -eq $num ];then
+  echo Cai dui le
+elif [ $x -gt $num ];then
+  echo 猜测大了
+  echo $num is right
+elif [ $x -lt $num ];then
+  echo 猜测小了
+else 
+  echo NB没有数字输入或者不是数字输入
+fi
+
+
+
+[root@server0 ~]# systemctl 
+is-active             is-enabled        restart
+daemon-reload          kill              set-default
+default                show	          disable              
+enable                 start	          status             
+stop			   get-default         poweroff        
+help                 reboot              reload    
+
+ http---------------超文本传输协议-------80
+ https-----------安全超文本传输协议------443
+ DNS ---------------- 域名解析协议-------53
+ FTP------------------文件传输协议-------21
+ tftp -------------简单文件传输协议------69
+
+ telnet---远程管理协议(传输加密不安全)-----23
+ smtp--------------------发邮件协议----161
+ pop3--------------------收邮件协议----110
+ snmp-----------------互联网管理协议----161
+
+	数据包 ： 源IP地址    目标IP地址      数据       访问的端口号
+
