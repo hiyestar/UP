@@ -1,0 +1,622 @@
+
+
+[root@svr7 ~]# cat /etc/yum.repos.d/rhel7.repo 
+[rhel7]
+name=rhel7.4
+enabled=1
+gpgcheck=0
+baseurl=ftp://192.168.4.254/rhel7
+
+[root@svr7 ~]# yum install  bind  bind-chroot -y
+
+[root@svr7 ~]# rpm -qa bind*
+bind-9.9.4-50.el7.x86_64
+bind-libs-lite-9.9.4-50.el7.x86_64
+bind-license-9.9.4-50.el7.noarch
+bind-chroot-9.9.4-50.el7.x86_64
+bind-utils-9.9.4-50.el7.x86_64
+bind-libs-9.9.4-50.el7.x86_64
+[root@svr7 ~]# cp -p /etc/named.conf /root/named.bak
+[root@svr7 ~]# vim /etc/named.conf
+[root@svr7 ~]# cat /etc/named.conf
+options {
+	directory "/var/named";
+	recursion yes;
+};
+acl test { 192.168.4.7;192.168.4.207; };
+view  "nsd" {
+ match-clients { test; };
+  zone "tedu.cn" IN {
+	type master;
+	file "tedu.cn.zone";
+  };
+  zone "qq.com" IN {
+        type master;
+        file "qq.com.zone";
+  };
+};
+view "other" {
+  match-clients { any; };
+  zone "tedu.cn" IN {
+        type master;
+        file "tedu.cn.other";
+  };
+  zone "qq.com" IN {
+        type master;
+        file "qq.com.other";
+  };
+};
+
+[root@svr7 ~]# named-checkconf /etc/named.conf ---#检查语法是否正确
+[root@svr7 ~]# echo $?
+0
+[root@svr7 ~]# cp -p /var/named/tedu.cn.zone  /var/named/tedu.cn.other
+[root@svr7 ~]# vim /var/named/tedu.cn.other
+[root@svr7 ~]# cat /var/named/tedu.cn.other
+$TTL 1D
+@	IN SOA	@ rname.invalid. (
+					0	; serial
+					1D	; refresh
+					1H	; retry
+					1W	; expire
+					3H )	; minimum
+tedu.cn.	NS	svr7
+bj.tedu.cn.	NS	pc207
+svr7		A	192.168.4.7	
+pc207		A	192.168.4.207
+www		A	10.20.30.40
+ftp		A	50.60.70.80
+[root@svr7 ~]# cp -p  /var/named/qq.com.zone  /var/named/qq.com.other
+[root@svr7 ~]# vim /var/named/qq.com.other
+[root@svr7 ~]# cat /var/named/qq.com.other
+$TTL 1D
+@	IN SOA	@ rname.invalid. (
+					0	; serial
+					1D	; refresh
+					1H	; retry
+					1W	; expire
+					3H )	; minimum
+qq.com.		NS	svr7
+bj.qq.com.	NS	pc207
+svr7		A	192.168.4.7
+pc207		A	192.168.4.207	
+www		A	11.22.33.44
+ftp		A	55.66.77.88
+
+
+[root@svr7 ~]# id named
+uid=25(named) gid=25(named) 组=25(named)
+[root@svr7 ~]# grep named /etc/passwd
+named:x:25:25:Named:/var/named:/sbin/nologin
+
+[root@svr7 ~]# cp -p /var/named/named.localhost  /var/named/tedu.cn.zone
+[root@svr7 ~]# vim /var/named/tedu.cn.zone
+[root@svr7 ~]# cat /var/named/tedu.cn.zone
+$TTL 1D
+@	IN SOA	@ rname.invalid. (
+					0	; serial
+					1D	; refresh
+					1H	; retry
+					1W	; expire
+					3H )	; minimum
+tedu.cn.	NS	svr7
+bj.tedu.cn.	NS	pc207
+svr7		A	192.168.4.7	
+pc207		A	192.168.4.207
+www		A	1.2.3.4
+ftp		A	5.6.7.8
+
+[root@svr7 ~]# ls /var/named/
+chroot  dynamic   named.empty      named.loopback  tedu.cn.zone
+data    named.ca  named.localhost  slaves
+
+[root@svr7 ~]# cp  -p  /var/named/tedu.cn.zone  /var/named/qq.com.zone
+[root@svr7 ~]# vim /var/named/qq.com.zone
+[root@svr7 ~]# cat /var/named/qq.com.zone
+$TTL 1D
+@	IN SOA	@ rname.invalid. (
+					0	; serial
+					1D	; refresh
+					1H	; retry
+					1W	; expire
+					3H )	; minimum
+qq.com.		NS	svr7
+bj.qq.com.	NS	pc207
+svr7		A	192.168.4.7
+pc207		A	192.168.4.207	
+www		A	1.2.30.40
+ftp		A	5.6.70.80
+
+[root@svr7 ~]# named-checkzone  /var/named/tedu.cn.zone  /var/named/qq.com.zone 
+[root@svr7 ~]# systemctl start named
+[root@svr7 ~]# systemctl start named-chroot
+[root@svr7 ~]# systemctl is-active named
+active
+[root@svr7 ~]# systemctl is-active named-chroot
+active
+
+
+
+-------------------------------------svr7-------------------
+
+------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+
+--------------------------------pc207------------------------------
+[root@pc207 ~]# cat /etc/yum.repos.d/rhel7.repo
+[rhel7]
+name=rhel7.4
+enabled=1
+gpgcheck=0
+baseurl=ftp://192.168.4.254/rhel7
+[root@pc207 ~]# yum install bind bind-chroot -y
+[root@pc207 ~]# rpm -qa bind*
+bind-9.9.4-50.el7.x86_64
+bind-libs-lite-9.9.4-50.el7.x86_64
+bind-license-9.9.4-50.el7.noarch
+bind-chroot-9.9.4-50.el7.x86_64
+bind-utils-9.9.4-50.el7.x86_64
+bind-libs-9.9.4-50.el7.x86_64
+[root@pc207 ~]# ls /etc/named.conf 
+/etc/named.conf
+[root@pc207 ~]# cp -p /etc/named.conf /root/named.bak
+[root@pc207 ~]# vim  /etc/named.conf 
+[root@pc207 ~]# cat  /etc/named.conf 
+options {
+	directory 	"/var/named";
+	recursion yes;
+};
+zone "bj.qq.com" IN {
+	type master;
+	file "bj.qq.com.zone";
+};
+zone "bj.tedu.cn" IN {
+	type master;
+	file "bj.tedu.cn.zone";
+};
+-------------------named-checkconf /etc/named.conf ---#检查语法是否正确
+[root@pc207 ~]# named-checkconf /etc/named.conf 
+
+[root@pc207 ~]# echo nameserver 192.168.4.7 > /etc/resolv.conf 
+[root@pc207 ~]# cat /etc/resolv.conf
+nameserver 192.168.4.7
+
+[root@pc207 ~]# cp -p /var/named/named.localhost  /var/named/bj.qq.com.zone
+[root@pc207 ~]# vim  /var/named/bj.qq.com.zone
+[root@pc207 ~]# cat  /var/named/bj.qq.com.zone 
+$TTL 1D
+@	IN SOA	@ rname.invalid. (
+					0	; serial
+					1D	; refresh
+					1H	; retry
+					1W	; expire
+					3H )	; minimum
+bj.qq.com.	NS	pc207
+pc207		A	192.168.4.207
+www 		A	6.6.6.6
+bj.qq.com.	A	192.168.4.207
+
+[root@pc207 ~]# cp -p /var/named/bj.qq.com.zone  /var/named/bj.tedu.cn.zone
+[root@pc207 ~]# vim /var/named/bj.tedu.cn.zone
+[root@pc207 ~]# cat /var/named/bj.tedu.cn.zone
+$TTL 1D
+@	IN SOA	@ rname.invalid. (
+					0	; serial
+					1D	; refresh
+					1H	; retry
+					1W	; expire
+					3H )	; minimum
+bj.tedu.cn.	NS	pc207
+pc207		A	192.168.4.207
+www 		A	60.60.60.60
+bj.qq.com.	A	192.168.4.207
+
+[root@pc207 ~]# ls /var/named/
+bj.qq.com.zone   chroot  dynamic   named.empty      named.loopback
+bj.tedu.cn.zone  data    named.ca  named.localhost  slaves
+
+[root@pc207 ~]# named-checkzone  /var/named/bj.tedu.cn.zone  /var/named/bj.qq.com.zone 
+/var/named/bj.qq.com.zone:2: warning: /var/named/bj.tedu.cn.zone: bad name (check-names)
+/var/named/bj.qq.com.zone:8: ignoring out-of-zone data (bj.qq.com)
+[root@pc207 ~]# echo $?
+1
+
+[root@pc207 ~]# systemctl start named
+[root@pc207 ~]# systemctl start named-chroot
+
+[root@pc207 ~]# nslookup pc207.bj.tedu.cn
+Server:		192.168.4.7
+Address:	192.168.4.7#53
+Non-authoritative answer:
+Name:	pc207.bj.tedu.cn
+Address: 192.168.4.207
+
+[root@pc207 ~]# nslookup pc207.bj.qq.com
+Server:		192.168.4.7
+Address:	192.168.4.7#53
+Non-authoritative answer:
+Name:	pc207.bj.qq.com
+Address: 192.168.4.207
+
+
+
+[root@pc207 ~]# nslookup pc207.qq.com
+Server:		192.168.4.7
+Address:	192.168.4.7#53
+Name:	pc207.qq.com
+Address: 192.168.4.207
+
+[root@pc207 ~]# nslookup pc207.tedu.cn
+Server:		192.168.4.7
+Address:	192.168.4.7#53
+Name:	pc207.tedu.cn
+Address: 192.168.4.207
+
+
+[root@pc207 ~]# nslookup pc207.bj.qq.com 192.168.4.207
+Server:		192.168.4.207
+Address:	192.168.4.207#53
+Name:	pc207.bj.qq.com
+Address: 192.168.4.207
+
+
+[root@pc207 ~]# nslookup pc207.bj.tedu.cn 192.168.4.207
+Server:		192.168.4.207
+Address:	192.168.4.207#53
+Name:	pc207.bj.tedu.cn
+Address: 192.168.4.207
+
+--------------------------------------------------------------------------------------
+[root@room11pc13 ~]# nslookup www.tedu.cn 192.168.4.7
+Server:		192.168.4.7
+Address:	192.168.4.7#53
+Name:	www.tedu.cn
+Address: 10.20.30.40
+
+[root@room11pc13 ~]# nslookup www.qq.com 192.168.4.7
+Server:		192.168.4.7
+Address:	192.168.4.7#53
+Name:	www.qq.com
+Address: 11.22.33.44
+---------------------------------------------------------------------
+[root@pc207 ~]# nslookup www.qq.com
+Server:		192.168.4.7
+Address:	192.168.4.7#53
+Name:	www.qq.com
+Address: 1.2.30.40
+
+
+[root@pc207 ~]# nslookup www.tedu.cn 
+Server:		192.168.4.7
+Address:	192.168.4.7#53
+Name:	www.tedu.cn
+Address: 1.2.3.4
+----------------------------------------------------------------
+[root@svr7 ~]# nslookup www.qq.com
+Server:		127.0.0.1
+Address:	127.0.0.1#53
+Name:	www.qq.com
+Address: 11.22.33.44
+
+[root@svr7 ~]# nslookup www.qq.com 192.168.4.7
+Server:		192.168.4.7
+Address:	192.168.4.7#53
+Name:	www.qq.com
+Address: 11.22.33.44
+
+[root@room11pc13 ~]# nslookup www.qq.com 192.168.4.7
+Server:		192.168.4.7
+Address:	192.168.4.7#53
+Name:	www.qq.com
+Address: 11.22.33.44
+
+[root@svr7 ~]# nslookup www.tedu.cn 192.168.4.7
+Server:		192.168.4.7
+Address:	192.168.4.7#53
+
+Name:	www.tedu.cn
+Address: 1.2.3.4
+
+[root@svr7 ~]# nslookup www.qq.com 192.168.4.7
+Server:		192.168.4.7
+Address:	192.168.4.7#53
+
+Name:	www.qq.com
+Address: 1.2.30.40
+
+------------------------------------
+----------------------------------Processes Tree
+[root@svr7 ~]# su - lisi
+[root@svr7 ~]# pstree lisi
+bash
+[root@svr7 ~]# pstree -p lisi   # -p 列出对应的PID编号
+bash(1527)
+
+[lisi@svr7 ~]$ vim /opt/test.txt
+       -p     Show  PIDs.   PIDs are shown as decimal numbers in paren‐
+              theses after each process name.  -p  implicitly  disables
+              compaction.
+       -a     Show command line arguments.  If the command  line  of  a
+              process  is  swapped out, that process is shown in paren‐
+              theses.  -a implicitly disables compaction for  processes
+              but not threads.
+
+[root@svr7 ~]# pstree -p lisi  # -p 列出对应的PID编号
+bash(1527)───vim(1581)
+[root@svr7 ~]# pstree -ap lisi   # -a 显示完整的命令行
+bash,1527
+  └─vim,1581 /opt/test.txt
+-------------------------------------------------
+-------------------------------------------------------------显示当前终端所有的进程(a) 
+------------------------------------------------------------当前用户在 所有终端下的进程(x)
+----------------------------------------------------------以用户格式输出(u)
+
+[root@svr7 ~]# ps -aux |  head -4   操作---列出正在运行的所有进程
+USER       PID %CPU %MEM    VSZ   RSS TTY      STAT START   TIME COMMAND
+root         1  0.0  0.6 129264  6624 ?        Ss   14:06   0:01 /usr/lib/systemd/systemd --switched-root --system --deserialize 21
+root         2  0.0  0.0      0     0 ?        S    14:06   0:00 [kthreadd]
+root         3  0.0  0.0      0     0 ?        S    14:06   0:00 [ksoftirqd/0]
+
+[root@svr7 ~]# ps aux |  head -4
+USER       PID %CPU %MEM    VSZ   RSS TTY      STAT START   TIME COMMAND
+root         1  0.0  0.6 129264  6624 ?        Ss   14:06   0:01 /usr/lib/systemd/systemd --switched-root --system --deserialize 21
+root         2  0.0  0.0      0     0 ?        S    14:06   0:00 [kthreadd]
+root         3  0.0  0.0      0     0 ?        S    14:06   0:00 [ksoftirqd/0]
+
+-------------------------------------------------------------显示 ' 当前终端 ' 所有的进程(a) 
+------------------------------------------------------------当前用户在 所有终端下的进程(x)
+----------------------------------------------------------以用户格式输出(u)
+=======================显示" 系统内 " 所有进程(-e)
+=======================以长格式输出(-l)
+=======================包括最完整的进程信息(-f)
+-------------------------PRI  NI 进程优先级,数值越小 优先级越高
+-----------------------------------PPID  父进程的  PID 号
+[root@svr7 ~]# ps elf |  head -1   操作(父进程的PPID)---列出正在运行的所有进程
+F   UID   PID  PPID PRI  NI    VSZ   RSS WCHAN  STAT TTY        TIME COMMAND
+
+[root@svr7 ~]# ps -elf |  head -2
+F S UID        PID  PPID  C PRI  NI ADDR SZ WCHAN  STIME TTY          TIME CMD
+4 S root         1     0  0  80   0 - 32316 ep_pol 14:06 ?        00:00:01 /usr/lib/systemd/systemd --switched-root --system --deserialize 21
+
+[root@svr7 ~]# ps aux | wc -l
+115
+[root@svr7 ~]# ps -aux | wc -l
+115
+
+[root@svr7 ~]# ps -elf | head -3
+F S UID        PID  PPID  C PRI  NI ADDR SZ WCHAN  STIME TTY          TIME CMD
+4 S root         1     0  0  80   0 - 32316 ep_pol 14:06 ?        00:00:01 /usr/lib/systemd/systemd --switched-root --system --deserialize 21
+1 S root         2     0  0  80   0 -     0 kthrea 14:06 ?        00:00:00 [kthreadd]
+[root@svr7 ~]# ps -elf | wc
+    115    1901   11751
+[root@svr7 ~]# ps -elf | wc -l
+115
+
+
+[root@svr7 ~]# find /etc/  -name '*.conf' | wc -l
+424
+
+[root@svr7 ~]# wc -l /etc/passwd
+41 /etc/passwd
+
+[root@svr7 ~]# top -d2                  #僵尸进程zombie
+                                   #load average:---1秒   5秒    15秒
+top - 15:16:53 up  1:10,  2 users,  load average: 0.00, 0.01, 0.01
+Tasks: 112 total,   2 running, 110 sleeping,   0 stopped,   0 zombie
+%Cpu(s):  0.0 us,  0.0 sy,  0.0 ni,100.0 id,  0.0 wa,  0.0 hi,  0.0 si,  0.0 st
+KiB Mem :  1016260 total,   694184 free,   133816 used,   188260 buff/cache
+KiB Swap:  2097148 total,  2097148 free,        0 used.   703676 avail Mem 
+
+  PID USER      PR  NI    VIRT    RES    SHR S %CPU %MEM     TIME+ COMMAND               
+ 2039 root      20   0  157684   2160   1524 R  0.5  0.2   0:00.40 top                   
+    1 root      20   0  129264   6624   2700 S  0.0  0.7   0:01.11 systemd               
+    2 root      20   0       0      0      0 S  0.0  0.0   0:00.00 kthreadd              
+    3 root      20   0       0      0      0 S  0.0  0.0   0:00.02 ksoftirqd/0           
+    5 root       0 -20       0      0      0 S  0.0  0.0   0:00.00 kworker/0:0H  
+
+[root@svr7 ~]# pgrep -l a  | head -5
+2 kthreadd
+7 migration/0
+10 watchdog/0
+14 khungtaskd
+15 writeback
+
+[root@svr7 ~]# pgrep -lU lisi
+1527 bash
+[root@svr7 ~]# pstree -p lisi
+bash(1527)
+[root@svr7 ~]# pgrep -U lisi
+1527
+
+[root@svr7 ~]# pgrep -lU lisi -t pts/1
+1527 bash
+2250 vim
+[root@svr7 ~]# who
+root     pts/0        2018-07-23 14:07 (192.168.4.254)
+root     pts/1        2018-07-23 14:26 (192.168.4.254)
+
+[root@svr7 ~]# pgrep -lU root  -t pts/0
+1244 bash
+
+
+[root@svr7 ~]# su - lisi
+[lisi@svr7 ~]$ vim /opt/test.txt
+
+[lisi@svr7 ~]$ top -d3
+[root@svr7 ~]# who
+root     pts/0        2018-07-23 14:07 (192.168.4.254)
+root     pts/1        2018-07-23 14:26 (192.168.4.254)
+root     pts/2        2018-07-23 15:41 (192.168.4.254)
+[root@svr7 ~]# pgrep -lU lisi 
+1527 bash
+2250 vim
+2339 bash
+2385 top
+[root@svr7 ~]# pgrep -lU lisi -t pts/1
+1527 bash
+2250 vim
+[root@svr7 ~]# pgrep -lU lisi -t pts/2
+2339 bash
+2385 top
+
+[root@svr7 ~]# pgrep named
+981
+[root@svr7 ~]# pgrep -l named
+981 named
+[root@svr7 ~]# pstree -ap named
+named,981 -u named -c /etc/named.conf
+  ├─{named},984
+  ├─{named},985
+  └─{named},986
+[root@svr7 ~]# a=`pgrep named`
+
+[root@svr7 ~]# echo $a
+981
+
+
+[root@svr7 ~]# sleep 600 
+^C
+
+[root@svr7 ~]# sleep 6000 &
+[1] 2568
+[root@svr7 ~]# sleep 600
+^Z
+[2]+  已停止               sleep 600
+[root@svr7 ~]# jobs
+[1]-  运行中               sleep 6000 &
+[2]+  已停止               sleep 600
+[root@svr7 ~]# bg 2   激活后台被挂起的任务bg
+[2]+ sleep 600 &
+
+[root@svr7 ~]# fg 1   将后台任务恢复到前台运行fg
+sleep 6000
+^C
+[root@svr7 ~]# jobs
+[2]+  完成                  sleep 600
+
+[root@svr7 ~]# jobs
+[1]+  运行中               sleep 6000 &
+[root@svr7 ~]# pkill sleep
+[1]+  已终止               sleep 6000
+[root@svr7 ~]# echo $?
+0
+[root@svr7 ~]# sleep 60 &
+[1] 2914
+[root@svr7 ~]# sleep 600 &
+[2] 2915
+[root@svr7 ~]# sleep 1200 &
+[3] 2916
+[root@svr7 ~]# jobs
+[1]   运行中               sleep 60 &
+[2]-  运行中               sleep 600 &
+[3]+  运行中               sleep 1200 &
+[root@svr7 ~]# pkill sleep
+[1]   已终止               sleep 60
+[2]-  已终止               sleep 600
+[3]+  已终止               sleep 1200
+[root@svr7 ~]# echo $?
+0
+[root@svr7 ~]# jobs
+[root@svr7 ~]# 
+[root@svr7 ~]# killall -9 -u lisi
+
+[root@svr7 ~]# jobs
+[root@svr7 ~]# sleep 3000 &
+[1] 2967
+[root@svr7 ~]# kill 2967
+[root@svr7 ~]# jobs
+[1]+  已终止               sleep 3000
+
+[root@svr7 ~]# sleep 3000 &
+[1] 2990
+[root@svr7 ~]# kill -9  2990
+[root@svr7 ~]# jobs
+[1]+  已杀死               sleep 3000
+[root@svr7 ~]# jobs
+[root@svr7 ~]# 
+
+
+
+[root@svr7 ~]# jobs
+[root@svr7 ~]# who 
+root     pts/0        2018-07-23 14:07 (192.168.4.254)
+root     pts/1        2018-07-23 14:26 (192.168.4.254)
+root     pts/2        2018-07-23 15:41 (192.168.4.254)
+[root@svr7 ~]# pgrep -lU lisi
+3104 bash
+3147 vim
+[root@svr7 ~]# pgrep -lU lisi -t pts/0
+[root@svr7 ~]# pgrep -lU lisi -t pts/1
+3104 bash
+3147 vim
+
+[root@svr7 ~]# killall -9  vim
+已杀死
+[lisi@svr7 ~]$ exit                                                                      
+登出       
+[root@svr7 ~]# echo $?
+0
+[root@svr7 ~]# pgrep -lU lisi -t pts/1
+3104 bash
+
+
+
+[root@room11pc13 ~]# clone-vm7
+
+[root@room11pc13 ~]# virsh list
+[root@room11pc13 ~]# virsh list --all
+ Id    名称                         状态
+----------------------------------------------------
+ 1     A                              running
+ 2     B                              running
+ 3     C                              running
+ 4     D                              running
+ -     classroom                      关闭
+ -     desktop                        关闭
+ -     pc207.tedu.cn                  关闭
+[root@room11pc13 ~]# virsh start rh7_node02
+域 rh7_node02 已开始
+
+[root@room11pc13 ~]# virsh console rh7_node02
+连接到域 rh7_node02
+localhost login: root
+密码：
+Last login: Tue Jan 30 12:29:01 on :0
+[root@localhost ~]# nmcli device status 
+[root@localhost ~]# nmcli connection modify eth0  ipv4.method manual ipv4.addreses  192.168.4.30/24 connection.autoconnect yes
+[root@localhost ~]# nmcli connection up eth0 
+[root@Consolex ~]# ifconfig | head -5
+eth0: flags=4163<UP,BROADCAST,RUNNING,MULTICAST>  mtu 1500
+        inet 192.168.4.30  netmask 255.255.255.0  broadcast 192.168.4.255
+        inet6 fe80::acee:90d6:564e:a8c0  prefixlen 64  scopeid 0x20<link>
+        ether 52:54:00:2a:a0:84  txqueuelen 1000  (Ethernet)
+        RX packets 18  bytes 936 (936.0 B)
+[root@Consolex ~]# shutdonw -h now
+[root@room11pc13 ~]# virsh console Consolex   # Ctrl + ]终止
+连接到域 Consolex
+换码符为 ^]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

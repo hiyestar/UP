@@ -1,0 +1,169 @@
+[root@My176 ~]# touch /root/桌面/cobbler.txt
+
+[root@My176 ~]# ls /var/lib/libvirt/images/iso/
+CentOS-7-x86_64-DVD-1708.iso  rhel-server-6.7-x86_64-dvd.iso  Win10_Pro_X64_zh_CN.iso
+lost+found                    rhel-server-7.4-x86_64-dvd.iso
+
+[root@My176 ~]# tail -3 /etc/fstab 
+UUID=bb62e9f9-f903-40e2-be01-730eb61cc7ea /                       ext4    defaults        1 1
+UUID=d60728be-85d6-4b5d-8ca8-b29016db27f1 /var/lib/libvirt/images ext4    defaults        1 2
+/var/lib/libvirt/images/iso/rhel-server-7.4-x86_64-dvd.iso  /var/ftp/rhel7 iso9660 defaults 0 0
+
+[root@My176 ~]# yum clean all 
+
+[root@My176 ~]# rpm -q vsftpd 
+vsftpd-3.0.2-22.el7.x86_64
+
+[root@My176 ~]# systemctl status vsftpd.service
+● vsftpd.service - Vsftpd ftp daemon
+6月 26 14:34:30 My176.121.209.57 systemd[1]: Starting Vsftpd ftp daemon...
+6月 26 14:34:30 My176.121.209.57 systemd[1]: Started Vsftpd ftp daemon.
+
+[root@My176 ~]# systemctl is-enabled vsftpd.service 
+enabled
+[root@My176 ~]# vim /etc/fstab 
+[root@My176 ~]# tail -6 /etc/fstab
+UUID=bb62e9f9-f903-40e2-be01-730eb61cc7ea /                       ext4    defaults        1 1
+UUID=d60728be-85d6-4b5d-8ca8-b29016db27f1 /var/lib/libvirt/images ext4    defaults        1 2
+/var/lib/libvirt/images/iso/rhel-server-7.4-x86_64-dvd.iso  /var/ftp/rhel7 iso9660 defaults 0 0
+/var/lib/libvirt/images/iso/rhel-server-6.7-x86_64-dvd.iso  /var/ftp/rhel6.7 iso9660 defaults  0 0
+/var/lib/libvirt/images/iso/CentOS-7-x86_64-DVD-1708.iso  /var/ftp/CentOS7 iso9660 defaults  0 0
+/var/lib/libvirt/images/iso/Win10_Pro_X64_zh_CN.iso  /var/ftp/Win10  iso9660 defaults 0 0
+
+[root@My176 ~]# mkdir /var/ftp/rhel6.7  /var/ftp/CentOS7  /var/ftp/Win10
+[root@My176 ~]# ls /var/ftp/
+CentOS7  pub  rhel6.7  rhel7  share  Win10
+
+[root@My176 ~]# mount -a
+mount: /dev/loop1 写保护，将以只读方式挂载
+mount: /dev/loop2 写保护，将以只读方式挂载
+mount: /dev/loop3 写保护，将以只读方式挂载
+[root@My176 ~]# df -h
+文件系统        容量  已用  可用 已用% 挂载点
+/dev/sda2       118G   15G   98G   13% /
+/dev/sda1       197G   52G  136G   28% /var/lib/libvirt/images
+/dev/loop0      3.8G  3.8G     0  100% /var/ftp/rhel7
+tmpfs           1.6G   52K  1.6G    1% /run/user/0
+/dev/sdb4       7.5G  578M  7.0G    8% /run/media/root/DRBL-live
+/dev/loop1      3.6G  3.6G     0  100% /var/ftp/rhel6.7
+/dev/loop2      4.3G  4.3G     0  100% /var/ftp/CentOS7
+/dev/loop3      3.3G  3.3G     0  100% /var/ftp/Win10
+[root@My176 ~]# ls /var/ftp/Win10
+[root@My176 ~]# ls /var/ftp/Win10/
+[root@My176 ~]# vim /etc/fstab 
+[root@My176 ~]# tail -4 /etc/fstab 
+/var/lib/libvirt/images/iso/rhel-server-7.4-x86_64-dvd.iso  /var/ftp/rhel7 iso9660 defaults 0 0
+/var/lib/libvirt/images/iso/rhel-server-6.7-x86_64-dvd.iso  /var/ftp/rhel6.7 iso9660 defaults  0 0
+/var/lib/libvirt/images/iso/CentOS-7-x86_64-DVD-1708.iso  /var/ftp/CentOS7 iso9660 defaults  0 0
+#/var/lib/libvirt/images/iso/Win10_Pro_X64_zh_CN.iso  /var/ftp/Win10  iso9660 defaults 0 0
+
+[root@My176 ~]# mount -a
+[root@My176 ~]# df -h
+[root@My176 ~]# firefox  ftp://192.168.4.254/
+^C
+[Child 19025] ###!!! ABORT: Aborting on channel error.: file /builddir/build/BUILD/firefox-52.2.0/firefox-52.2.0esr/ipc/glue/MessageChannel.cpp, line 2152
+[Child 19025] ###!!! ABORT: Aborting on channel error.: file /builddir/build/BUILD/firefox-52.2.0/firefox-52.2.0esr/ipc/glue/MessageChannel.cpp, line 2152
+
+[root@Cob ~]# hostname
+Cob
+[root@Cob ~]# ifconfig eth0
+eth0: flags=4163<UP,BROADCAST,RUNNING,MULTICAST>  mtu 1500
+        inet 192.168.4.169  netmask 255.255.255.0  broadcast 192.168.4.255
+        inet6 fe80::fe42:c988:6ec2:4346  prefixlen 64  scopeid 0x20<link>
+        ether 52:54:00:02:c3:a2  txqueuelen 1000  (Ethernet)
+        RX packets 13169  bytes 698529 (682.1 KiB)
+        RX errors 0  dropped 5  overruns 0  frame 0
+        TX packets 197  bytes 23763 (23.2 KiB)
+        TX errors 0  dropped 0 overruns 0  carrier 0  collisions 0
+[root@Cob ~]# vim /etc/yum.repos.d/rhel-centos.repo
+[root@Cob ~]# cat /etc/yum.repos.d/rhel-centos.repo
+[rhel7]
+name=rhel7
+enabled=1
+baseurl=ftp://192.168.4.254/rhel7
+gpgcheck=0
+[rhel6.7]
+name=rhel6.7
+enabled=1
+baseurl=ftp://192.168.4.254/rhel6.7
+gpgcheck=0
+[Cent]
+name=CentOS7
+enabled=1
+baseurl=ftp://192.168.4.254/CentOS7
+gpgcheck=0
+[root@Cob ~]# ls /etc/yum.repos.d/
+redhat.repo  rhel-centos.repo
+
+[root@Cob ~]# cat /etc/yum.repos.d/redhat.repo 
+#
+# Certificate-Based Repositories
+# Managed by (rhsm) subscription-manager
+# If this file is empty and this system is subscribed consider 
+# a "yum repolist" to refresh available repos
+
+[root@Cob ~]# yum clean all 
+已加载插件：langpacks, product-id, search-disabled-repos, subscription-manager
+This system is not registered with an entitlement server. You can use subscription-manager to register.
+正在清理软件源： Cent rhel6.7 rhel7
+Cleaning up everything
+Maybe you want: rm -rf /var/cache/yum, to also free up space taken by orphaned data from disabled or removed repos
+[root@Cob ~]# yum  repolist 
+已加载插件：langpacks, product-id, search-disabled-repos, subscription-manager
+This system is not registered with an entitlement server. You can use subscription-manager to register.
+Cent                                                                                                 | 3.6 kB  00:00:00     
+rhel6.7                                                                                              | 4.1 kB  00:00:00     
+rhel7                                                                                                | 4.1 kB  00:00:00     
+(1/6): rhel6.7/group_gz                                                                              | 211 kB  00:00:00     
+(2/6): rhel7/group_gz                                                                                | 137 kB  00:00:00     
+(3/6): Cent/group_gz                                                                                 | 156 kB  00:00:00     
+(4/6): Cent/primary_db                                                                               | 3.1 MB  00:00:00     
+(5/6): rhel6.7/primary_db                                                                            | 3.1 MB  00:00:00     
+(6/6): rhel7/primary_db                                                                              | 4.0 MB  00:00:00     
+源标识                                                     源名称                                                      状态
+Cent                                                       CentOS7                                                     3,894
+rhel6.7                                                    rhel6.7                                                     3,819
+rhel7                                                      rhel7                                                       4,986
+repolist: 12,699
+[root@Cob ~]# 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

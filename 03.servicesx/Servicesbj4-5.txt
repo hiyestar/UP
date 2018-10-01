@@ -1,0 +1,939 @@
+了解：虚拟机命令行管理指令
+[root@room9pc01 ~]# virt-manager       #启用图形虚拟系统管理器
+[root@room9pc01 ~]# virsh list         #列出正在运行的虚拟机
+[root@room9pc01 ~]# virsh list --all   #列出所有虚拟机
+
+[root@room9pc01 ~]# clone-vm7     #产生一个新的虚拟机
+Enter VM number: 5
+
+[root@room9pc01 ~]# virsh list --all
+[root@room9pc01 ~]# virsh start rh7_node05   #开启虚拟机
+[root@room9pc01 ~]# virsh list --all
+
+[root@room9pc01 ~]# virsh console rh7_node05  #控制虚拟机不需要IP
+
+   退出终端管理模式：Ctrl +  】
+
+#######################################################
+环境准备：检查Yum是否可用
+
+虚拟机A：
+[root@svr7 ~]# yum clean all    #清空Yum缓存
+[root@svr7 ~]# yum repolist 
+
+虚拟机B： 
+[root@pc207 ~]# yum clean all   #清空Yum缓存
+[root@pc207 ~]# yum repolist  
+
+
+[root@room11pc13 ~]# ssh-keygen
+[root@room11pc13 ~]# cat /root/.ssh/known_hosts 
+[root@room11pc13 ~]# ssh-copy-id root@192.168.4.207
+[root@room11pc13 ~]# cat /root/.ssh/known_hosts 
+192.168.4.207 ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBLbeZn0oixXQQEAEclKnr1zideN3MmtD9EfVZwn7NJu8qcJ/UJB4DnHsAfe+y0hOkv0bF+ek23RuH3YfeT4WWMY=
+[root@room11pc13 ~]# cat /root/.ssh/known_hosts 
+192.168.4.207 ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBLbeZn0oixXQQEAEclKnr1zideN3MmtD9EfVZwn7NJu8qcJ/UJB4DnHsAfe+y0hOkv0bF+ek23RuH3YfeT4WWMY=
+172.25.0.11 ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBHX+o9KAnlfw2dE7CsmM4hqfv1udM79a5NWC2BuWlmfKSwfYLptPQMJF8bnqaz0EjDlxCxRu/aito+GphPLzp/k=
+
+
+
+######################################################
+DHCP概述及原理
+
+• Dynamic Host Configuration Protocol
+– 动态主机配置协议,由 IETF(Internet 网络工程师任
+务小组)组织制定, 用来简化主机地址分配管理
+
+• 主要分配以下入网参数
+– IP地址/子网掩码/广播地址
+– 默认网关地址、DNS服务器地址
+
+
+DHCP概述及原理（广播进行，一个网络中只能有一个DHCP服务器，先到先的）
+• DHCP地址分配的四次会话
+– DISCOVERY --> OFFER --> REQUEST -->ACK
+
+
+虚拟机A：
+1.安装软件包dhcp
+2. 修改配置文件/etc/dhcp/dhcpd.conf
+  末行模式读入  :r  /usr/share/doc/dhcp*/dhcpd.conf.example
+
+ subnet 192.168.4.0 netmask 255.255.255.0 {   #分配的网段
+  range 192.168.4.100 192.168.4.200;        #分配的IP地址范围
+  option domain-name-servers 192.168.4.7;   #分配的DNS地址
+  option routers 192.168.4.254;             #分配的网关地址
+  default-lease-time 600;                   #IP地址默认租期时间
+  max-lease-time 7200;                      #IP地址最大租期时间
+  }
+3.重起服务
+[root@svr7 /]# systemctl restart dhcpd
+
+############################################################
+网络装机
+
+• 规模化:同时装配多台主机
+• 自动化:装系统、配置各种服务
+• 远程实现:不需要光盘、U盘等物理安装介质
+
+• PXE,Pre-boot eXecution Environment
+  – 预启动执行环境,在操作系统之前运行
+  – 可用于远程安装
+• 工作模式
+ – PXE client 集成在网卡的启动芯片中
+  – 当计算机引导时,从网卡芯片中把PXE client调入内存
+执行,获取PXE server配置、显示菜单,根据用户选
+择将远程引导程序下载到本机运行
+
+
+• 需要哪些服务组件?
+– DHCP服务,分配IP地址、定位引导程序
+– TFTP服务,提供引导程序下载
+– HTTP服务,提供yum安装源
+
+########################################################
+一、配置DHCP网络装机设置
+
+1.修改配置文件
+[root@svr7 /]# vim /etc/dhcp/dhcpd.conf 
+subnet 192.168.4.0 netmask 255.255.255.0 {
+  range 192.168.4.100 192.168.4.200;
+  option domain-name-servers 192.168.4.7;
+  option routers 192.168.4.254;
+  default-lease-time 600;
+  max-lease-time 7200;
+  next-server  192.168.4.7;   #指定下一个服务器
+  filename  "pxelinux.0";     #指定网卡引导文件名称
+ }
+
+2.重起dhcpd服务
+[root@svr7 /]# systemctl  restart dhcpd
+
+  pxelinux.0:网卡引导文件(网络装机说明书) 二进制文件
+                       安装一个软件可以自动产生默认叫pxelinux.0
+
+
+######################################################
+二、搭建tftp服务，提供众多的引导文件
+
+    简单的文件传输协议   端口 69
+  tftp默认共享数据路径：/var/lib/tftpboot
+
+1.安装tftp-server软件包   
+[root@svr7 /]# yum -y install tftp-server
+
+2.启动tftp服务即可
+[root@svr7 /]# systemctl restart tftp
+[root@svr7 /]# ls /var/lib/tftpboot/
+
+3.部署pxelinux.0文件
+ # yum provides */pxelinux.0       #查询仓库中那个软件包产生该文件
+ #  yum -y install syslinux        
+
+ # rpm -ql syslinux | grep pxelinux.0  #查询已安装的软件包安装清单
+
+ # cp /usr/share/syslinux/pxelinux.0   /var/lib/tftpboot/
+ # ls /var/lib/tftpboot/
+
+4.部署菜单文件  
+   pxelinux.0----》/var/lib/tftpboot/pxelinux.cfg/default
+
+# mkdir  /var/lib/tftpboot/pxelinux.cfg
+# mount  /dev/cdrom   /mnt/
+# ls  /mnt/
+
+# cp  /mnt/isolinux/isolinux.cfg /var/lib/tftpboot/pxelinux.cfg/default
+
+# ls  /var/lib/tftpboot/pxelinux.cfg
+
+# ls  -l  /var/lib/tftpboot/pxelinux.cfg/default
+
+# chmod  u+w  /var/lib/tftpboot/pxelinux.cfg/default
+
+# ls  -l  /var/lib/tftpboot/pxelinux.cfg/default
+
+5.部署引导文件
+   vesamenu.c32  图形模块，呈现背景图片  及 颜色
+     vmlinuz     启动内核
+    initrd.img   驱动程序
+    splash.png   黑色背景图片
+
+ # cp /mnt/isolinux/vesamenu.c32 
+      /mnt/isolinux/vmlinuz 
+      /mnt/isolinux/initrd.img 
+      /mnt/isolinux/splash.png     /var/lib/tftpboot/
+
+ # ls /var/lib/tftpboot/
+ initrd.img  pxelinux.cfg  vesamenu.c32
+ pxelinux.0  splash.png    vmlinuz
+
+6.修改菜单文件内容
+# vim  /var/lib/tftpboot/pxelinux.cfg/default
+  1 default vesamenu.c32    默认加载图形模块
+  2 timeout 600             默认读秒
+
+ 10 menu background splash.png     指定默认的表背景图片
+ 11 menu title NSD1806 PXE Server  指定菜单的标题  
+
+ 61 label linux
+ 62   menu label Install RHEL7     菜单显示内容
+      menu default                 读秒结束默认选择
+ 63   kernel vmlinuz               加载内核
+ 64   append initrd=initrd.img     加载驱动程序
+
+##########################################################
+总结：
+    dhcp----》IP地址、next-server、filename
+    tftp----》pxelinux.0
+    pxelinux.0----》/var/lib/tftpboot/pxelinux.cfg/default
+    default----》vesamenu.c32\splash.png\vmlinuz\initrd.img
+
+########################################################
+初步测试：
+    1.新建虚拟机 选择PXE网络引导安装
+    2.网络类型选择 private1
+
+#######################################################
+三、构建httpd服务，利用Web共享众多的RPM包
+
+1.安装软件包
+[root@svr7 /]# yum -y install httpd
+[root@svr7 /]# systemctl restart httpd
+
+2.建立共享路径
+[root@svr7 /]# mkdir /var/www/html/rhel7
+[root@svr7 /]# mount /dev/cdrom  /var/www/html/rhel7
+mount: /dev/sr0 写保护，将以只读方式挂载
+[root@svr7 /]# ls /var/www/html/rhel7
+
+3.测试
+[root@svr7 /]# firefox 192.168.4.7/rhel7
+
+########################################################
+四、部署无人值守安装，生成应答文件
+
+1.图形生成应答文件工具system-config-kickstart 
+[root@svr7 /]# yum -y install system-config-kickstart 
+
+2.运行工具system-config-kickstart 
+[root@svr7 /]# system-config-kickstart 
+
+     检测 “软件包选择” 是否可以选择
+       
+     与本机Yum仓库标识: [development]
+ [root@svr7 /]# vim /etc/yum.repos.d/rhel7.repo 
+  [development]
+
+[root@svr7 /]# system-config-kickstart 
+
+     检测 “软件包选择” 是否可以选择
+
+3.查看应答文件
+[root@svr7 /]# ls /root/ks.cfg 
+[root@svr7 /]# vim  /root/ks.cfg
+
+4.利用Web共享ks文件，传递给客户端
+[root@svr7 /]# cp  /root/ks.cfg  /var/www/html/
+[root@svr7 /]# ls  /var/www/html/
+
+[root@Adns ~]# ls -l /root/1
+-rw-r--r--. 1 root root 320 7月  24 10:57 /root/1
+[root@Adns ~]# cat /root/1
+#
+# DHCP Server Configuration file.
+#   see /usr/share/doc/dhcp*/dhcpd.conf.example
+#   see dhcpd.conf(5) man page
+subnet 192.168.4.0 netmask 255.255.255.0 {
+  range 192.168.4.100 192.168.4.200;
+  option domain-name-servers 192.168.4.7;
+  option routers 192.168.4.254;
+  default-lease-time 600;
+  max-lease-time 7200;
+}
+
+#######################################################
+五、修改菜单文件，指定ks应答文件
+[root@svr7 /]# vim /var/lib/tftpboot/pxelinux.cfg/default 
+
+label linux
+  menu label Install RHEL7
+  menu default
+  kernel vmlinuz
+  append initrd=initrd.img  ks=http://192.168.4.7/ks.cfg
+
+#######################################################
+总结：
+    dhcp----》IP地址、next-server、filename
+    tftp----》pxelinux.0
+    pxelinux.0----》/var/lib/tftpboot/pxelinux.cfg/default
+    default----》vesamenu.c32\splash.png\vmlinuz\initrd.img
+    ks=http://192.168.4.7/ks.cfg---》url --  url="http://192.168.4.7/rhel7"
+
+#########################################################
+[root@C-Web1 ~]# ssh -X root@192.168.4.7
+[root@Adns ~]# exit
+登出
+Connection to 192.168.4.7 closed.
+[root@C-Web1 ~]# cat /root/.ssh/known_hosts
+192.168.4.7 ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBLbeZn0oixXQQEAEclKnr1zideN3MmtD9EfVZwn7NJu8qcJ/UJB4DnHsAfe+y0hOkv0bF+ek23RuH3YfeT4WWMY=
+[root@C-Web1 ~]# ssh -X root@192.168.4.207
+[root@B ~]# exit
+登出
+Connection to 192.168.4.207 closed.
+[root@C-Web1 ~]# cat /root/.ssh/known_hosts  #记录ssh 远程客户端标示文件
+192.168.4.7 ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBLbeZn0oixXQQEAEclKnr1zideN3MmtD9EfVZwn7NJu8qcJ/UJB4DnHsAfe+y0hOkv0bF+ek23RuH3YfeT4WWMY=
+192.168.4.207 ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBLbeZn0oixXQQEAEclKnr1zideN3MmtD9EfVZwn7NJu8qcJ/UJB4DnHsAfe+y0hOkv0bF+ek23RuH3YfeT4WWMY=
+[root@C-Web1 ~]# ssh-keygen #生成公钥 私钥验证
+
+[root@C-Web1 ~]# ls /root/.ssh/
+id_rsa  id_rsa.pub  known_hosts
+
+[root@C-Web1 ~]# ssh-copy-id root@192.168.4.7  #传递公钥 到对方主机
+
+[root@C-Web1 ~]# ssh 'root@192.168.4.7'
+Last login: Wed Jul 25 13:32:23 2018 from 192.168.4.10
+[root@Adns ~]# exit
+登出
+Connection to 192.168.4.7 closed.
+[root@C-Web1 ~]# ssh -X root@192.168.4.7
+Last login: Wed Jul 25 13:41:05 2018 from 192.168.4.10
+[root@Adns ~]# exit
+登出
+Connection to 192.168.4.7 closed.
+[root@C-Web1 ~]# ls /root/.ssh/
+id_rsa  id_rsa.pub  known_hosts
+
+[root@C-Web1 ~]# ssh-copy-id root@192.168.4.207   #传递公钥 到对方主机
+[root@C-Web1 ~]# ssh  root@192.168.4.207
+Last login: Wed Jul 25 13:35:04 2018 from 192.168.4.10
+[root@B ~]# exit
+登出
+Connection to 192.168.4.207 closed.
+[root@C-Web1 ~]# cat /root/.ssh/known_hosts 
+192.168.4.7 ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBLbeZn0oixXQQEAEclKnr1zideN3MmtD9EfVZwn7NJu8qcJ/UJB4DnHsAfe+y0hOkv0bF+ek23RuH3YfeT4WWMY=
+192.168.4.207 ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBLbeZn0oixXQQEAEclKnr1zideN3MmtD9EfVZwn7NJu8qcJ/UJB4DnHsAfe+y0hOkv0bF+ek23RuH3YfeT4WWMY=
+
+
+
+
+
+
+
+
+
+
+   -a, --archive               archive mode; equals -rlptgoD (no -H,-A,-X)
+        -v, --verbose               increase verbosity
+        -z, --compress              compress file data during the transfer
+       --delete
+              This tells rsync to delete  extraneous  files  from  the
+              receiving  side  (ones that aren’t on the sending side),
+              but only for the directories  that  are  being  synchro‐
+              nized.   You  must  have  asked  rsync to send the whole
+              directory (e.g. "dir" or "dir/") without using  a  wild‐
+              card  for  the directory’s contents (e.g. "dir/*") since
+              the wildcard is expanded by the  shell  and  rsync  thus
+              gets  a  request  to  transfer individual files, not the
+              files’ parent directory.  Files that are  excluded  from
+              the transfer are also excluded from being deleted unless
+              you use the --delete-excluded option or mark  the  rules
+              as   only   matching   on  the  sending  side  (see  the
+              include/exclude modifiers in the FILTER RULES section).
+
+[root@Adns ~]# mkdir /nsd
+[root@Adns ~]# echo server > /nsd/test.txt
+[root@Adns ~]# mkdir /test
+[root@Adns ~]# rsync -avz /nsd  /test  注意斜杠/nsd
+
+[root@Adns ~]# ls /test
+nsd
+[root@Adns ~]# mkdir /test2
+[root@Adns ~]# rsync -avz  /nsd/  /test2  注意斜杠/nsd/
+
+[root@Adns ~]# ls /test2
+test.txt
+
+[root@Adns ~]# rsync -avz  --delete /nsd/  /test  注意斜杠/nsd/
+
+[root@Adns ~]# ls /test
+test.txt
+
+[root@Adns ~]# ls /opt/
+A.txt  rh
+[root@Adns ~]# rsync -avz  --delete /opt root@192.168.4.207:/opt/  注意斜杠/opt
+[root@B ~]# ls /opt
+rh
+[root@B ~]# ls /opt
+opt  rh
+--------------------------------------------------上行root@192.168.4.207:/opt/-----------------
+[root@Adns ~]# rsync -avz --delete /opt/  root@192.168.4.207:/opt/  #注意斜杠/opt/
+[root@B ~]# ls /opt
+A.txt  rh
+
+
+
+[root@B ~]# ls /opt/
+A.txt  B.txt  rh
+-----------------------========下行root@192.168.4.207:/opt/----------------
+[root@Adns ~]# rsync -avz --delete root@192.168.4.207:/opt/  /opt/  #下行
+[root@Adns ~]# ls /opt/
+A.txt  B.txt  rh
+
+[root@Adns ~]# ssh-keygen  #生成公钥 私钥验证
+Generating public/private rsa key pair.
+Enter file in which to save the key (/root/.ssh/id_rsa): 直接回车确认
+Enter passphrase (empty for no passphrase): 直接回车确认
+Enter same passphrase again: 直接回车确认
+Your identification has been saved in /root/.ssh/id_rsa.
+Your public key has been saved in /root/.ssh/id_rsa.pub.
+The key fingerprint is:
+SHA256:DDEB5RWE5oSXstUDKy/GYsf2qtkLUycnt64wrnNfg3g root@Adns
+The key's randomart image is:
++---[RSA 2048]----+
+|    .+*B+.       |
+|    o.B=o        |
+|    .O+  .       |
+|   o.o.o         |
+|  o @ = S        |
+| . B X .         |
+|  * E =          |
+|...O + .         |
+|.++o*o.          |
++----[SHA256]-----+
+[root@Adns ~]# ls /root/.ssh/
+id_rsa  id_rsa.pub  known_hosts
+[root@Adns ~]# head -1 /root/.ssh/known_hosts  #记录ssh 远程客户端标示文件
+192.168.4.207 ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBLbeZn0oixXQQEAEclKnr1zideN3MmtD9EfVZwn7NJu8qcJ/UJB4DnHsAfe+y0hOkv0bF+ek23RuH3YfeT4WWMY=
+
+[root@B ~]# cat /root/.ssh/known_hosts 
+192.168.4.7 ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBLbeZn0oixXQQEAEclKnr1zideN3MmtD9EfVZwn7NJu8qcJ/UJB4DnHsAfe+y0hOkv0bF+ek23RuH3YfeT4WWMY=
+
+[root@Adns ~]# ssh-copy-id  root@192.168.4.207   #传递公钥 到对方主机
+[root@Adns ~]# ssh -X root@192.168.4.207
+Last login: Wed Jul 25 11:23:32 2018 from 192.168.4.7
+[root@B ~]# exit
+登出
+Connection to 192.168.4.207 closed.
+[root@Adns ~]# 
+[root@Adns ~]# ls /root/.ssh/
+authorized_keys  id_rsa  id_rsa.pub  known_hosts
+
+
+[root@B ~]# ssh-copy-id  root@192.168.4.7
+
+/usr/bin/ssh-copy-id: ERROR: failed to open ID file '/root/.pub': 没有那个文件或目录
+	(to install the contents of '/root/.pub' anyway, look at the -f option)
+
+[root@B ~]# ssh-keygen   #生成公钥 私钥验证
+
+[root@B ~]# ssh-copy-id  root@192.168.4.7   #传递公钥 到对方主机
+/usr/bin/ssh-copy-id: INFO: Source of key(s) to be installed: "/root/.ssh/id_rsa.pub"
+
+[root@B ~]# ssh -X root@192.168.4.7
+Last login: Wed Jul 25 11:26:22 2018 from 192.168.4.207
+[root@Adns ~]# exit
+登出
+Connection to 192.168.4.7 closed.
+[root@B ~]# 
+[root@B ~]# ls /root/.ssh/
+authorized_keys  id_rsa  id_rsa.pub  known_hosts
+
+
+
+[root@Adns ~]# for i in {2..20}
+> do
+> scp /opt/ root@192.168.4.$i
+> done^C
+
+[root@room11pc13 ~]# scp /root/桌面/tools.tar.gz  root@192.168.4.7:/root/root@192.168.4.7's password: 
+tools.tar.gz                           100%  766KB  22.2MB/s   00:00 
+
+[root@Adns ~]# ls /root
+1                     ks.cfg        模板  文档  桌面
+anaconda-ks.cfg       tools.tar.gz  视频  下载
+initial-setup-ks.cfg  公共          图片  音乐
+[root@Adns ~]# tar -xPf /root/tools.tar.gz 
+[root@Adns ~]# tar -xf /root/tools.tar.gz  -C  /
+[root@Adns ~]# ls /tools/
+inotify-tools-3.13.tar.gz  other
+-------------------------------------------------------------------------------------------
+[root@room11pc13 ~]# ssh-keygen  #1 生成公钥 私钥验证
+                                      #2 传递公钥 到对方主机
+[root@room11pc13 ~]# ssh-copy-id root@192.168.4.7
+[root@room11pc13 ~]# ssh-copy-id root@192.168.4.207
+
+[root@room11pc13 ~]# ssh -X root@172.25.0.10
+[root@room11pc13 ~]# ssh -X root@172.25.0.11
+
+[root@room11pc13 ~]# ssh-copy-id root@172.25.0.10
+[root@room11pc13 ~]# ssh-copy-id root@172.25.0.11
+
+
+------------------------------------------------------------------------------------------------------------------
+[root@Adns ~]# firewall-cmd --get-default-zone 
+trusted
+[root@Adns ~]# getenforce 
+Permissive
+[root@Adns ~]# yum  install -y gcc make
+[root@Adns inotify-tools-3.13]# rpm -q gcc make
+gcc-4.8.5-16.el7.x86_64
+make-3.82-23.el7.x86_64
+
+[root@Adns ~]# cd /inotify-tools-3.13/
+
+[root@Adns inotify-tools-3.13]# ./configure 
+
+[root@Adns inotify-tools-3.13]# make
+-----------##make          makedb        makedeltarpm  makedumpfile  
+[root@Adns inotify-tools-3.13]# make install
+[root@Adns inotify-tools-3.13]# which inotifywa
+inotifywait   inotifywatch  
+[root@Adns inotify-tools-3.13]# which inotifywait 
+/usr/local/bin/inotifywait
+[root@Adns ~]# ls /opt
+A.txt  B.txt  rh
+[root@Adns ~]# mkdir /opt/test
+[root@Adns inotify-tools-3.13]# inotifywait -rq /opt/
+/opt/ OPEN,ISDIR 
+
+[root@B ~]# ls /opt
+A.txt  B.txt  rh
+[root@Adns ~]# rm -f /opt/A.txt
+[root@Adns ~]# echo 123 >> /opt/B.txt
+[root@Adns ~]# touch /opt/B2.txt
+[root@Adns inotify-tools-3.13]# inotifywait -mrq -e modify,create,delete /opt
+/opt/ DELETE A.txt
+/opt/ MODIFY B.txt
+/opt/ CREATE B2.txt
+^C
+
+
+[root@Adns /]# vim /root/rsync.sh
+[root@Adns /]# cat /root/rsync.sh
+#!/bin/bash 
+while inotifywait -rqq /opt/  #q减少屏幕输出-------qq阻止屏幕输出信息
+ do 
+    rsync  -az  --delete /opt/ root@192.168.4.207:/opt/
+ done &
+[root@Adns /]# chmod +x /root/rsync.sh
+[root@Adns /]# /root/rsync.sh
+[root@Adns /]# mkdir /opt/xx
+[root@Adns ~]# rm -rf /opt/test/
+
+[root@Adns ~]# rm -f /opt/A.txt
+[root@Adns ~]# echo 123 >> /opt/B.txt
+[root@Adns ~]# touch /opt/B2.txt
+
+[root@B ~]# ls /opt
+B2.txt  B.txt  rh  xx
+
+[root@Adns /]# pstree -p |grep rsync.sh
+           |-rsync.sh(10923)---rsync(24582)
+           |-rsync.sh(10949)---rsync(24585)---ssh(24586)
+[root@Adns /]# killall  rsync.sh
+[root@Adns /]# pstree -p | grep rsync.sh
+
+======================================================
+[root@Cobbler ~]# getenforce 
+Disabled
+[root@Cobbler ~]# firewall-cmd --get-default-zone 
+trusted
+[root@Cobbler ~]# ifconfig | head -3
+eth0: flags=4163<UP,BROADCAST,RUNNING,MULTICAST>  mtu 1500
+        inet 192.168.4.168  netmask 255.255.255.0  broadcast 192.168.4.255
+        inet6 fe80::eee4:e644:f3af:4264  prefixlen 64  scopeid 0x20<link>
+[root@Cobbler ~]# mkdir /etc/yum.repos.d/repo
+[root@Cobbler ~]# mv /etc/yum.repos.d/Cent*.repo /etc/yum.repos.d/repo
+[root@Cobbler ~]# ls /etc/yum.repos.d/
+repo  rhel7.repo
+[root@Cobbler ~]# ls /etc/yum.repos.d/repo/
+CentOS-Base.repo  CentOS-Debuginfo.repo  CentOS-Media.repo    CentOS-Vault.repo
+CentOS-CR.repo    CentOS-fasttrack.repo  CentOS-Sources.repo
+[root@Cobbler ~]# yum clean all
+[root@Cobbler ~]# yum repolist 
+
+[root@Cobbler ~]# ls /root
+anaconda-ks.cfg  initial-setup-ks.cfg  模板  图片  下载  桌面
+Cobbler.zip      公共                  视频  文档  音乐
+[root@Cobbler ~]# unzip /root/Cobbler.zip  -d  /
+
+[root@Cobbler ~]# cd /Cobbler/
+[root@Cobbler Cobbler]# ls
+cobbler_boot.tar.gz  cobbler_web.png  cobbler.zip
+
+
+[root@Cobbler Cobbler]# unzip  /Cobbler/cobbler.zip  -d /opt/
+
+
+[root@Cobbler Cobbler]# yum install -y /opt/cobbler/*.rpm
+
+[root@Cobbler Cobbler]# ls /opt/cobbler/ | wc
+     20      20     803
+[root@Cobbler Cobbler]# ls /opt/cobbler/ | wc -l
+20
+
+
+[root@Cobbler Cobbler]# vim /etc/cobbler/settings
+242 manage_dhcp: 1
+272 next_server: 192.168.4.168
+292 pxe_just_once: 1
+
+384 server: 192.168.4.168
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+            
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

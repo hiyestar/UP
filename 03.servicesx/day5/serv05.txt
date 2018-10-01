@@ -1,0 +1,349 @@
+[root@svr7 ~]# hostname
+svr7.tedu.cn
+[root@svr7 ~]# ifconfig eth0
+eth0: flags=4163<UP,BROADCAST,RUNNING,MULTICAST>  mtu 1500
+        inet 192.168.4.7  netmask 255.255.255.0  broadcast 192.168.4.255
+        inet6 fe80::280a:d76:9723:738d  prefixlen 64  scopeid 0x20<link>
+        ether 52:54:00:7a:9b:78  txqueuelen 1000  (Ethernet)
+        RX packets 122  bytes 11783 (11.5 KiB)
+        RX errors 0  dropped 6  overruns 0  frame 0
+        TX packets 88  bytes 12053 (11.7 KiB)
+        TX errors 0  dropped 0 overruns 0  carrier 0  collisions 0
+[root@svr7 ~]# ls /
+bin   dev  dir2  home  lib64  mnt  proc  run   srv  test   tmp    usr
+boot  dir  etc   lib   media  opt  root  sbin  sys  test2  tools  var
+[root@svr7 ~]# rm -rf /dir /dir2
+[root@svr7 ~]# ls /
+bin   dev  home  lib64  mnt  proc  run   srv  test   tmp    usr
+boot  etc  lib   media  opt  root  sbin  sys  test2  tools  var
+[root@svr7 ~]# 
+[root@svr7 ~]# rm -rf /test /test2
+[root@svr7 ~]# ls /
+bin  boot  dev  etc  home  lib  lib64  media  mnt  opt  proc  root  run  sbin  srv  sys  tmp  tools  usr  var
+[root@svr7 ~]# mkdir /dir /test
+[root@svr7 ~]# echo 1234 > /dir/x1.txt
+[root@svr7 ~]# echo 123456789 > /dir/x2.txt
+[root@svr7 ~]# ls /dir
+x1.txt  x2.txt
+[root@svr7 ~]# ls /test
+[root@svr7 ~]# rsync -avz /dir /test
+sending incremental file list
+dir/
+dir/x1.txt
+dir/x2.txt
+
+sent 170 bytes  received 54 bytes  448.00 bytes/sec
+total size is 15  speedup is 0.07
+[root@svr7 ~]# ls /test
+dir
+[root@svr7 ~]# ls /test/dir
+x1.txt  x2.txt
+[root@svr7 ~]# rsync -avz /dir/  /test
+sending incremental file list
+./
+x1.txt
+x2.txt
+
+sent 158 bytes  received 53 bytes  422.00 bytes/sec
+total size is 15  speedup is 0.07
+[root@svr7 ~]# ls /test/
+dir  x1.txt  x2.txt
+[root@svr7 ~]# echo 1234a > /dir/x3.txt
+[root@svr7 ~]# rsync -avz /dir/  /test
+sending incremental file list
+./
+x3.txt
+
+sent 124 bytes  received 34 bytes  316.00 bytes/sec
+total size is 21  speedup is 0.13
+[root@svr7 ~]# ls /test
+dir  x1.txt  x2.txt  x3.txt
+[root@svr7 ~]# ls -l /dir/x1.txt
+-rw-r--r--. 1 root root 5 6月  25 09:36 /dir/x1.txt
+[root@svr7 ~]# ls -l /test/x1.txt
+-rw-r--r--. 1 root root 5 6月  25 09:36 /test/x1.txt
+
+[root@svr7 ~]# ls /test
+dir  x1.txt  x2.txt  x3.txt
+[root@svr7 ~]# ls /dir
+x1.txt  x2.txt  x3.txt
+[root@svr7 ~]# rsync -avz --delete /dir/ /test
+sending incremental file list
+deleting dir/x2.txt
+deleting dir/x1.txt
+deleting dir/
+
+sent 75 bytes  received 12 bytes  174.00 bytes/sec
+total size is 21  speedup is 0.24
+[root@svr7 ~]# ls /dir
+x1.txt  x2.txt  x3.txt
+[root@svr7 ~]# ls /test
+x1.txt  x2.txt  x3.txt
+[root@svr7 ~]# --
+
+[root@svr7 ~]# ls /opt
+rh
+[root@svr7 ~]# touch /opt/x1.txt
+[root@svr7 ~]# echo 123 > /opt/x1.txt
+[root@svr7 ~]# rsync -avz --delete root@192.168.4.207:/opt/
+root@192.168.4.207's password: 
+receiving incremental file list
+drwxr-xr-x          16 2018/01/30 12:10:34 .
+drwxr-xr-x           6 2015/03/09 18:02:33 rh
+
+sent 12 bytes  received 50 bytes  13.78 bytes/sec
+total size is 0  speedup is 0.00
+[root@svr7 ~]# ls /opt
+rh  x1.txt
+[root@svr7 ~]# rsync -avz --delete /opt/ root@192.168.4.207:/opt/
+root@192.168.4.207's password: 
+sending incremental file list
+./
+x1.txt
+
+sent 115 bytes  received 35 bytes  27.27 bytes/sec
+total size is 4  speedup is 0.03
+[root@svr7 ~]# ls /opt
+rh  x1.txt
+----------------------
+[root@pc207 ~]# ls /opt
+rh
+[root@pc207 ~]# ls /opt
+rh  x1.txt
+[root@pc207 ~]# 
+
+============
+[root@svr7 ~]# ssh-keygen 
+Generating public/private rsa key pair.
+Enter file in which to save the key (/root/.ssh/id_rsa): 
+Enter passphrase (empty for no passphrase): 
+Enter same passphrase again: 
+Your identification has been saved in /root/.ssh/id_rsa.
+Your public key has been saved in /root/.ssh/id_rsa.pub.
+The key fingerprint is:
+SHA256:zlroctA5yszgnkguuWVxM4v59by1pcWXDZUmBlgaqYY root@svr7.tedu.cn
+The key's randomart image is:
++---[RSA 2048]----+
+|         .+o     |
+|         oo .   .|
+|      . ..   o o.|
+|     E o    . o. |
+|  . +...S     .  |
+|  .=.+++   .   + |
+| +==.oo.+ . + o .|
+|=+.o*o.= . = .   |
+|++o .oo +.o      |
++----[SHA256]-----+
+[root@svr7 ~]# ls /root/.ssh/
+id_rsa  id_rsa.pub  known_hosts
+[root@svr7 ~]# cat /root/.ssh/known_hosts
+192.168.4.207 ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBLbeZn0oixXQQEAEclKnr1zideN3MmtD9EfVZwn7NJu8qcJ/UJB4DnHsAfe+y0hOkv0bF+ek23RuH3YfeT4WWMY=
+
+[root@svr7 ~]# ssh-copy-id root@192.168.4.207
+/usr/bin/ssh-copy-id: INFO: Source of key(s) to be installed: "/root/.ssh/id_rsa.pub"
+/usr/bin/ssh-copy-id: INFO: attempting to log in with the new key(s), to filter out any that are already installed
+/usr/bin/ssh-copy-id: INFO: 1 key(s) remain to be installed -- if you are prompted now it is to install the new keys
+root@192.168.4.207's password: 
+
+Number of key(s) added: 1
+
+Now try logging into the machine, with:   "ssh 'root@192.168.4.207'"
+and check to make sure that only the key(s) you wanted were added.
+
+[root@svr7 ~]# ls /opt
+rh  x1.txt
+[root@svr7 ~]# touch /opt/rh/xtest.txt
+[root@svr7 ~]# rsync -avz --delete /opt/ root@192.168.4.207:/opt/
+sending incremental file list
+rh/
+rh/xtest.txt
+
+sent 128 bytes  received 35 bytes  326.00 bytes/sec
+total size is 4  speedup is 0.02
+[root@svr7 ~]# ls /root/.ssh/
+id_rsa  id_rsa.pub  known_hosts
+[root@svr7 ~]# head -2 /root/.ssh/known_hosts 
+192.168.4.207 ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBLbeZn0oixXQQEAEclKnr1zideN3MmtD9EfVZwn7NJu8qcJ/UJB4DnHsAfe+y0hOkv0bF+ek23RuH3YfeT4WWMY=
+
+[root@svr7 ~]# head -2 /root/.ssh/id_rsa
+-----BEGIN RSA PRIVATE KEY-----
+MIIEpQIBAAKCAQEA1dXH4LBW08C0we15AfRC/ki1X2GGAToNyjt5k22u9CLinnsK
+
+------------------------------
+[root@pc207 ~]# ls /opt
+rh  x1.txt
+[root@pc207 ~]# ls /opt/rh
+xtest.txt
+[root@pc207 ~]# ls /root/.ssh/
+authorized_keys
+[root@pc207 ~]# cat /root/.ssh/
+cat: /root/.ssh/: 是一个目录
+[root@pc207 ~]# cat /root/.ssh/authorized_keys 
+ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDV1cfgsFbTwLTB7XkB9EL+SLVfYYYBOg3KO3mTba70IuKeewozw6QyZH+8jJl6BQYBlT15zKNF3S6bxJky1jKBsaMwawq6952wooSjAV/QQWCp15ixs/CcQthBc/FuwGGoJwayWCUxj8F2RnZfddlcqt3UojVyDyLyXSKEjlk3KFJl8d84VD27GsZUelBWSCupwz84Za1Jidva1xSxUwiANNhyYofLzOk9vp301w/2VimtrH7G5vmX7ujZS1/4X/BOwJMvvoYi+0x0WiuJdyD8gzmBV3ndPDkineubZ/fM3S8nZ0FIfh0bpGjB9NySPts32COqLtyIWdTvbxi309rP root@svr7.tedu.cn
+[root@pc207 ~]# 
+
+=======================
+
+[root@My176 ~]# scp /root/桌面/tools.tar.gz root@192.168.4.7:/root/
+root@192.168.4.7's password: 
+tools.tar.gz                                  100%  766KB  11.0MB/s   00:00  
+-----------------------------------------------------------------------
+[root@svr7 ~]# ls /root
+anaconda-ks.cfg  initial-setup-ks.cfg  ks.cfg  tools.tar.gz  公共  模板  视频  图片  文档  下载  音乐  桌面
+[root@svr7 ~]# mkdir /nsd
+[root@svr7 ~]# tar -xf /root/tools.tar.gz  -C /nsd
+[root@svr7 ~]# ls /nsd
+tools
+[root@svr7 ~]# ls /nsd/tools/
+inotify-tools-3.13.tar.gz  other
+
+
+[root@svr7 ~]# tar -xf /nsd/tools//inotify-tools-3.13.tar.gz  -C  /
+[root@svr7 ~]# ls /
+bin   dev  etc   inotify-tools-3.13  lib64  mnt  opt   root  sbin  sys   tmp    usr
+boot  dir  home  lib                 media  nsd  proc  run   srv   test  tools  var
+[root@svr7 ~]# cd /inotify-tools-3.13/
+
+[root@svr7 inotify-tools-3.13]# rpm -q make
+make-3.82-23.el7.x86_64
+[root@svr7 inotify-tools-3.13]# rpm -q gcc
+未安装软件包 gcc 
+[root@svr7 inotify-tools-3.13]# yum -y install gcc
+[root@svr7 inotify-tools-3.13]# rpm -q gcc
+gcc-4.8.5-16.el7.x86_64
+[root@svr7 inotify-tools-3.13]# ls /tools/other
+boxes-1.1.1-4.el7.x86_64.rpm  ntfs-3g-2014.2.15-6.el6.x86_64.rpm  repodata
+cmatrix-1.2a-1.i386.rpm       oneko-1.2-19.fc24.x86_64.rpm        sl-5.02-1.el7.x86_64.rpm
+
+[root@svr7 inotify-tools-3.13]# pwd
+/inotify-tools-3.13
+[root@svr7 inotify-tools-3.13]# ./configure
+[root@svr7 inotify-tools-3.13]# make
+
+[root@svr7 inotify-tools-3.13]# make install
+[root@svr7 inotify-tools-3.13]# ls
+aclocal.m4    config.h       config.status  COPYING     libinotifytools  Makefile.am  NEWS
+AUTHORS       [config.h].in  config.sub     depcomp     libtool          Makefile.in  README
+ChangeLog     config.h.in    configure      INSTALL     ltmain.sh        man          src
+config.guess  config.log     configure.ac   install-sh  Makefile         missing      stamp-h1
+
+[root@svr7 inotify-tools-3.13]# vim /root/rsync.sh
+[root@svr7 inotify-tools-3.13]# cat  /root/rsync.sh
+#!/bin/bash
+while inotifywait -rqq /opt
+do
+  rsync -az --delete /opt/ root@192.168.4.207:/opt/
+done
+[root@svr7 inotify-tools-3.13]# chmod +x /root/rsync.sh
+[root@svr7 inotify-tools-3.13]# /root/rsync.sh 
+^C
+[root@svr7 inotify-tools-3.13]# /root/rsync.sh $
+^C
+[root@svr7 inotify-tools-3.13]# /root/rsync.sh &
+[1] 9432
+[root@svr7 inotify-tools-3.13]# ls /opt
+rh  x1.txt
+[root@svr7 inotify-tools-3.13]# touch /opt/x2.txt
+
+@svr7~]#make
+#make install
+验证[root@svr7 ~]#rsync -avz --delete /opt/ root@192.168.4.207:/opt/
+
+
+
+再开终端[root@svr7 ~]# inotifywait -rq /opt/
+/opt/ OPEN,ISDIR 
+回到先前的终端
+[root@svr7 inotify-tools-3.13]# cd ~
+[root@svr7 ~]# 
+[root@svr7 ~]# jobs
+[1]+  运行中               /root/rsync.sh &(工作目录：/inotify-tools-3.13)
+[root@svr7 ~]# killall rsync.sh
+[1]+  已终止               /root/rsync.sh(工作目录：/inotify-tools-3.13)
+(当前工作目录：~)
+[root@svr7 ~]# jobs
+[root@svr7 ~]# 
+
+
+ for  i  in {1..20}
+  do 
+     
+  done
+
+
+while [ ]
+ do
+   
+  
+ done
+@svr7 ~]#vim /root/while.sh
+ #!/bin/bash
+i=1
+while [$i -lt 10  ]
+ do
+    i=$[$i+1】
+     echo $i
+ done
+
+@svr7 /]#vim /root/rsync.sh
+#!/bin/bash
+while inotifywait -rqq  /opt 
+#while inotifywait -rq  /opt &> /dev/null
+do 
+ rsync -az --delete /opt/ root@192.168.4.207:/opt/
+# rsync -avz --delete /opt/ root@192.168.4.207:/opt/
+done
+
+@svr7 /]#chmod +x /root/rsync.sh
+@svr7 /]#/root/rsync.sh
+@svr7 /]#killall rsync.sh
+--------------------------------------------------------------------12306.cn-----------------
+CentOS                                    RHEL  
+
+[root@My176 ~]# ls /iso/
+CentOS-7-x86_64-DVD-1708.iso    rhel-server-7.4-x86_64-dvd.iso
+lost+found                      Win10_Pro_X64_zh_CN.iso
+rhel-server-6.7-x86_64-dvd.iso
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

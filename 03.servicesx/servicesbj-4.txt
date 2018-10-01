@@ -1,0 +1,216 @@
+Dynamic Host Configuration Protocol
+动态主机配置协议,用来简化主机地址分配管理
+
+PXE Pre-boot eXecution Environment
+预启动执行环境,在操作系统之前运行
+
+[root@Adns ~]# yum install -y dhcp
+
+[root@Adns ~]# vim /etc/dhcp/dhcpd.conf 
+[root@Adns ~]# cat /etc/dhcp/dhcpd.conf
+#
+# DHCP Server Configuration file.
+#   see /usr/share/doc/dhcp*/dhcpd.conf.example
+#   see dhcpd.conf(5) man page
+
+subnet 192.168.4.0 netmask 255.255.255.0 {
+  range 192.168.4.100 192.168.4.200;
+  option domain-name-servers 192.168.4.7;
+  option routers 192.168.4.254;
+  default-lease-time 600;
+  max-lease-time 7200;
+}
+[root@Adns ~]# systemctl start dhcpd
+[root@Adns ~]# vim /etc/dhcp/dhcpd.conf 
+[root@Adns ~]# cat /etc/dhcp/dhcpd.conf
+#
+# DHCP Server Configuration file.
+#   see /usr/share/doc/dhcp*/dhcpd.conf.example
+#   see dhcpd.conf(5) man page
+subnet 192.168.4.0 netmask 255.255.255.0 {
+  range 192.168.4.100 192.168.4.200;
+  option domain-name-servers 192.168.4.7;
+  option routers 192.168.4.254;
+  default-lease-time 600;
+  max-lease-time 7200;
+  next-server 192.168.4.7;  #指定下一个服务器(tftp--端口69)
+  filename "pxelinux.0";   #指定网卡引导文件名称(安装说明书)
+}
+[root@Adns ~]# systemctl restart dhcpd
+
+[root@Adns ~]# yum install -y tftp-server.x86_64  #
+[root@Adns ~]# systemctl start tftp.socket 
+[root@Adns ~]# systemctl restart tftp
+[root@Adns ~]# ls /var/lib/tftpboot/
+
+[root@Adns ~]# yum provides  */pxelinux.0  #查询仓库中哪个软件包产生该文件
+
+syslinux-4.05-13.el7.x86_64 : Simple kernel loader which boots from a FAT
+                            : filesystem
+源    ：rhel7
+匹配来源：
+文件名    ：/usr/share/syslinux/pxelinux.0
+
+[root@Adns ~]# yum install -y syslinux   #部署文件 pxelinux.0
+
+[root@Adns ~]# rpm -ql syslinux | grep pxelinux.0  #查询软件包安装清单
+/usr/share/syslinux/gpxelinux.0
+/usr/share/syslinux/pxelinux.0
+[root@Adns ~]# cp -p /usr/share/syslinux/pxelinux.0  /var/lib/tftpboot/
+[root@Adns ~]# ls /var/lib/tftpboot/
+pxelinux.0
+[root@Adns ~]# mkdir /var/lib/tftpboot/pxelinux.cfg  #部署菜单文件
+
+[root@Adns ~]# mount /dev/cdrom /mnt  
+
+[root@Adns ~]# ls /mnt
+addons            images      repodata
+EFI               isolinux    RPM-GPG-KEY-redhat-beta
+EULA              LiveOS      RPM-GPG-KEY-redhat-release
+extra_files.json  media.repo  TRANS.TBL
+GPL               Packages
+[root@Adns ~]# cp /mnt/isolinux/isolinux.cfg  /var/lib/tftpboot/pxelinux.cfg/default
+--------------- #4部署菜单文件/var/lib/tftpboot/pxelinux.cfg/default
+
+[root@Adns ~]# ls /var/lib/tftpboot/pxelinux.cfg/   
+default
+
+[root@Adns ~]# vim /var/lib/tftpboot/pxelinux.cfg/default
+[root@Adns ~]# head -2 /var/lib/tftpboot/pxelinux.cfg/default
+default vesamenu.c32
+timeout 60
+[root@Adns ~]# chmod 644 /var/lib/tftpboot/pxelinux.cfg/default
+[root@Adns ~]# ls -l /var/lib/tftpboot/pxelinux.cfg/default 
+-rw-r--r--. 1 root root 3165 7月  24 14:34 /var/lib/tftpboot/pxelinux.cfg/default
+
+[root@Adns ~]# ls /var/lib/tftpboot/
+pxelinux.0  pxelinux.cfg                 #5部署引导文件
+
+[root@Adns ~]# cp /mnt/isolinux/vesamenu.c32  /mnt/isolinux/vmlinuz  /mnt/isolinux/initrd.img  /mnt/isolinux/splash.png  /var/lib/tftpboot/
+[root@Adns ~]# ls /var/lib/tftpboot/
+initrd.img  pxelinux.0  pxelinux.cfg  splash.png  vesamenu.c32  vmlinuz
+[root@Adns ~]# ls /var/lib/tftpboot/
+hai.png     pxelinux.0    splash.png    vmlinuz
+initrd.img  pxelinux.cfg  vesamenu.c32
+
+  1 default vesamenu.c32
+  2 timeout 60
+ 10 menu background hai.png
+ 11 menu title NSD1806 PXE Server
+ 61 label linux
+ 62   menu label ^Install Red Hat  Linux 7.4
+ 63   menu default
+ 64   kernel vmlinuz
+ 65   append initrd=initrd.img inst.stage2=hd:LABEL=RHEL-7.4\x20Serv    er.x86_64 quiet
+
+[root@Adns ~]# vim /var/lib/tftpboot/pxelinux.cfg/default
+[root@Adns ~]# head -2 /var/lib/tftpboot/pxelinux.cfg/default
+default vesamenu.c32
+timeout 60
+[root@Adns ~]# head -11 /var/lib/tftpboot/pxelinux.cfg/default | tail -2
+menu background hai.png
+menu title NSD1806 PXE Server
+
+[root@Adns ~]# tail -4 /var/lib/tftpboot/pxelinux.cfg/default
+label linux
+  menu label ^Install Red Hat  Linux 7.4
+  kernel vmlinuz
+  append initrd=initrd.img inst.stage2=hd:LABEL=RHEL-7.4\x20Server.x86_64 quiet
+[root@Adns ~]# 
+[root@Adns ~]# systemctl restart tftp
+
+[root@Adns ~]# systemctl restart dhcpd
+[root@Adns ~]# yum -y install httpd
+[root@Adns ~]# ls /var/www/html
+[root@Adns ~]# mkdir /var/www/html/rhel7
+
+[root@Adns ~]# umount /mnt
+[root@Adns ~]# mount /dev/cdrom  /var/www/html/rhel7
+[root@Adns ~]# df -hT /var/www/html/rhel7/
+文件系统       类型     容量  已用  可用 已用% 挂载点
+/dev/sr0       iso9660  3.8G  3.8G     0  100% /var/www/html/rhel7
+[root@Adns ~]# ls -l /dev/cdrom 
+lrwxrwxrwx. 1 root root 3 7月  24 14:28 /dev/cdrom -> sr0
+[root@Adns ~]# ls -l /dev/sr0
+brw-rw----+ 1 root cdrom 11, 0 7月  24 14:28 /dev/sr0
+
+[root@Adns ~]# systemctl start httpd
+[root@Adns ~]# firefox 192.168.4.7/rhel7
+
+[root@Adns ~]# vim /etc/fstab 
+[root@Adns ~]# tail -1 /etc/fstab
+/dev/sr0  /var/www/html/rhel7   iso9660  defaults   0   0
+
+[root@Adns ~]# umount /var/www/html/rhel7/
+[root@Adns ~]# ls /var/www/html/rhel7/
+
+[root@Adns ~]# mount -a
+mount: /dev/sr0 写保护，将以只读方式挂载
+[root@Adns ~]# ls /var/www/html/rhel7/
+addons            GPL       media.repo               RPM-GPG-KEY-redhat-release
+EFI               images    Packages                 TRANS.TBL
+EULA              isolinux  repodata
+extra_files.json  LiveOS    RPM-GPG-KEY-redhat-beta
+
+[root@Adns ~]# yum install -y system-config-kickstart
+[root@Adns ~]# system-config-kickstart 
+
+[root@Adns ~]# vim /etc/yum.repos.d/rhel7.repo 
+您在 /var/spool/mail/root 中有新邮件
+[root@Adns ~]# head  /etc/yum.repos.d/rhel7.repo
+[development]
+name=rhel7.4
+enabled=1
+gpgcheck=0
+baseurl=ftp://192.168.4.254/rhel7
+[root@Adns ~]# system-config-kickstart 
+
+安装后脚本
+使用解释器程序  /bin/bash
+
+useradd lisi
+echo 123 | passwd --stdin lisi
+
+[root@Adns ~]# ls /root/ks.cfg 
+/root/ks.cfg
+[root@Adns ~]# vim /root/ks.cfg 
+[root@Adns ~]# cp /root/ks.cfg  /var/www/html/
+[root@Adns ~]# ls /var/www/html/
+ks.cfg  rhel7
+
+[root@Adns ~]# vim /var/lib/tftpboot/pxelinux.cfg/default 
+[root@Adns ~]# cat -n /var/lib/tftpboot/pxelinux.cfg/default | tail -4
+    62	  menu label ^Install Red Hat  Linux 7.4
+    63	  menu default
+    64	  kernel vmlinuz
+    65	  append initrd=initrd.img  ks=http://192.168.4.7/ks.cfg   
+
+[root@Adns ~]# systemctl restart tftp
+[root@Adns ~]# systemctl restart dhcpd
+
+------------------------------------------------------------------------------------------------------------------------------------------------------
+[root@pc207 ~]# yum install -y httpd    tftp-server.x86_64 
+[root@pc207 ~]# rpm -qa httpd tftp-server dhcp*
+httpd-2.4.6-67.el7.x86_64
+tftp-server-5.2-13.el7.x86_64
+dhcp-common-4.2.5-58.el7.x86_64
+dhcp-libs-4.2.5-58.el7.x86_64
+[root@pc207 ~]# yum install -y dhcp
+[root@pc207 ~]# rpm -qa dhcp
+dhcp-4.2.5-58.el7.x86_64
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
