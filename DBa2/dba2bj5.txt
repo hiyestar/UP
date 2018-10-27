@@ -1,0 +1,499 @@
+
+
+
+[root@hiys ~]# for i in 192.168.4.5{0..7};do  scp  Mycat-server-1.4-beta-20150604171601-linux.tar.gz  maxscale-2.1.2-1.rhel.7.x86_64.rpm  root@${i}:/root/;done
+
+[root@hiys ~]# ll Mycat-server-1.*
+-rw-r--r-- 1 root root  7663894 10月 27 08:56 Mycat-server-1.4-beta-20150604171601-linux.tar.gz
+-rw-r--r-- 1 root root 15662280 10月 27 11:14 Mycat-server-1.6-RELEASE-20161028204710-linux.tar.gz
+[root@hiys ~]# for i in 192.168.4.5{0..7}; do scp -o StrictHostKeyChecking=no  Mycat-server-1.*  root@${i}:/root/; done
+root@192.168.4.50's password: 
+Mycat-server-1.4-beta-20150604171601-linux.tar.gz                                                           100% 7484KB 176.1MB/s   00:00    
+Mycat-server-1.6-RELEASE-20161028204710-linux.tar.gz                                                        100%   15MB 170.3MB/s   00:00    
+root@192.168.4.51's password: 
+
+
+
+[root@H50 ~]# ifconfig |awk '/inet /{print $2}';route -n |awk 'NR>1&&NR<8{print $2}'
+192.168.4.50
+192.168.2.50
+201.1.1.50
+201.1.2.50
+127.0.0.1
+192.168.122.1
+Gateway
+192.168.4.254
+192.168.2.254
+201.1.1.254
+201.1.2.254
+0.0.0.0
+[root@H50 ~]# ll Mycat-server-1.*
+-rw-r--r--. 1 root root  7663894 10月 27 11:16 Mycat-server-1.4-beta-20150604171601-linux.tar.gz
+-rw-r--r--. 1 root root 15662280 10月 27 11:16 Mycat-server-1.6-RELEASE-20161028204710-linux.tar.gz
+[root@H50 ~]# ll maxscale-2.1.2-1.rhel.7.x86_64.rpm 
+-rw-r--r--. 1 root root 17333732 10月 27 09:02 maxscale-2.1.2-1.rhel.7.x86_64.rpm
+[root@H50 ~]#  
+
+
+
+
+
+
+
+
+
+
+
+[root@H51 ~]# mysql -uroot -p1234
+mysql> use db9;show tables;
+
+| Tables_in_db9 |
++---------------+
+| t1            |
+| t2            |
+| user          |
+| user2         |
+| v3            |
+| v4            |
+| v5            |
+| v6            |
+| v7            |
+| v8            |
+| v9            |
++---------------+
+11 rows in set (0.00 sec)
+
+mysql> 
+
+
+delimiter /
+create procedure p11()
+begin
+  declare x int(2);
+  set x=1;
+  loop
+     select  x;
+  end loop;
+end/
+delimiter ;
+call p11;
+
+drop procedure p10;
+delimiter /
+create procedure p10()
+begin
+   loop
+      select id,name,uid,gid from db9.user limit 0,2;
+  end loop;
+end/
+delimiter ;
+call p10;
+
+drop procedure p12;
+delimiter /
+create procedure p12()
+begin
+  declare i int(2);
+  set i=1;
+  repeat
+     select i;
+     select id,name,uid,gid from db9.user limit 0,2;
+  set i = i + 1 ;
+  until i > 4
+  end repeat;
+end/
+delimiter ;
+call p12;
+
+mysql> drop procedure p10;
+
+mysql> delimiter /
+mysql> create procedure p10()
+    -> begin
+    ->    loop
+    ->       select id,name,uid,gid from db9.user limit 0,2;
+    ->   end loop;
+    -> end/
+
+mysql> delimiter ;
+mysql> call p10;
+
+
+mysql> delimiter /
+mysql> create procedure p11()
+    -> begin
+    ->   declare x int(2);
+    ->   set x=1;
+    ->   loop
+    ->      select  x;
+    ->   end loop;
+    -> end/
+Query OK, 0 rows affected (0.00 sec)
+
+mysql> delimiter ;
+mysql> call p11;
+
+
+
+mysql> drop procedure p12;
+Query OK, 0 rows affected (0.00 sec)
+
+mysql> delimiter /
+mysql> create procedure p12()
+    -> begin
+    ->   declare i int(2);
+    ->   set i=1;
+    ->   repeat
+    ->      select i;
+    ->      select id,name,uid,gid from db9.user limit 0,2;
+    ->   set i = i + 1 ;
+    ->   until i > 4
+    ->   end repeat;  #当条件大于4的时候终止循环
+    -> end/
+Query OK, 0 rows affected (0.00 sec)
+
+mysql> delimiter ;
+mysql> call p12;
+
+| i    |
++------+
+|    1 |
+
+| id | name  | uid  | gid  |
++----+-------+------+------+
+|  1 | admin |    0 |    0 |
+|  2 | bin   |    1 |    1 |
+
+| i    |
++------+
+|    2 |
+
+| id | name  | uid  | gid  |
++----+-------+------+------+
+|  1 | admin |    0 |    0 |
+|  2 | bin   |    1 |    1 |
+
+| i    |
++------+
+|    3 |
+
+| id | name  | uid  | gid  |
++----+-------+------+------+
+|  1 | admin |    0 |    0 |
+|  2 | bin   |    1 |    1 |
+
+| i    |
++------+
+|    4 |
+
+| id | name  | uid  | gid  |
++----+-------+------+------+
+|  1 | admin |    0 |    0 |
+|  2 | bin   |    1 |    1 |
+
+mysql> use db9;show tables;
+
+delimiter /
+ create procedure sumnum(in line int(2))
+ begin
+   declare  x int(2);
+   declare  y int(2);
+   declare  z int(2);
+   set  z=0;
+   set  x=1;
+   while x <= line do
+      select uid  into  y from db9.user where id=x;
+      if  y  %  2 = 0 then
+         set  z=z+1;
+           select id,name,uid from db9.user where id=x;
+      end if;
+        set  x=x+1;
+   end while;
+   select  z;
+ end/
+delimiter ;
+set @line=5;
+call  sumnum(@line);
+
+mysql> delimiter /
+mysql>  create procedure sumnum(in line int(2))
+    ->  begin
+    ->    declare  x int(2);
+    ->    declare  y int(2);
+    ->    declare  z int(2);
+    ->    set  z=0;
+    ->    set  x=1;
+    ->    while x <= line do
+    ->       select uid  into  y from db9.user where id=x;
+    ->       if  y  %  2 = 0 then
+    ->          set  z=z+1;
+    ->            select id,name,uid from db9.user where id=x;
+    ->       end if;
+    ->         set  x=x+1;
+    ->    end while;
+    ->    select  z;
+    ->  end/
+Query OK, 0 rows affected (0.00 sec)
+
+mysql> delimiter ;
+mysql> set @line=5;
+Query OK, 0 rows affected (0.00 sec)
+
+mysql> call  sumnum(@line);
+
+| id | name  | uid  |
+|  1 | admin |    0 |
+1 row in set (0.00 sec)
+
+| id | name   | uid  |
+|  3 | daemon |    2 |
+1 row in set (0.00 sec)
+
+| id | name | uid  |
+|  5 | lp   |    4 |
+1 row in set (0.00 sec)
+
+| z    |
+|    3 |
+1 row in set (0.00 sec)
+
+Query OK, 0 rows affected (0.00 sec)
+(
+mysql> show procedure status\G  #查看存储过程(方法一)
+
+mysql>  select db,name,type from  mysql.proc where name like "%sum%";  #查看存储过程(方法二)
++-----+----------------------------------+-----------+
+| db  | name                             | type      |
++-----+----------------------------------+-----------+
+| db9 | sumnum                           | PROCEDURE |
+| sys | ps_is_consumer_enabled           | FUNCTION  |
+| sys | ps_setup_disable_consumer        | PROCEDURE |
+| sys | ps_setup_enable_consumer         | PROCEDURE |
+| sys | ps_setup_show_disabled_consumers | PROCEDURE |
+| sys | ps_setup_show_enabled_consumers  | PROCEDURE |
++-----+----------------------------------+-----------+
+6 rows in set (0.00 sec)
+
+mysql> system ll  Mycat-*
+sh: ll: 未找到命令
+mysql> system ls -l  Mycat-*
+-rw-r--r--. 1 root root 7663894 10月 27 09:02 Mycat-server-1.4-beta-20150604171601-linux.tar.gz
+mysql> system ls -l  maxscale-2.1.2*
+-rw-r--r--. 1 root root 17333732 10月 27 09:02 maxscale-2.1.2-1.rhel.7.x86_64.rpm
+mysql>  
+
+
+
+
+
+[root@H54 ~]# ll Mycat-server-1.4-beta-20150604171601-linux.tar.gz  maxscale-2.1.2-1.rhel.7.x86_64.rpm 
+-rw-r--r--. 1 root root 17333732 10月 27 09:02 maxscale-2.1.2-1.rhel.7.x86_64.rpm
+-rw-r--r--. 1 root root  7663894 10月 27 09:02 Mycat-server-1.4-beta-20150604171601-linux.tar.gz
+[root@H54 ~]# ifconfig |awk '/inet /{print $2}';route -n |awk 'NR>1&&NR<8{print $2}'
+192.168.4.54
+192.168.2.54
+201.1.1.54
+201.1.2.54
+127.0.0.1
+192.168.122.1
+Gateway
+192.168.4.254
+192.168.2.254
+201.1.1.254
+201.1.2.254
+0.0.0.0
+[root@H54 ~]# ll maxscale-2.1.2-1.rhel.7.x86_64.rpm \
+> ;
+-rw-r--r--. 1 root root 17333732 10月 27 09:02 maxscale-2.1.2-1.rhel.7.x86_64.rpm
+[root@H54 ~]# vim /etc/my.cnf
+[root@H54 ~]# ls /var/lib/mysql/
+auto.cnf    ca.pem           client-key.pem  ibdata1      ib_logfile1  mysql       mysql.sock.lock     private_key.pem  server-cert.pem  sys
+ca-key.pem  client-cert.pem  ib_buffer_pool  ib_logfile0  ibtmp1       mysql.sock  performance_schema  public_key.pem   server-key.pem
+[root@H54 ~]# rm -rf master.info relay-log.info *-relay-bin.*
+[root@H54 ~]# sed -n '/\[mysqld/,+2p' /etc/my.cnf
+[mysqld]
+validate_password_policy=0
+validate_password_length=4
+[root@H54 ~]# mysql -uroot -p1234
+
+mysql> show slave status;
+Empty set (0.00 sec)
+
+mysql> show databases;
+| Database           |
+| information_schema |
+| mysql              |
+| performance_schema |
+| sys                |
+
+mysql> 
+
+
+
+
+
+
+
+
+
+
+
+
+[root@H55 ~]# ifconfig |awk '/inet /{print $2}';route -n |awk 'NR>1&&NR<8{print $2}'
+192.168.4.55
+192.168.2.55
+201.1.1.55
+201.1.2.55
+127.0.0.1
+192.168.122.1
+Gateway
+192.168.4.254
+192.168.2.254
+201.1.1.254
+201.1.2.254
+0.0.0.0
+[root@H55 ~]# ll Mycat-server-1.*
+-rw-r--r--. 1 root root  7663894 10月 27 11:16 Mycat-server-1.4-beta-20150604171601-linux.tar.gz
+-rw-r--r--. 1 root root 15662280 10月 27 11:16 Mycat-server-1.6-RELEASE-20161028204710-linux.tar.gz
+[root@H55 ~]# ll maxscale-2.1.2-1.rhel.7.x86_64.rpm 
+-rw-r--r--. 1 root root 17333732 10月 27 09:02 maxscale-2.1.2-1.rhel.7.x86_64.rpm
+[root@H55 ~]# ll maxscale-2.1.2-1.rhel.7.x86_64.rpm 
+-rw-r--r--. 1 root root 17333732 10月 27 09:02 maxscale-2.1.2-1.rhel.7.x86_64.rpm
+[root@H55 ~]# mysql -uroot -p1234
+mysql> show databases;
+
+| Database           |
+| information_schema |
+| mysql              |
+| performance_schema |
+| sys                |
+
+mysql> show slave status\G
+Empty set (0.00 sec)
+
+mysql> 
+ 
+
+
+
+
+
+
+
+
+
+
+
+[root@H57 ~]# ifconfig |awk '/inet /{print $2}';route -n |awk 'NR>1&&NR<8{print $2}'
+192.168.4.57
+192.168.2.57
+201.1.1.57
+201.1.2.57
+127.0.0.1
+192.168.122.1
+Gateway
+192.168.4.254
+192.168.2.254
+201.1.1.254
+201.1.2.254
+0.0.0.0
+[root@H57 ~]# ll maxscale-2.1.2-1.rhel.7.x86_64.rpm  Mycat-server-1.*
+-rw-r--r--. 1 root root 17333732 10月 27 09:02 maxscale-2.1.2-1.rhel.7.x86_64.rpm
+-rw-r--r--. 1 root root  7663894 10月 27 11:16 Mycat-server-1.4-beta-20150604171601-linux.tar.gz
+-rw-r--r--. 1 root root 15662280 10月 27 11:16 Mycat-server-1.6-RELEASE-20161028204710-linux.tar.gz
+[root@H57 ~]# mysql -uroot -p1234
+
+mysql> show databases;show slave status;
+| Database           |
+| information_schema |
+| mysql              |
+| performance_schema |
+| sys                |
++--------------------+
+4 rows in set (0.00 sec)
+
+Empty set (0.00 sec)
+
+mysql> 
+[root@H57 ~]# rpm  -qa |grep  -i jdk
+java-1.8.0-openjdk-1.8.0.131-11.b12.el7.x86_64
+java-1.8.0-openjdk-headless-1.8.0.131-11.b12.el7.x86_64
+copy-jdk-configs-2.2-3.el7.noarch
+[root@H57 ~]# java  -version
+openjdk version "1.8.0_131"
+OpenJDK Runtime Environment (build 1.8.0_131-b12)
+OpenJDK 64-Bit Server VM (build 25.131-b12, mixed mode)
+
+[root@H57 ~]# tar -xzvf Mycat-server-1.4-beta-20150604171601-linux.tar.gz 
+.......................
+mycat/bin/mycat
+.................................
+mycat/catlet/
+[root@H57 ~]# ls mycat/
+bin  catlet  conf  lib  logs  version.txt
+[root@H57 ~]# mv  mycat/ /usr/local/
+[root@H57 ~]# ls /usr/local/mycat/
+bin  catlet  conf  lib  logs  version.txt
+[root@H57 ~]# cd /usr/local/mycat/;ls bin/
+mycat  rehash.sh  startup_nowrap.sh  wrapper-linux-ppc-64  wrapper-linux-x86-32  wrapper-linux-x86-64
+[root@H57 mycat]# ls
+bin  catlet  conf  lib  logs  version.txt
+[root@H57 mycat]# ls conf/
+autopartition-long.txt   log4j.xml                router.xml  sequence_conf.properties       server.xml
+cacheservice.properties  partition-hash-int.txt   rule.xml    sequence_db_conf.properties    wrapper.conf
+ehcache.xml              partition-range-mod.txt  schema.xml  sequence_time_conf.properties
+
+[root@H57 mycat]# head -n 2 conf/server.xml 
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- - - Licensed under the Apache License, Version 2.0 (the "License"); 
+
+[root@H57 mycat]# head -n 2 conf/schema.xml  
+<?xml version="1.0"?>
+<!DOCTYPE mycat:schema SYSTEM "schema.dtd">
+
+[root@H57 mycat]# head -n 2 conf/rule.xml 
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- - - Licensed under the Apache License, Version 2.0 (the "License"); 
+[root@H57 mycat]# vim conf/rule.xml
+[root@H57 mycat]# vim  conf/schema.xml 
+[root@H57 mycat]# vim  conf/server.xml
+[root@H57 mycat]# ls lib/
+druid-1.0.14.jar         leveldb-api-0.7.jar         log4j-1.2.17.jar              slf4j-api-1.7.12.jar
+ehcache-core-2.6.11.jar  libwrapper-linux-ppc-64.so  mapdb-1.0.7.jar               slf4j-log4j12-1.7.12.jar
+guava-18.0.jar           libwrapper-linux-x86-32.so  mongo-java-driver-2.11.4.jar  univocity-parsers-1.5.4.jar
+leveldb-0.7.jar          libwrapper-linux-x86-64.so  Mycat-server-1.4-beta.jar     wrapper.jar
+[root@H57 mycat]# ls logs/
+[root@H57 mycat]# cat version.txt 
+BuildTime  2015-06-04 09:15:58
+GitVersion   8f196f8ce23843e62330fddbed2c39baea187d1d
+MavenVersion 1.4-beta
+GitUrl https://github.com/MyCATApache/Mycat-Server.git
+MyCatSite http://www.mycat.org.cn
+QQGroup 106088787
+[root@H57 mycat]# 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
